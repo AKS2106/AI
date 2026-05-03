@@ -1,0 +1,339 @@
+
+<style>
+*{box-sizing:border-box}
+.tabs{display:flex;gap:5px;flex-wrap:wrap;padding:1rem 0 0}
+.tab{padding:6px 12px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-size:12px;cursor:pointer;background:transparent;color:var(--color-text-secondary);font-family:var(--font-sans);transition:all .15s}
+.tab:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.tab.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary);font-weight:500}
+.panel{display:none;padding-top:1.25rem}
+.panel.active{display:block}
+.lbl{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin:14px 0 6px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.1rem;margin-bottom:8px}
+.tip{padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;margin-bottom:8px;border:0.5px solid}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+@media(max-width:500px){.two{grid-template-columns:1fr}}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+@media(max-width:500px){.three{grid-template-columns:1fr}}
+.row{display:flex;align-items:flex-start;gap:8px;margin:5px 0;font-size:13px;line-height:1.5}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.code{background:var(--color-background-secondary);border-radius:10px;padding:1rem;font-family:var(--font-mono);font-size:12px;line-height:1.75;color:var(--color-text-primary);white-space:pre-wrap;word-break:break-word;border:0.5px solid var(--color-border-tertiary);margin-bottom:8px}
+.metric-card{background:var(--color-background-secondary);border-radius:10px;padding:.875rem 1rem;text-align:center}
+.metric-val{font-size:22px;font-weight:500;color:var(--color-text-primary);line-height:1.2}
+.metric-lbl{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
+.ask-btn{margin-top:10px;padding:7px 14px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:transparent;font-size:13px;cursor:pointer;color:var(--color-text-primary);font-family:var(--font-sans)}
+.ask-btn:hover{background:var(--color-background-secondary)}
+.decision-q{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px}
+.opt-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:8px;margin:4px 0;border:0.5px solid var(--color-border-tertiary);font-size:13px;cursor:pointer;background:var(--color-background-primary);transition:background .15s}
+.opt-row:hover{background:var(--color-background-secondary)}
+.opt-row.selected{border-color:#378ADD;background:#E6F1FB;color:#0C447C}
+.result-box{padding:14px 16px;border-radius:10px;margin-top:14px;font-size:13px;line-height:1.7;border:0.5px solid;display:none}
+.result-box.show{display:block}
+.spectrum-track{height:12px;border-radius:6px;background:linear-gradient(to right,#E6F1FB,#E1F5EE,#FAEEDA,#FAECE7);margin:10px 0;position:relative;border:0.5px solid var(--color-border-tertiary)}
+.spectrum-label{display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-secondary);margin-bottom:2px}
+.stage-row{display:flex;gap:8px;align-items:flex-start;margin:8px 0}
+.stage-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0}
+input[type=range]{width:100%}
+</style>
+
+<h2 class="sr-only">Few-shot vs fine-tuning decision framework with cost calculator and interactive decision tree</h2>
+
+<div class="tabs">
+  <button class="tab active" onclick="sw('spectrum',this)">The spectrum</button>
+  <button class="tab" onclick="sw('cost',this)">Cost calculator</button>
+  <button class="tab" onclick="sw('decide',this)">Decision tree</button>
+  <button class="tab" onclick="sw('when',this)">When each wins</button>
+  <button class="tab" onclick="sw('interview',this)">Interview answers</button>
+</div>
+
+<!-- SPECTRUM -->
+<div id="panel-spectrum" class="panel active">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:14px;line-height:1.7">It's not binary. There are 4 options on a spectrum from "zero infrastructure" to "full model ownership."</div>
+
+  <div style="margin-bottom:20px">
+    <div class="spectrum-label">
+      <span>Zero infrastructure</span>
+      <span>Full model ownership</span>
+    </div>
+    <div class="spectrum-track"></div>
+  </div>
+
+  <div class="card" style="border-left:3px solid #378ADD;margin-bottom:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">1. Zero-shot / System prompt</div>
+      <div style="font-size:11px;padding:3px 8px;background:#E6F1FB;color:#0C447C;border-radius:6px">Deploy: today</div>
+    </div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:6px">Instructions only, no examples. Cost: just the tokens in your prompt.</div>
+    <div class="two" style="margin-bottom:0">
+      <div style="font-size:12px"><span style="color:#1D9E75">✓</span> Zero setup, zero training data<br><span style="color:#1D9E75">✓</span> Change behavior by editing a string<br><span style="color:#1D9E75">✓</span> Works for standard tasks</div>
+      <div style="font-size:12px"><span style="color:#A32D2D">✗</span> Inconsistent on novel formats<br><span style="color:#A32D2D">✗</span> Can't teach custom domain logic<br><span style="color:#A32D2D">✗</span> Prompt must fit in every call</div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:3px solid #1D9E75;margin-bottom:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">2. Few-shot prompting</div>
+      <div style="font-size:11px;padding:3px 8px;background:#E1F5EE;color:#085041;border-radius:6px">Deploy: hours</div>
+    </div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:6px">2–10 examples prepended to every API call. Examples teach format, tone, and domain logic.</div>
+    <div class="two" style="margin-bottom:0">
+      <div style="font-size:12px"><span style="color:#1D9E75">✓</span> No training, instant iteration<br><span style="color:#1D9E75">✓</span> Can swap examples at runtime<br><span style="color:#1D9E75">✓</span> Great for low-to-medium volume</div>
+      <div style="font-size:12px"><span style="color:#A32D2D">✗</span> Examples cost tokens every call<br><span style="color:#A32D2D">✗</span> High volume = very expensive<br><span style="color:#A32D2D">✗</span> Context window fills up faster</div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:3px solid #EF9F27;margin-bottom:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">3. Fine-tuning</div>
+      <div style="font-size:11px;padding:3px 8px;background:#FAEEDA;color:#633806;border-radius:6px">Deploy: days–weeks</div>
+    </div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:6px">Train a model on hundreds–thousands of examples. Behavior is baked into weights — no examples needed at inference.</div>
+    <div class="two" style="margin-bottom:0">
+      <div style="font-size:12px"><span style="color:#1D9E75">✓</span> Shorter prompts → lower cost at scale<br><span style="color:#1D9E75">✓</span> Consistent format and tone<br><span style="color:#1D9E75">✓</span> Can teach custom knowledge/style</div>
+      <div style="font-size:12px"><span style="color:#A32D2D">✗</span> Needs 100s–1000s of labeled examples<br><span style="color:#A32D2D">✗</span> Retraining cost when task changes<br><span style="color:#A32D2D">✗</span> Slower to iterate</div>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:3px solid #D85A30;margin-bottom:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">4. Train from scratch / RLHF</div>
+      <div style="font-size:11px;padding:3px 8px;background:#FAECE7;color:#712B13;border-radius:6px">Deploy: months</div>
+    </div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:6px">Full pre-training or reinforcement learning from human feedback. Used by AI labs, not application engineers.</div>
+    <div style="font-size:12px"><span style="color:#1D9E75">✓</span> Complete model control &nbsp;&nbsp; <span style="color:#A32D2D">✗</span> Requires millions of examples, GPU clusters, ML research team</div>
+  </div>
+
+  <div class="tip" style="background:#EEEDFE;border-color:#CECBF6;color:#3C3489;margin-top:4px">
+    As an AI engineer (not an AI researcher), you'll spend 90% of your time in options 1–3. Option 4 is for teams like Anthropic, OpenAI, and Google.
+  </div>
+</div>
+
+<!-- COST CALCULATOR -->
+<div id="panel-cost" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:14px;line-height:1.7">Adjust the sliders to model your use case. See where the break-even point is.</div>
+
+  <div style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--color-text-secondary);margin-bottom:4px">
+      <span>Daily API calls</span><span id="calls-val" style="font-weight:500;color:var(--color-text-primary)">10,000</span>
+    </div>
+    <input type="range" min="1" max="6" step="1" value="3" id="calls-range" oninput="calcCost()">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-tertiary)"><span>100</span><span>1k</span><span>10k</span><span>100k</span><span>1M</span><span>10M</span></div>
+  </div>
+
+  <div style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--color-text-secondary);margin-bottom:4px">
+      <span>Few-shot examples (tokens each)</span><span id="ex-val" style="font-weight:500;color:var(--color-text-primary)">500 tokens</span>
+    </div>
+    <input type="range" min="100" max="2000" step="100" value="500" id="ex-range" oninput="calcCost()">
+  </div>
+
+  <div style="margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--color-text-secondary);margin-bottom:4px">
+      <span>Fine-tune training examples</span><span id="ft-val" style="font-weight:500;color:var(--color-text-primary)">1,000</span>
+    </div>
+    <input type="range" min="100" max="5" step="1" value="2" id="ft-range" oninput="calcCost()">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--color-text-tertiary)"><span>100</span><span>500</span><span>1k</span><span>2k</span><span>5k</span></div>
+  </div>
+
+  <div class="three" id="cost-metrics">
+    <div class="metric-card"><div class="metric-val" id="m-fs-daily">—</div><div class="metric-lbl">Few-shot / day</div></div>
+    <div class="metric-card"><div class="metric-val" id="m-ft-daily">—</div><div class="metric-lbl">Fine-tune / day</div></div>
+    <div class="metric-card"><div class="metric-val" id="m-breakeven">—</div><div class="metric-lbl">Break-even (days)</div></div>
+  </div>
+
+  <div class="card" id="cost-verdict" style="margin-top:10px;font-size:13px;line-height:1.7"></div>
+
+  <div class="tip" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C;margin-top:10px;font-size:12px">
+    Assumptions: GPT-4o pricing ~$2.50/1M input tokens. Fine-tuned model ~$1.25/1M tokens (cheaper inference) + one-time training ~$0.008/1k tokens. These are approximations — always check current pricing for your model.
+  </div>
+</div>
+
+<!-- DECISION TREE -->
+<div id="panel-decide" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:14px">Answer each question to get a recommendation.</div>
+  <div id="q1">
+    <div class="decision-q">1. How many API calls will this feature make per day?</div>
+    <div class="opt-row" onclick="pick('q1','low',this)"><span>Under 1,000 calls/day</span><span style="font-size:11px;color:var(--color-text-tertiary)">low volume</span></div>
+    <div class="opt-row" onclick="pick('q1','med',this)"><span>1,000 – 100,000 calls/day</span><span style="font-size:11px;color:var(--color-text-tertiary)">medium volume</span></div>
+    <div class="opt-row" onclick="pick('q1','high',this)"><span>100,000+ calls/day</span><span style="font-size:11px;color:var(--color-text-tertiary)">high volume</span></div>
+  </div>
+  <div id="q2" style="display:none;margin-top:12px">
+    <div class="decision-q">2. How often will the task definition change?</div>
+    <div class="opt-row" onclick="pick('q2','often',this)"><span>Frequently (weekly/monthly)</span><span style="font-size:11px;color:var(--color-text-tertiary)">still iterating</span></div>
+    <div class="opt-row" onclick="pick('q2','stable',this)"><span>Rarely (quarterly or never)</span><span style="font-size:11px;color:var(--color-text-tertiary)">stable task</span></div>
+  </div>
+  <div id="q3" style="display:none;margin-top:12px">
+    <div class="decision-q">3. How much labeled training data do you have?</div>
+    <div class="opt-row" onclick="pick('q3','none',this)"><span>Under 50 examples</span><span style="font-size:11px;color:var(--color-text-tertiary)">very little</span></div>
+    <div class="opt-row" onclick="pick('q3','some',this)"><span>50 – 500 examples</span><span style="font-size:11px;color:var(--color-text-tertiary)">some data</span></div>
+    <div class="opt-row" onclick="pick('q3','lots',this)"><span>500+ examples</span><span style="font-size:11px;color:var(--color-text-tertiary)">good dataset</span></div>
+  </div>
+  <div id="q4" style="display:none;margin-top:12px">
+    <div class="decision-q">4. Does the task require strict output consistency?</div>
+    <div class="opt-row" onclick="pick('q4','yes',this)"><span>Yes — every response must follow the exact same format</span></div>
+    <div class="opt-row" onclick="pick('q4','no',this)"><span>No — some variation is acceptable</span></div>
+  </div>
+  <div id="dt-result" class="result-box"></div>
+  <button id="dt-reset" class="ask-btn" style="display:none;margin-top:8px" onclick="resetTree()">Start over</button>
+</div>
+
+<!-- WHEN EACH WINS -->
+<div id="panel-when" class="panel">
+  <div class="lbl">Few-shot wins here</div>
+  <div class="card" style="border-left:3px solid #1D9E75;margin-bottom:10px">
+    <div class="row"><div class="dot" style="background:#1D9E75"></div><div><strong>Prototyping & early product</strong> — you're still figuring out what the task even is. Changing a few-shot example takes seconds; retraining takes days.</div></div>
+    <div class="row"><div class="dot" style="background:#1D9E75"></div><div><strong>Low-to-medium volume</strong> — under ~50k calls/day, the token cost of examples is cheaper than the engineering + training cost of fine-tuning.</div></div>
+    <div class="row"><div class="dot" style="background:#1D9E75"></div><div><strong>Multiple task variants</strong> — if you have 10 slightly different customer segments needing slightly different outputs, you can swap few-shot examples per segment without maintaining 10 fine-tuned models.</div></div>
+    <div class="row"><div class="dot" style="background:#1D9E75"></div><div><strong>No labeled data yet</strong> — you can hand-write 5 good examples in an afternoon. Collecting 500 labeled examples for fine-tuning takes weeks.</div></div>
+    <div class="row"><div class="dot" style="background:#1D9E75"></div><div><strong>Tasks that change</strong> — A/B testing prompts, seasonal adjustments, regulatory changes. Few-shot is a config change; fine-tuning is a retraining job.</div></div>
+  </div>
+
+  <div class="lbl">Fine-tuning wins here</div>
+  <div class="card" style="border-left:3px solid #EF9F27;margin-bottom:10px">
+    <div class="row"><div class="dot" style="background:#EF9F27"></div><div><strong>High volume, stable task</strong> — 500k+ calls/day on a task that won't change. At that scale, eliminating 500 tokens of examples per call saves tens of thousands of dollars monthly.</div></div>
+    <div class="row"><div class="dot" style="background:#EF9F27"></div><div><strong>Strict output format</strong> — code generation for a specific framework, medical record templates, legal document structures. Fine-tuning bakes the format in so reliably you rarely need output validation.</div></div>
+    <div class="row"><div class="dot" style="background:#EF9F27"></div><div><strong>Proprietary tone/style</strong> — teaching the model to write like your brand voice, in your internal jargon, with your company-specific terminology. Impossible to do reliably with prompts alone.</div></div>
+    <div class="row"><div class="dot" style="background:#EF9F27"></div><div><strong>Latency-sensitive</strong> — fewer input tokens = faster time-to-first-token. For real-time applications, removing 500 tokens of examples meaningfully improves p95 latency.</div></div>
+    <div class="row"><div class="dot" style="background:#EF9F27"></div><div><strong>Data privacy</strong> — if your examples contain sensitive customer data, you can't put them in every API call. Fine-tuning keeps examples in the training run, not runtime prompts.</div></div>
+  </div>
+
+  <div class="lbl">The hybrid pattern (what most production systems use)</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px;line-height:1.7">Fine-tune for format + tone, then use a short system prompt for task-specific instructions. Best of both worlds.</div>
+    <div class="stage-row"><div class="stage-num" style="background:#E1F5EE;color:#085041">1</div><div style="font-size:13px">Fine-tune on 1,000 examples to learn your output format, vocabulary, and tone</div></div>
+    <div class="stage-row"><div class="stage-num" style="background:#FAEEDA;color:#633806">2</div><div style="font-size:13px">Use a 50-token system prompt for task-specific rules that change over time</div></div>
+    <div class="stage-row"><div class="stage-num" style="background:#EEEDFE;color:#3C3489">3</div><div style="font-size:13px">Result: consistent format (from fine-tune) + flexible behavior (from prompt) at low token cost</div></div>
+  </div>
+</div>
+
+<!-- INTERVIEW ANSWERS -->
+<div id="panel-interview" class="panel">
+  <div class="lbl">The 4 interview questions you will get asked</div>
+
+  <div class="card" style="margin-bottom:10px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Q: "When would you choose few-shot over fine-tuning?"</div>
+    <div class="tip" style="background:#E1F5EE;border-color:#9FE1CB;color:#085041;margin:0;font-size:13px">"I default to few-shot when the task is still being defined, volume is under ~50k calls/day, or I need to iterate quickly. Fine-tuning requires labeled data and a retraining pipeline — that overhead isn't worth it until the task is stable and the volume justifies the savings."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:10px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Q: "What are the risks of fine-tuning?"</div>
+    <div class="tip" style="background:#FAEEDA;border-color:#FAC775;color:#633806;margin:0;font-size:13px">"Three main risks: (1) catastrophic forgetting — fine-tuning on a narrow task can degrade the model's general capabilities. (2) overfitting — with fewer than ~500 examples, the model memorizes rather than generalizes. (3) distribution shift — if production inputs look different from training examples, performance degrades silently. You need an eval pipeline that catches this."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:10px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Q: "How do you know when fine-tuning has worked?"</div>
+    <div class="tip" style="background:#EEEDFE;border-color:#CECBF6;color:#3C3489;margin:0;font-size:13px">"You need a held-out eval set — typically 10–20% of your labeled data kept separate from training. You measure: (1) format compliance rate (does it always output valid JSON?), (2) task accuracy against ground truth, (3) edge case handling. Fine-tuning is successful when it matches or beats the few-shot baseline on all three, with shorter prompts."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:10px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Q: "What's LoRA and when would you use it?"</div>
+    <div class="tip" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C;margin:0;font-size:13px">"LoRA (Low-Rank Adaptation) is a parameter-efficient fine-tuning technique. Instead of updating all model weights, it trains small adapter matrices that are added to specific layers. This means: 10–100x fewer trainable parameters, fits on a single GPU, and trains in hours not days. It's the standard approach for fine-tuning open-source models like Llama or Mistral when you're self-hosting. The trade-off vs full fine-tuning is slightly lower max quality, but for most production tasks the difference is negligible."</div>
+  </div>
+
+  <div class="lbl">The answer that impresses senior interviewers</div>
+  <div class="tip" style="background:#F1EFE8;border-color:#D3D1C7;color:#444441">
+    "In practice I don't think of it as few-shot OR fine-tuning — I think of it as a progression. I start with zero-shot to validate the task is solvable. I add few-shot examples to hit quality targets. Once the task is stable and volume grows, I collect the few-shot examples + model outputs as training data and fine-tune. That way the fine-tuning data is already validated because it came from a working few-shot system."
+  </div>
+  <button class="ask-btn" onclick="sendPrompt('Show me how to implement LoRA fine-tuning in Python with the HuggingFace PEFT library. Give me a complete working example.')">Show me LoRA in Python ↗</button>
+  <button class="ask-btn" style="margin-left:8px" onclick="sendPrompt('How do I build an evaluation pipeline to measure whether my fine-tuned model is actually better than the few-shot baseline? What metrics and tools should I use?')">Build an eval pipeline ↗</button>
+</div>
+
+<script>
+function sw(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+const callLevels=[100,1000,10000,100000,1000000,10000000];
+const ftExLevels=[100,500,1000,2000,5000];
+function calcCost(){
+  const ci=parseInt(document.getElementById('calls-range').value)-1;
+  const calls=callLevels[ci];
+  document.getElementById('calls-val').textContent=calls.toLocaleString();
+  const exTok=parseInt(document.getElementById('ex-range').value);
+  document.getElementById('ex-val').textContent=exTok.toLocaleString()+' tokens';
+  const fti=parseInt(document.getElementById('ft-range').value)-1;
+  const ftEx=ftExLevels[Math.min(fti,ftExLevels.length-1)];
+  document.getElementById('ft-val').textContent=ftEx.toLocaleString();
+  const pricePerTok=2.50/1000000;
+  const ftPricePerTok=1.25/1000000;
+  const ftTrainCost=ftEx*200*0.008/1000;
+  const fsDailyCost=calls*exTok*pricePerTok;
+  const ftDailyCost=calls*50*ftPricePerTok;
+  const saving=fsDailyCost-ftDailyCost;
+  const breakEven=saving>0?Math.ceil(ftTrainCost/saving):999;
+  document.getElementById('m-fs-daily').textContent='$'+fsDailyCost.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('m-ft-daily').textContent='$'+ftDailyCost.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('m-breakeven').textContent=breakEven>=999?'Never':breakEven+'d';
+  const v=document.getElementById('cost-verdict');
+  if(saving<=0){
+    v.innerHTML='<span style="color:var(--color-text-success)">Few-shot is cheaper</span> at this volume. Fine-tuning inference costs more because your example token count is low relative to base inference cost. Stick with few-shot.';
+  } else if(breakEven>180){
+    v.innerHTML='<span style="color:#BA7517">Marginal case.</span> Fine-tuning breaks even in '+breakEven+' days. Unless you need consistency or privacy benefits, the ROI is too long — stay with few-shot.';
+  } else {
+    v.innerHTML='<span style="color:#0C447C">Fine-tuning wins</span> at this volume. It saves $'+saving.toFixed(2)+'/day and breaks even on training cost in '+breakEven+' days. The economics clearly favor fine-tuning.';
+  }
+}
+calcCost();
+document.getElementById('ft-range').max=5;
+
+const answers={};
+const results={
+  low_often:  {c:'#E1F5EE',bc:'#9FE1CB',tc:'#085041',t:'Use few-shot',b:'Low volume + changing task = few-shot is the clear winner. The token overhead is affordable and you need the flexibility to iterate quickly without retraining.'},
+  low_stable_none: {c:'#E1F5EE',bc:'#9FE1CB',tc:'#085041',t:'Use few-shot',b:'Even though the task is stable, you don\'t have enough labeled data for fine-tuning. Write 5–10 good examples and use few-shot. Collect model outputs over time to build your future fine-tuning dataset.'},
+  low_stable_some: {c:'#FAEEDA',bc:'#FAC775',tc:'#633806',t:'Consider fine-tuning',b:'You have enough data and a stable task. Run the cost calculator — at low volume the economics may not justify it yet, but fine-tuning will improve consistency. A good time to pilot it.'},
+  low_stable_lots: {c:'#FAEEDA',bc:'#FAC775',tc:'#633806',t:'Fine-tuning recommended',b:'You have the data and the task is stable. Even at low volume, 500+ examples will produce noticeably better consistency than few-shot. Start fine-tuning.'},
+  med_often:  {c:'#E1F5EE',bc:'#9FE1CB',tc:'#085041',t:'Use few-shot',b:'Medium volume but frequently changing task — retraining overhead would kill your iteration speed. Stay with few-shot until the task stabilizes.'},
+  med_stable_none: {c:'#E1F5EE',bc:'#9FE1CB',tc:'#085041',t:'Use few-shot, collect data',b:'Good candidate for future fine-tuning, but you don\'t have the data yet. Use few-shot now and treat your prompt examples + outputs as a dataset you\'re building toward fine-tuning at 500+ examples.'},
+  med_stable_some: {c:'#FAEEDA',bc:'#FAC775',tc:'#633806',t:'Fine-tune now',b:'Medium volume, stable task, and 50–500 examples — this is the sweet spot for fine-tuning. Check the cost calculator, but the economics likely favor it within 1–3 months.'},
+  med_stable_lots: {c:'#0C447C',bc:'#B5D4F4',tc:'#E6F1FB',t:'Fine-tune immediately',b:'This is exactly the profile fine-tuning is built for. You have the data, the task is stable, and the volume makes the token savings meaningful. Build your fine-tuning pipeline.'},
+  high_often:  {c:'#FAEEDA',bc:'#FAC775',tc:'#633806',t:'Reduce change frequency or separate concerns',b:'High volume but changing task is a difficult position. Consider separating: fine-tune for stable format/tone, use a short prompt for the parts that change. Or invest in making the task definition more stable before fine-tuning.'},
+  high_stable_none: {c:'#FAEEDA',bc:'#FAC775',tc:'#633806',t:'Collect data urgently',b:'High volume with no data is a critical gap. Every API call at this volume with few-shot examples is expensive. Prioritize labeling 500+ examples ASAP. In the meantime, optimize your few-shot prompt for minimum token count.'},
+  high_stable_some: {c:'#0C447C',bc:'#B5D4F4',tc:'#E6F1FB',t:'Fine-tune immediately',b:'At high volume, even 50 examples is enough to start. The per-call token savings at 100k+ calls/day is substantial — potentially $10k+/month. Make fine-tuning your top priority.'},
+  high_stable_lots: {c:'#0C447C',bc:'#B5D4F4',tc:'#E6F1FB',t:'Fine-tune immediately',b:'Clear fine-tuning case. At this volume and with this much data, you should already be fine-tuned. The cost savings are likely in the tens of thousands per month. Also consider LoRA on an open-source model for full cost control.'},
+};
+
+function pick(q,val,el){
+  document.querySelectorAll('#'+q+' .opt-row').forEach(r=>r.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[q]=val;
+  document.getElementById('dt-result').classList.remove('show');
+  if(q==='q1'){document.getElementById('q2').style.display='block';document.getElementById('q3').style.display='none';document.getElementById('q4').style.display='none';}
+  if(q==='q2'){
+    if(val==='often'){showResult('dt');return;}
+    document.getElementById('q3').style.display='block';
+    document.getElementById('q4').style.display='none';
+  }
+  if(q==='q3'){
+    if(answers.q2==='stable'&&(val==='none'||val==='some')){showResult('dt');return;}
+    document.getElementById('q4').style.display='block';
+  }
+  if(q==='q4'){showResult('dt');}
+}
+
+function showResult(){
+  const v=answers.q1, ch=answers.q2, d=answers.q3;
+  let key='';
+  if(ch==='often') key=v+'_often';
+  else {
+    key=v+'_stable_'+(d||'none');
+  }
+  const r=results[key]||results['low_often'];
+  const box=document.getElementById('dt-result');
+  box.style.background=r.c;
+  box.style.borderColor=r.bc;
+  box.style.color=r.tc;
+  box.innerHTML='<strong>'+r.t+'</strong><br>'+r.b;
+  box.classList.add('show');
+  document.getElementById('dt-reset').style.display='inline-block';
+}
+
+function resetTree(){
+  Object.keys(answers).forEach(k=>delete answers[k]);
+  ['q2','q3','q4'].forEach(q=>{document.getElementById(q).style.display='none';});
+  document.querySelectorAll('.opt-row').forEach(r=>r.classList.remove('selected'));
+  document.getElementById('dt-result').classList.remove('show');
+  document.getElementById('dt-reset').style.display='none';
+}
+</script>

@@ -1,0 +1,183 @@
+
+<style>
+*{box-sizing:border-box}
+.lbl{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin:14px 0 6px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.1rem;margin-bottom:8px}
+.tip{padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;border:0.5px solid;margin-bottom:8px}
+.code{background:var(--color-background-secondary);border-radius:10px;padding:1rem;font-family:var(--font-mono);font-size:12px;line-height:1.75;color:var(--color-text-primary);white-space:pre-wrap;word-break:break-word;border:0.5px solid var(--color-border-tertiary);margin-bottom:8px}
+.ask-btn{padding:7px 14px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:transparent;font-size:13px;cursor:pointer;color:var(--color-text-primary);font-family:var(--font-sans);margin-top:8px;margin-right:6px}
+.ask-btn:hover{background:var(--color-background-secondary)}
+.tabs{display:flex;gap:5px;flex-wrap:wrap;padding:1rem 0 0}
+.tab{padding:6px 12px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-size:12px;cursor:pointer;background:transparent;color:var(--color-text-secondary);font-family:var(--font-sans);transition:all .15s}
+.tab:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.tab.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary);font-weight:500}
+.panel{display:none;padding-top:1.25rem}
+.panel.active{display:block}
+</style>
+
+<h2 class="sr-only">Parallel tool calls in LangGraph — timeline comparison, message structure, and when to use</h2>
+
+<div class="tabs">
+  <button class="tab active" onclick="sw('timeline',this)">Timeline</button>
+  <button class="tab" onclick="sw('message',this)">Message structure</button>
+  <button class="tab" onclick="sw('when',this)">When to use</button>
+  <button class="tab" onclick="sw('gotchas',this)">Interview gotchas</button>
+</div>
+
+<div id="panel-timeline" class="panel active">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px">The speedup comes from overlapping I/O wait time. Hover each bar to see the math.</div>
+
+  <div style="margin-bottom:18px">
+    <div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Sequential — 3 calls, 2.4s total</div>
+    <div style="position:relative;height:80px">
+      <div title="get_stock_price AAPL — 0.8s" style="position:absolute;left:0;top:4px;width:33.3%;height:20px;background:#E6F1FB;border:0.5px solid #B5D4F4;border-radius:4px;display:flex;align-items:center;padding:0 6px;cursor:default">
+        <span style="font-size:11px;color:#0C447C;white-space:nowrap">stock_price(AAPL) 0.8s</span>
+      </div>
+      <div title="get_analyst_rating MSFT — 0.6s" style="position:absolute;left:33.3%;top:4px;width:25%;height:20px;background:#E1F5EE;border:0.5px solid #9FE1CB;border-radius:4px;display:flex;align-items:center;padding:0 6px;cursor:default">
+        <span style="font-size:11px;color:#085041;white-space:nowrap">latest_news(MSFT) 0.6s</span>
+      </div>
+      <div title="get_latest_news NVDA — 1.0s" style="position:absolute;left:58.3%;top:4px;width:41.7%;height:20px;background:#EEEDFE;border:0.5px solid #CECBF6;border-radius:4px;display:flex;align-items:center;padding:0 6px;cursor:default">
+        <span style="font-size:11px;color:#3C3489;white-space:nowrap">analyst_rating(NVDA) 1.0s</span>
+      </div>
+      <div style="position:absolute;bottom:0;left:0;right:0;height:12px;display:flex;align-items:center">
+        <div style="flex:1;height:1px;background:var(--color-border-tertiary)"></div>
+        <span style="font-size:11px;color:var(--color-text-tertiary);margin:0 6px">2.4s total</span>
+        <div style="flex:1;height:1px;background:var(--color-border-tertiary)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:18px">
+    <div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Parallel — 3 calls, 1.0s total (2.4x faster)</div>
+    <div style="position:relative;height:100px">
+      <div title="get_stock_price AAPL — 0.8s" style="position:absolute;left:0;top:4px;width:80%;height:20px;background:#E6F1FB;border:0.5px solid #B5D4F4;border-radius:4px;display:flex;align-items:center;padding:0 6px">
+        <span style="font-size:11px;color:#0C447C;white-space:nowrap">stock_price(AAPL) 0.8s</span>
+      </div>
+      <div title="get_latest_news MSFT — 0.6s" style="position:absolute;left:0;top:30px;width:60%;height:20px;background:#E1F5EE;border:0.5px solid #9FE1CB;border-radius:4px;display:flex;align-items:center;padding:0 6px">
+        <span style="font-size:11px;color:#085041;white-space:nowrap">latest_news(MSFT) 0.6s</span>
+      </div>
+      <div title="get_analyst_rating NVDA — 1.0s" style="position:absolute;left:0;top:56px;width:100%;height:20px;background:#EEEDFE;border:0.5px solid #CECBF6;border-radius:4px;display:flex;align-items:center;padding:0 6px">
+        <span style="font-size:11px;color:#3C3489;white-space:nowrap">analyst_rating(NVDA) 1.0s ← bottleneck</span>
+      </div>
+      <div style="position:absolute;bottom:0;left:0;right:0;height:12px;display:flex;align-items:center">
+        <div style="width:41.7%;height:2px;background:#1D9E75;border-radius:1px"></div>
+        <span style="font-size:11px;color:#0F6E56;margin:0 6px;font-weight:500">1.0s total</span>
+        <div style="flex:1;height:1px;background:var(--color-border-tertiary)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip" style="background:#E1F5EE;border-color:#9FE1CB;color:#085041">
+    <strong>The rule:</strong> parallel wall time = slowest individual tool. Sequential wall time = sum of all tools. Every tool you add sequentially costs you its full latency. Every tool you add in parallel costs you only the marginal time beyond the current slowest.
+  </div>
+</div>
+
+<div id="panel-message" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;line-height:1.7">The entire parallel/sequential distinction lives in a single message structure difference. The LLM emits one AIMessage with N tool_calls — your node decides how to execute them.</div>
+
+  <div class="lbl">What the API returns for parallel calls</div>
+  <div class="code">AIMessage(
+    content="",           # empty — model is calling tools, not speaking
+    tool_calls=[
+        # ← ALL THREE in the same message
+        {"id": "tc_001", "name": "get_stock_price",    "args": {"ticker": "AAPL"}},
+        {"id": "tc_002", "name": "get_latest_news",    "args": {"ticker": "MSFT"}},
+        {"id": "tc_003", "name": "get_analyst_rating", "args": {"ticker": "NVDA"}},
+    ]
+)</div>
+
+  <div class="lbl">What you return after executing all 3</div>
+  <div class="code">[ ToolMessage(content="AAPL: $213.18 (+1.2%)...", tool_call_id="tc_001"),
+  ToolMessage(content="MSFT latest: Azure AI...",   tool_call_id="tc_002"),
+  ToolMessage(content="NVDA: Buy, target $1100...", tool_call_id="tc_003") ]
+# ↑ All 3 go back as a list — the LLM sees all results at once</div>
+
+  <div class="lbl">Why tool_call_id matters</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7">Each <code>ToolMessage</code> must carry the <code>tool_call_id</code> matching the original request. The LLM uses this to correlate "I asked for AAPL price (tc_001) and got $213.18 back (tc_001)". Without matching IDs, the model gets confused about which result belongs to which request — especially when tool results arrive out of order from parallel execution.</div>
+  </div>
+
+  <div class="lbl">The ThreadPoolExecutor pattern (core of the implementation)</div>
+  <div class="code">def parallel_tool_node(state):
+    tool_calls = state["messages"][-1].tool_calls  # ALL calls from one message
+
+    def execute_one(tc):
+        return tc["id"], TOOL_REGISTRY[tc["name"]].invoke(tc["args"])
+
+    results = []
+    with ThreadPoolExecutor(max_workers=len(tool_calls)) as executor:
+        futures = {executor.submit(execute_one, tc): tc for tc in tool_calls}
+        for future in as_completed(futures):     # collect as each finishes
+            call_id, output = future.result()
+            results.append(ToolMessage(
+                content=output,
+                tool_call_id=call_id,            # ← MUST match the request
+            ))
+
+    return {"messages": results}                 # all results in one state update</div>
+</div>
+
+<div id="panel-when" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">Parallel tool calls only help when calls are independent. Calling them in parallel when they have dependencies produces wrong results.</div>
+
+  <div class="lbl">Use parallel when — calls are independent</div>
+  <div class="card" style="border-left:3px solid #1D9E75;margin-bottom:8px">
+    <div style="font-size:13px;color:var(--color-text-primary);font-weight:500;margin-bottom:6px">Good candidates for parallelism</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.8">
+      Fetching the same data for multiple entities: "Compare AAPL, MSFT, NVDA"<br>
+      Multiple independent lookups: stock price + news + analyst rating for one ticker<br>
+      Searching multiple sources: web search + internal KB + database query<br>
+      Validating multiple fields: check email format + check username availability + check age
+    </div>
+  </div>
+
+  <div class="lbl">Use sequential when — calls have dependencies</div>
+  <div class="card" style="border-left:3px solid #E24B4A;margin-bottom:8px">
+    <div style="font-size:13px;color:var(--color-text-primary);font-weight:500;margin-bottom:6px">Must be sequential (output of A feeds input of B)</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.8">
+      Search → then summarize the search result<br>
+      Get user ID → then query their orders with that ID<br>
+      Generate code → then run it and check the output<br>
+      Fetch document → then extract specific fields from it
+    </div>
+  </div>
+
+  <div class="tip" style="background:#FAEEDA;border-color:#FAC775;color:#633806">
+    <strong>The LLM decides.</strong> You don't need to explicitly tell the agent "call these in parallel." A well-written system prompt ("call tools for all entities simultaneously") plus good tool descriptions lets the model figure it out. If it's still calling sequentially, add a few-shot example showing parallel tool calls in your system prompt.
+  </div>
+</div>
+
+<div id="panel-gotchas" class="panel">
+  <div class="lbl">4 things interviewers probe on</div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Q: "Why use threads instead of async for parallel tools?"</div>
+    <div class="tip" style="background:#E1F5EE;border-color:#9FE1CB;color:#085041;margin:0;font-size:13px">"Most tool implementations (HTTP clients, database drivers) are synchronous. Wrapping them in async requires rewriting them with asyncio. ThreadPoolExecutor lets synchronous tools run in parallel without any modification — it's the pragmatic default. For tools written as async functions, use asyncio.gather() instead."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Q: "What if one parallel tool fails and others succeed?"</div>
+    <div class="tip" style="background:#FAEEDA;border-color:#FAC775;color:#633806;margin:0;font-size:13px">"Wrap each tool execution in try/except inside the thread. A failed tool returns a ToolMessage with an error string instead of raising an exception — the LLM sees the error message and can adapt (try a different tool, skip that stock, ask the user). Never let one tool failure crash the entire parallel batch."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Q: "Does the LLM always call tools in parallel when it can?"</div>
+    <div class="tip" style="background:#EEEDFE;border-color:#CECBF6;color:#3C3489;margin:0;font-size:13px">"No — it depends on the model and prompt. Claude and GPT-4 support parallel tool calls but tend toward sequential by default. You encourage parallelism with explicit system prompt instructions: 'when you need data for multiple entities, call all tools simultaneously in a single response.' Without this nudge, the model often calls tools one at a time."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Q: "How does LangGraph's built-in ToolNode handle this vs a custom node?"</div>
+    <div class="tip" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C;margin:0;font-size:13px">"LangGraph's prebuilt ToolNode from langgraph.prebuilt executes all tool_calls in a single AIMessage concurrently by default — you get parallel execution for free. A custom tool node gives you more control: custom error handling, timing instrumentation, result truncation, rate limiting per tool. For production I start with the prebuilt node, then replace it with a custom one when I need observability or error recovery logic."</div>
+  </div>
+  <button class="ask-btn" onclick="sendPrompt('Show me how to use LangGraph prebuilt ToolNode vs a custom tool node — what exactly does the prebuilt version do and when should I replace it?')">Prebuilt vs custom ToolNode ↗</button>
+  <button class="ask-btn" onclick="sendPrompt('Explain multi-agent systems and fine-tuning in depth: supervisor/worker patterns, agent communication, LoRA and PEFT. I am preparing for an AI engineer interview with 3 years experience.')">Move to Phase 5 ↗</button>
+</div>
+
+<script>
+function sw(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>

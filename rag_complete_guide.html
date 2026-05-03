@@ -1,0 +1,445 @@
+
+<style>
+*{box-sizing:border-box}
+.tabs{display:flex;gap:5px;flex-wrap:wrap;padding:1rem 0 0}
+.tab{padding:6px 12px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-size:12px;cursor:pointer;background:transparent;color:var(--color-text-secondary);font-family:var(--font-sans);transition:all .15s}
+.tab:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.tab.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary);font-weight:500}
+.panel{display:none;padding-top:1.25rem}
+.panel.active{display:block}
+.lbl{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin:14px 0 6px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.1rem;margin-bottom:8px}
+.tip{padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;margin-bottom:8px;border:0.5px solid}
+.code{background:var(--color-background-secondary);border-radius:10px;padding:1rem;font-family:var(--font-mono);font-size:12px;line-height:1.75;color:var(--color-text-primary);white-space:pre-wrap;word-break:break-word;border:0.5px solid var(--color-border-tertiary);margin-bottom:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+@media(max-width:500px){.two{grid-template-columns:1fr}}
+.row{display:flex;align-items:flex-start;gap:8px;margin:5px 0;font-size:13px;line-height:1.5}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.ask-btn{padding:7px 14px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:transparent;font-size:13px;cursor:pointer;color:var(--color-text-primary);font-family:var(--font-sans);margin-top:8px}
+.ask-btn:hover{background:var(--color-background-secondary)}
+.chunk{display:inline-block;padding:4px 9px;border-radius:6px;font-size:12px;font-family:var(--font-mono);margin:2px;line-height:1.5;cursor:default;border:0.5px solid transparent;transition:all .2s}
+.chunk:hover{border-color:var(--color-border-primary)}
+.vec-bar{height:6px;border-radius:3px;margin:1px 0;transition:width .4s}
+.sim-row{display:flex;align-items:center;gap:8px;margin:4px 0}
+.sim-label{font-size:12px;font-family:var(--font-mono);width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--color-text-primary);flex-shrink:0}
+.sim-track{flex:1;height:10px;background:var(--color-border-tertiary);border-radius:5px;overflow:hidden}
+.sim-fill{height:100%;border-radius:5px;transition:width .5s}
+.sim-pct{font-size:11px;color:var(--color-text-secondary);width:36px;text-align:right;flex-shrink:0}
+.step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0}
+.pipeline-step{display:flex;gap:12px;align-items:flex-start;margin:10px 0}
+select,input[type=range]{font-family:var(--font-sans)}
+</style>
+
+<h2 class="sr-only">RAG complete guide — pipeline overview, chunking strategies, embeddings, semantic search, and interview prep</h2>
+
+<div class="tabs">
+  <button class="tab active" onclick="sw('pipeline',this)">Pipeline overview</button>
+  <button class="tab" onclick="sw('chunking',this)">Chunking</button>
+  <button class="tab" onclick="sw('embeddings',this)">Embeddings</button>
+  <button class="tab" onclick="sw('search',this)">Semantic search</button>
+  <button class="tab" onclick="sw('interview',this)">Interview answers</button>
+</div>
+
+<!-- PIPELINE OVERVIEW -->
+<div id="panel-pipeline" class="panel active">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">RAG has two distinct phases. You run the indexing phase once (or on update). The query phase runs on every user question.</div>
+
+  <div class="lbl">Phase 1 — indexing (done once, offline)</div>
+  <div class="pipeline-step">
+    <div class="step-dot" style="background:#E6F1FB;color:#0C447C">1</div>
+    <div class="card" style="flex:1;margin-bottom:0">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Load documents</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:3px">PDFs, web pages, databases, Notion, Confluence — anything with text. LangChain has 80+ loaders.</div>
+    </div>
+  </div>
+  <div style="width:1px;height:10px;background:var(--color-border-secondary);margin-left:13px"></div>
+  <div class="pipeline-step">
+    <div class="step-dot" style="background:#E1F5EE;color:#085041">2</div>
+    <div class="card" style="flex:1;margin-bottom:0">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Chunk into pieces</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:3px">Split each doc into overlapping segments (~500 tokens each). Too big = too much noise. Too small = loses context.</div>
+    </div>
+  </div>
+  <div style="width:1px;height:10px;background:var(--color-border-secondary);margin-left:13px"></div>
+  <div class="pipeline-step">
+    <div class="step-dot" style="background:#EEEDFE;color:#3C3489">3</div>
+    <div class="card" style="flex:1;margin-bottom:0">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Embed each chunk</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:3px">Run every chunk through an embedding model (e.g. text-embedding-3-small). Output: a vector of ~1536 floats per chunk.</div>
+    </div>
+  </div>
+  <div style="width:1px;height:10px;background:var(--color-border-secondary);margin-left:13px"></div>
+  <div class="pipeline-step">
+    <div class="step-dot" style="background:#FAEEDA;color:#633806">4</div>
+    <div class="card" style="flex:1;margin-bottom:0">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Store in vector DB</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:3px">Save (vector, original text, metadata) to Chroma, Pinecone, Weaviate, or pgvector. Indexed for fast similarity search.</div>
+    </div>
+  </div>
+
+  <div class="lbl" style="margin-top:18px">Phase 2 — query (runs on every user question)</div>
+  <div class="pipeline-step">
+    <div class="step-dot" style="background:#FAEEDA;color:#633806">5</div>
+    <div class="card" style="flex:1;margin-bottom:0">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Embed the question</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:3px">Run the user's question through the same embedding model. Now it's a vector in the same space as your chunks.</div>
+    </div>
+  </div>
+  <div style="width:1px;height:10px;background:var(--color-border-secondary);margin-left:13px"></div>
+  <div class="pipeline-step">
+    <div class="step-dot" style="background:#EAF3DE;color:#27500A">6</div>
+    <div class="card" style="flex:1;margin-bottom:0">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Retrieve top-k chunks</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:3px">Find the k chunks whose vectors are closest (highest cosine similarity) to the question vector. Typically k=3–5.</div>
+    </div>
+  </div>
+  <div style="width:1px;height:10px;background:var(--color-border-secondary);margin-left:13px"></div>
+  <div class="pipeline-step">
+    <div class="step-dot" style="background:#FAECE7;color:#712B13">7</div>
+    <div class="card" style="flex:1;margin-bottom:0">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Augment the prompt</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:3px">Inject the retrieved chunks into the LLM prompt as context: "Answer using only this context: [chunks]. Question: [question]"</div>
+    </div>
+  </div>
+  <div style="width:1px;height:10px;background:var(--color-border-secondary);margin-left:13px"></div>
+  <div class="pipeline-step">
+    <div class="step-dot" style="background:#E6F1FB;color:#0C447C">8</div>
+    <div class="card" style="flex:1;margin-bottom:0">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Generate answer</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-top:3px">LLM reads the context and answers. It can cite sources. It can say "I don't know" when the context doesn't contain the answer.</div>
+    </div>
+  </div>
+
+  <div class="tip" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C;margin-top:12px">
+    The key insight: the LLM never needs to memorize your data. It just needs to read and summarize the relevant passage you hand it. This means your knowledge base can be updated at any time without retraining.
+  </div>
+</div>
+
+<!-- CHUNKING -->
+<div id="panel-chunking" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">Chunking is the most underrated decision in a RAG system. Bad chunking breaks retrieval even with a perfect embedding model.</div>
+
+  <div class="lbl">Live demo — see how strategies split text differently</div>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+      <select id="chunk-strategy" onchange="rechunk()" style="font-size:13px">
+        <option value="fixed">Fixed size (500 chars, 50 overlap)</option>
+        <option value="sentence">Sentence-aware</option>
+        <option value="paragraph">Paragraph / semantic</option>
+        <option value="small">Too small (100 chars) — bad</option>
+        <option value="large">Too large (1000 chars) — bad</option>
+      </select>
+    </div>
+    <div id="chunk-output" style="line-height:1.9;font-size:13px"></div>
+    <div id="chunk-stats" style="font-size:12px;color:var(--color-text-secondary);margin-top:8px;padding-top:8px;border-top:0.5px solid var(--color-border-tertiary)"></div>
+  </div>
+
+  <div class="lbl">The 4 chunking strategies compared</div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="row"><div class="dot" style="background:#378ADD"></div><div><strong>Fixed-size with overlap</strong> — split every N characters, overlap by M. Simple, predictable. The overlap prevents losing context at boundaries. LangChain's default. Best for: homogeneous documents (articles, reports).</div></div>
+    <div class="row"><div class="dot" style="background:#1D9E75"></div><div><strong>Sentence/paragraph aware</strong> — split on natural language boundaries (periods, newlines). Chunks stay semantically coherent. Best for: conversational text, Q&A docs, anything with natural structure.</div></div>
+    <div class="row"><div class="dot" style="background:#7F77DD"></div><div><strong>Recursive character splitting</strong> — try paragraph breaks first, fall back to sentence breaks, then word breaks, then characters. LangChain's <code>RecursiveCharacterTextSplitter</code>. Best for: mixed content.</div></div>
+    <div class="row"><div class="dot" style="background:#D85A30"></div><div><strong>Semantic chunking</strong> — embed each sentence, group sentences with similar embeddings together. Highest quality, slowest. Best for: technical docs where topics change mid-paragraph.</div></div>
+  </div>
+
+  <div class="tip" style="background:#FAEEDA;border-color:#FAC775;color:#633806">
+    Interview trap: "What chunk size should I use?" — there is no universal answer. The right size depends on your embedding model's max input, your document type, and how specific your questions are. Always run evals with 20–50 representative questions and measure retrieval accuracy at different chunk sizes.
+  </div>
+  <button class="ask-btn" onclick="sendPrompt('What is the parent document retriever pattern in RAG, and when should I use it instead of standard chunking?')">Parent document retriever ↗</button>
+</div>
+
+<!-- EMBEDDINGS -->
+<div id="panel-embeddings" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">An embedding model converts text into a dense vector of floats. The magic: similar meanings → similar vectors. This is what makes "semantic" search possible.</div>
+
+  <div class="lbl">Visualizing a 6-dimensional embedding (real embeddings are 1536-dim)</div>
+  <div class="card">
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px">Each bar = one dimension of the vector. Select a word to see its embedding pattern:</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="word-btns"></div>
+    <div id="vec-vis" style="margin-bottom:10px"></div>
+    <div id="vec-note" style="font-size:12px;color:var(--color-text-secondary);padding:8px 10px;background:var(--color-background-secondary);border-radius:8px"></div>
+  </div>
+
+  <div class="lbl">Cosine similarity — how "closeness" is measured</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px;line-height:1.6">Cosine similarity measures the angle between two vectors — not their distance. Two vectors pointing in the same direction = similarity 1.0. Opposite directions = –1.0. Perpendicular = 0.0.</div>
+    <div class="code" style="margin-bottom:0">import numpy as np
+
+def cosine_similarity(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+# Example:
+vec_query = embed("What is the return policy?")
+vec_chunk = embed("Our refund window is 30 days")
+score = cosine_similarity(vec_query, vec_chunk)
+# → 0.87  (high similarity — good retrieval candidate)</div>
+  </div>
+
+  <div class="lbl">Choosing an embedding model</div>
+  <div class="two">
+    <div class="card">
+      <div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px">API-based (easier)</div>
+      <div class="row"><div class="dot" style="background:#378ADD"></div><div style="font-size:13px"><code>text-embedding-3-small</code> — OpenAI, 1536-dim, $0.02/1M tokens. Best value.</div></div>
+      <div class="row"><div class="dot" style="background:#1D9E75"></div><div style="font-size:13px"><code>text-embedding-3-large</code> — OpenAI, 3072-dim, higher accuracy for complex domains.</div></div>
+      <div class="row"><div class="dot" style="background:#7F77DD"></div><div style="font-size:13px"><code>voyage-3</code> — Anthropic-recommended, strong on retrieval benchmarks.</div></div>
+    </div>
+    <div class="card">
+      <div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px">Self-hosted (more control)</div>
+      <div class="row"><div class="dot" style="background:#378ADD"></div><div style="font-size:13px"><code>BAAI/bge-m3</code> — multilingual, runs on CPU, free. Good default for open-source stacks.</div></div>
+      <div class="row"><div class="dot" style="background:#1D9E75"></div><div style="font-size:13px"><code>nomic-embed-text</code> — strong performance, Apache 2.0 license.</div></div>
+      <div class="row"><div class="dot" style="background:#7F77DD"></div><div style="font-size:13px">Always use the same model at index time AND query time. Mismatched models = garbage results.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SEMANTIC SEARCH -->
+<div id="panel-search" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">This demo shows why semantic search beats keyword search. Try a query — keyword search looks for exact matches, semantic search finds meaning.</div>
+
+  <div class="lbl">Live comparison — keyword vs semantic search</div>
+  <div class="card">
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <select id="query-select" onchange="runSearch(this.value)" style="flex:1;font-size:13px">
+        <option value="">-- Pick a query --</option>
+        <option value="refund">How do I get my money back?</option>
+        <option value="cancel">Stop my subscription</option>
+        <option value="slow">The app is running slowly</option>
+        <option value="login">I forgot my password</option>
+        <option value="price">How much does it cost?</option>
+      </select>
+    </div>
+    <div id="search-results"></div>
+  </div>
+
+  <div class="lbl">Beyond basic vector search — advanced retrieval</div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="row"><div class="dot" style="background:#378ADD"></div><div><strong>Hybrid search</strong> — combine semantic (vector) + keyword (BM25) scores. Semantic finds conceptually similar chunks; BM25 finds exact term matches. Weighted sum of both scores wins on most benchmarks. Use <code>rank_fusion</code> in Weaviate or <code>EnsembleRetriever</code> in LangChain.</div></div>
+    <div class="row"><div class="dot" style="background:#1D9E75"></div><div><strong>Reranking</strong> — retrieve top-20 cheaply, then run a cross-encoder reranker to pick the best 3–5. Cross-encoders compare query + chunk together (more accurate but slower). Cohere Rerank, BGE-reranker. A single reranking step often improves RAG quality more than any other optimization.</div></div>
+    <div class="row"><div class="dot" style="background:#7F77DD"></div><div><strong>Metadata filtering</strong> — pre-filter by metadata before vector search. "Only search chunks from documents tagged 'billing', uploaded after 2024-01-01". Faster and more precise. Every chunk should store metadata: source, date, section, doc_type.</div></div>
+    <div class="row"><div class="dot" style="background:#D85A30"></div><div><strong>Query expansion / HyDE</strong> — before searching, ask the LLM to generate a hypothetical answer to the question. Embed that answer and search with it. Works because a hypothetical answer uses the same vocabulary as the relevant chunks, improving recall on abstract questions.</div></div>
+  </div>
+
+  <div class="tip" style="background:#EEEDFE;border-color:#CECBF6;color:#3C3489">
+    Interview answer for "how do you improve RAG quality?": (1) Better chunking — semantic chunking or parent-doc retriever. (2) Reranking — cross-encoder after vector retrieval. (3) Hybrid search — add BM25. (4) Metadata filtering — reduce the search space. (5) Query rewriting — fix ambiguous questions before embedding. In that order of ROI.
+  </div>
+  <button class="ask-btn" onclick="sendPrompt('Explain the HyDE (Hypothetical Document Embeddings) technique for RAG in detail with a code example')">HyDE technique ↗</button>
+</div>
+
+<!-- INTERVIEW ANSWERS -->
+<div id="panel-interview" class="panel">
+  <div class="lbl">The 5 questions you will definitely get asked</div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Q: "When would you use RAG vs fine-tuning?"</div>
+    <div class="tip" style="background:#E1F5EE;border-color:#9FE1CB;color:#085041;margin:0;font-size:13px">"RAG when the knowledge changes frequently (product docs, internal wikis, news) or when you need source citations. Fine-tuning when you need consistent style/behavior, not new knowledge — fine-tuning teaches the model HOW to talk, not WHAT to know. In practice: use RAG for knowledge, fine-tuning for format."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Q: "What causes bad RAG retrieval and how do you fix it?"</div>
+    <div class="tip" style="background:#FAEEDA;border-color:#FAC775;color:#633806;margin:0;font-size:13px">"Three main causes: (1) Chunks are too large — dilutes the relevant signal. Fix: smaller chunks + parent doc retriever. (2) Query-chunk mismatch — the question uses different vocabulary than the answer. Fix: HyDE, query expansion, or hybrid search. (3) Wrong embedding model — used a generic model on specialized domain text. Fix: domain-specific embedder or fine-tune the embedder."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Q: "How do you evaluate a RAG pipeline?"</div>
+    <div class="tip" style="background:#EEEDFE;border-color:#CECBF6;color:#3C3489;margin:0;font-size:13px">"Two separate evals: (1) Retrieval eval — given a question, did we retrieve the right chunks? Measure recall@k and MRR. (2) Generation eval — given the right chunks, did the LLM answer correctly? Use RAGAS framework: measures faithfulness (answer grounded in context), answer relevancy, and context precision/recall. The key insight: retrieval and generation failures have different fixes."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Q: "What vector databases have you used, and how do you choose?"</div>
+    <div class="tip" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C;margin:0;font-size:13px">"For prototyping: Chroma — local, no server, zero config. For production at moderate scale: Weaviate or Qdrant — self-hostable, strong hybrid search, good filtering. For large scale with managed infra: Pinecone — fully managed, simple API. For teams already on Postgres: pgvector — no new infra, good enough for &lt;1M vectors. The choice is mostly about operational complexity, not capability."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Q: "What is the 'lost in the middle' problem?"</div>
+    <div class="tip" style="background:#FAECE7;border-color:#F5C4B3;color:#712B13;margin:0;font-size:13px">"LLMs pay less attention to context in the middle of a long prompt — they prioritize beginning and end. So if you stuff 10 retrieved chunks into the prompt, the most relevant chunk might be chunk 5 and the LLM partially ignores it. Fix: (1) Retrieve fewer, higher-quality chunks (k=3 not k=10). (2) Put the most relevant chunk first and last. (3) Use reranking to ensure quality before insertion."</div>
+  </div>
+
+  <div class="lbl">The answer that impresses senior interviewers</div>
+  <div class="tip" style="background:#F1EFE8;border-color:#D3D1C7;color:#444441">
+    "The hardest part of RAG isn't the vector search — it's the evaluation loop. Anyone can wire up ChromaDB in an afternoon. What separates production RAG from a demo is: a labeled eval set of 100+ question/answer pairs, automated metrics (RAGAS or custom), and a CI pipeline that runs the eval on every change to chunking strategy, embedding model, or retrieval params. Without this, you're flying blind."
+  </div>
+  <button class="ask-btn" onclick="sendPrompt('Show me how to set up RAGAS evaluation for a RAG pipeline in Python — give me working code with faithfulness, answer relevancy, and context precision metrics')">RAGAS evaluation code ↗</button>
+</div>
+
+<script>
+function sw(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+const DOC = `Acme Corp Return Policy
+
+We want you to be completely satisfied with your purchase. If you are not satisfied for any reason, you may return most items within 30 days of delivery for a full refund.
+
+To initiate a return, please contact our support team at support@acme.com or call 1-800-ACME. You will receive a prepaid shipping label within 24 hours.
+
+Subscription Cancellation
+
+You may cancel your subscription at any time from your Account Settings page. Navigate to Settings > Billing > Cancel Subscription. Your access will continue until the end of the current billing period. No refunds are issued for partial months.
+
+Technical Support
+
+If you experience performance issues with our application, please first try clearing your browser cache and cookies. If problems persist, our engineering team can be reached at tech@acme.com. Response time is typically 2-4 business hours.
+
+Account Access
+
+To reset your password, click "Forgot Password" on the login page and enter your email address. A reset link will be sent within 5 minutes. If you do not receive it, check your spam folder or contact support.
+
+Pricing Plans
+
+Our Basic plan starts at $9/month, Professional at $29/month, and Enterprise pricing is available on request. All plans include a 14-day free trial. Annual billing offers a 20% discount.`;
+
+const chunkColors = [
+  ['#E6F1FB','#0C447C'],['#E1F5EE','#085041'],['#EEEDFE','#3C3489'],
+  ['#FAEEDA','#633806'],['#FAECE7','#712B13'],['#EAF3DE','#27500A'],
+  ['#E6F1FB','#185FA5'],['#E1F5EE','#0F6E56'],
+];
+
+function fixedChunk(text, size, overlap){
+  const chunks=[];
+  let i=0;
+  while(i<text.length){
+    chunks.push(text.slice(i,i+size));
+    i+=size-overlap;
+  }
+  return chunks;
+}
+function sentenceChunk(text){
+  return text.match(/[^.!?]+[.!?]+[\s]*/g)||[text];
+}
+function paragraphChunk(text){
+  return text.split(/\n\n+/).filter(s=>s.trim().length>20);
+}
+
+function rechunk(){
+  const strat=document.getElementById('chunk-strategy').value;
+  let chunks;
+  if(strat==='fixed') chunks=fixedChunk(DOC,500,50);
+  else if(strat==='sentence') chunks=sentenceChunk(DOC);
+  else if(strat==='paragraph') chunks=paragraphChunk(DOC);
+  else if(strat==='small') chunks=fixedChunk(DOC,100,10);
+  else chunks=fixedChunk(DOC,1000,100);
+
+  const out=document.getElementById('chunk-output');
+  out.innerHTML=chunks.map((c,i)=>{
+    const [bg,col]=chunkColors[i%chunkColors.length];
+    return `<span class="chunk" style="background:${bg};color:${col}" title="Chunk ${i+1}: ${c.length} chars">${c.trim().slice(0,60)}${c.length>60?'…':''}</span>`;
+  }).join(' ');
+
+  const avgLen=Math.round(chunks.reduce((a,c)=>a+c.length,0)/chunks.length);
+  document.getElementById('chunk-stats').textContent=
+    `${chunks.length} chunks · avg ${avgLen} chars each · strategy: ${strat}`;
+}
+rechunk();
+
+const wordVecs={
+  'king':    [0.9,0.8,0.1,0.2,0.7,0.3],
+  'queen':   [0.85,0.75,0.15,0.8,0.65,0.25],
+  'doctor':  [0.2,0.3,0.9,0.85,0.1,0.7],
+  'nurse':   [0.25,0.28,0.85,0.9,0.08,0.75],
+  'car':     [0.1,0.15,0.2,0.1,0.9,0.85],
+  'truck':   [0.08,0.12,0.15,0.12,0.92,0.88],
+  'happy':   [0.7,0.2,0.4,0.1,0.3,0.9],
+  'joyful':  [0.72,0.18,0.42,0.08,0.28,0.92],
+};
+const dimLabels=['semantic-royal','prestige','medical','care','vehicle','emotion'];
+const vecColors=['#378ADD','#1D9E75','#7F77DD','#D85A30','#EF9F27','#E24B4A'];
+
+function renderVec(word){
+  const v=wordVecs[word];
+  const vis=document.getElementById('vec-vis');
+  vis.innerHTML=v.map((val,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;margin:3px 0">
+      <span style="font-size:11px;color:var(--color-text-secondary);width:110px;flex-shrink:0">${dimLabels[i]}</span>
+      <div style="flex:1;height:8px;background:var(--color-border-tertiary);border-radius:4px;overflow:hidden">
+        <div style="width:${Math.round(val*100)}%;height:100%;background:${vecColors[i]};border-radius:4px"></div>
+      </div>
+      <span style="font-size:11px;color:var(--color-text-secondary);width:32px;text-align:right">${val.toFixed(2)}</span>
+    </div>`).join('');
+
+  const notes={
+    king:'High on "semantic-royal" and "prestige". Low on medical, vehicle, emotion.',
+    queen:'Very similar to "king" — same semantic neighborhood. Slightly higher on "care" dimension.',
+    doctor:'Dominant medical + care dimensions. Nothing royal, nothing vehicle-related.',
+    nurse:'Nearly identical vector to "doctor" — they live very close in embedding space.',
+    car:'Completely dominated by the vehicle dimension. No medical or royal signal.',
+    truck:'Almost identical to "car". This is why semantic search finds "truck" when you search "car".',
+    happy:'High emotion + prestige. Medium medical (happiness relates to wellbeing).',
+    joyful:'Nearly identical to "happy" — a synonym maps to almost the same vector.',
+  };
+  document.getElementById('vec-note').textContent=notes[word]||'';
+}
+
+const wordBtns=document.getElementById('word-btns');
+Object.keys(wordVecs).forEach(w=>{
+  const b=document.createElement('button');
+  b.textContent=w;
+  b.style.cssText='padding:5px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:transparent;font-size:12px;cursor:pointer;color:var(--color-text-primary);font-family:var(--font-sans)';
+  b.onclick=()=>{
+    wordBtns.querySelectorAll('button').forEach(x=>x.style.background='transparent');
+    b.style.background='var(--color-background-secondary)';
+    renderVec(w);
+  };
+  wordBtns.appendChild(b);
+});
+renderVec('king');
+wordBtns.querySelector('button').style.background='var(--color-background-secondary)';
+
+const corpus=[
+  {text:'Our refund window is 30 days. Contact support@acme.com to initiate a return.',keywords:['refund','return','days'],sem:{refund:0.95,cancel:0.3,slow:0.1,login:0.05,price:0.15}},
+  {text:'Cancel your subscription anytime in Account Settings > Billing > Cancel Subscription.',keywords:['cancel','subscription','billing'],sem:{refund:0.25,cancel:0.97,slow:0.05,login:0.1,price:0.3}},
+  {text:'For performance issues, clear your browser cache and cookies first.',keywords:['cache','cookies','browser'],sem:{refund:0.05,cancel:0.1,slow:0.91,login:0.15,price:0.05}},
+  {text:'Reset your password by clicking "Forgot Password" on the login page.',keywords:['password','reset','login'],sem:{refund:0.05,cancel:0.08,slow:0.1,login:0.96,price:0.05}},
+  {text:'Basic plan: $9/month. Professional: $29/month. Enterprise: contact us.',keywords:['plan','price','month'],sem:{refund:0.1,cancel:0.2,slow:0.05,login:0.05,price:0.95}},
+  {text:'Your access continues until end of billing period after cancellation.',keywords:['access','billing','period'],sem:{refund:0.2,cancel:0.75,slow:0.05,login:0.05,price:0.25}},
+  {text:'Annual billing offers a 20% discount on all plans.',keywords:['annual','discount','billing'],sem:{refund:0.1,cancel:0.15,slow:0.05,login:0.05,price:0.8}},
+];
+
+const queryKeywords={refund:['money','back','return','refund'],cancel:['stop','cancel','subscription','end'],slow:['slow','performance','lag','speed'],login:['password','login','forgot','access'],price:['cost','price','how much','plan']};
+
+function runSearch(q){
+  if(!q) return;
+  const out=document.getElementById('search-results');
+  const kws=queryKeywords[q]||[];
+
+  const kwScored=corpus.map(c=>{
+    const text=c.text.toLowerCase();
+    const hits=kws.filter(k=>text.includes(k.toLowerCase())).length;
+    return {...c,kwScore:hits/kws.length};
+  }).sort((a,b)=>b.kwScore-a.kwScore);
+
+  const semScored=corpus.map(c=>({...c,semScore:c.sem[q]||0})).sort((a,b)=>b.semScore-a.semScore);
+
+  let html=`<div class="two">
+    <div>
+      <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin-bottom:8px">Keyword search results</div>
+      ${kwScored.slice(0,3).map((c,i)=>
+        `<div style="margin:4px 0;padding:8px 10px;border-radius:8px;background:${c.kwScore>0?'#E6F1FB':'var(--color-background-secondary)'};border:0.5px solid ${c.kwScore>0?'#B5D4F4':'var(--color-border-tertiary)'}">
+          <div style="font-size:12px;color:${c.kwScore>0?'#0C447C':'var(--color-text-secondary)'};">${c.text.slice(0,70)}…</div>
+          <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:3px">match: ${c.kwScore>0?Math.round(c.kwScore*100)+'%':'no keywords found'}</div>
+        </div>`).join('')}
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin-bottom:8px">Semantic search results</div>
+      ${semScored.slice(0,3).map((c,i)=>
+        `<div style="margin:4px 0;padding:8px 10px;border-radius:8px;background:${i===0?'#E1F5EE':'var(--color-background-secondary)'};border:0.5px solid ${i===0?'#9FE1CB':'var(--color-border-tertiary)'}">
+          <div style="font-size:12px;color:${i===0?'#085041':'var(--color-text-secondary)'};">${c.text.slice(0,70)}…</div>
+          <div style="font-size:11px;color:var(--color-text-tertiary);margin-top:3px">similarity: ${Math.round(c.semScore*100)}%</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+
+  const queryTexts={refund:'How do I get my money back?',cancel:'Stop my subscription',slow:'The app is running slowly',login:'I forgot my password',price:'How much does it cost?'};
+  const insight={
+    refund:"Keyword search finds 'return' but misses 'refund window'. Semantic search understands 'money back' = refund.",
+    cancel:"Keyword search can't match 'stop' to 'Cancel Subscription'. Semantic search finds both cancellation chunks.",
+    slow:"'Running slowly' has zero keyword overlap with 'performance issues'. Only semantic search finds the right chunk.",
+    login:"'Forgot my password' — keyword search matches 'forgot'. Both work here since vocabulary overlaps.",
+    price:"'How much does it cost' vs 'plan starts at $9'. Keyword search fails on cost/price mismatch. Semantic wins.",
+  };
+  html+=`<div class="tip" style="background:#F1EFE8;border-color:#D3D1C7;color:#444441;margin-top:8px"><strong>Why they differ:</strong> ${insight[q]}</div>`;
+  out.innerHTML=html;
+}
+</script>

@@ -1,0 +1,192 @@
+
+<style>
+  .roadmap { padding: 1.5rem 0; font-family: var(--font-sans); }
+  .phase-header { display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 14px 16px; border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); margin-bottom: 4px; user-select: none; }
+  .phase-header:hover { background: var(--color-background-secondary); }
+  .phase-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+  .phase-title { flex: 1; }
+  .phase-title h3 { margin: 0; font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+  .phase-title p { margin: 0; font-size: 13px; color: var(--color-text-secondary); }
+  .phase-arrow { font-size: 13px; color: var(--color-text-tertiary); transition: transform 0.2s; }
+  .phase-arrow.open { transform: rotate(90deg); }
+  .phase-body { display: none; padding: 12px 16px 16px; border: 0.5px solid var(--color-border-tertiary); border-top: none; border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg); margin-bottom: 12px; background: var(--color-background-primary); }
+  .phase-body.open { display: block; }
+  .concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .concept-pill { padding: 8px 12px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); font-size: 13px; color: var(--color-text-primary); background: var(--color-background-secondary); }
+  .concept-pill span { font-size: 11px; color: var(--color-text-secondary); display: block; margin-top: 2px; }
+  .project-box { padding: 12px 14px; border-radius: var(--border-radius-md); margin-top: 10px; border: 0.5px solid; }
+  .ask-btn { margin-top: 12px; padding: 8px 16px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; font-size: 13px; cursor: pointer; color: var(--color-text-primary); }
+  .ask-btn:hover { background: var(--color-background-secondary); }
+  .section-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-tertiary); margin: 12px 0 8px; }
+</style>
+
+<div class="roadmap">
+  <h2 class="sr-only">AI Engineer Learning Roadmap — 5 phases from fundamentals to multi-agent systems</h2>
+
+  <div id="phases"></div>
+</div>
+
+<script>
+const phases = [
+  {
+    num: "1",
+    color: "#E6F1FB", textColor: "#0C447C", borderColor: "#378ADD",
+    title: "Core AI Concepts",
+    subtitle: "The vocabulary every AI engineer must know",
+    weeks: "Week 1–2",
+    concepts: [
+      { name: "Tokens", desc: "How text is broken into chunks" },
+      { name: "Transformers", desc: "The architecture behind all LLMs" },
+      { name: "Temperature", desc: "Controlling randomness in output" },
+      { name: "Hallucinations", desc: "When models confidently make things up" },
+      { name: "Context window", desc: "How much text a model can 'see'" },
+      { name: "Embeddings", desc: "Turning text into numbers (vectors)" },
+    ],
+    project: "Run your first API call with OpenAI or Anthropic. Try different temperatures and observe output changes.",
+    projectColor: "#E6F1FB", projectBorder: "#B5D4F4", projectText: "#185FA5",
+    askLabel: "Explain Phase 1 concepts in depth ↗",
+    askPrompt: "Explain Phase 1 AI concepts in simple terms with examples: tokens, transformers, temperature, hallucinations, context window, and embeddings. I'm a beginner."
+  },
+  {
+    num: "2",
+    color: "#E1F5EE", textColor: "#085041", borderColor: "#1D9E75",
+    title: "Prompt Engineering",
+    subtitle: "Getting reliable, structured output from LLMs",
+    weeks: "Week 3–4",
+    concepts: [
+      { name: "Zero-shot prompting", desc: "Ask directly, no examples" },
+      { name: "Few-shot prompting", desc: "Give examples in the prompt" },
+      { name: "Chain of Thought (CoT)", desc: "Ask model to think step by step" },
+      { name: "System prompts", desc: "Priming / setting model behavior" },
+      { name: "Structured output", desc: "Getting JSON back reliably" },
+      { name: "ReAct pattern", desc: "Reason + Act in a loop" },
+    ],
+    project: "Build a prompt that classifies customer support emails into categories. Use system prompt + few-shot examples.",
+    projectColor: "#E1F5EE", projectBorder: "#9FE1CB", projectText: "#0F6E56",
+    askLabel: "Explain Phase 2 concepts in depth ↗",
+    askPrompt: "Explain prompt engineering techniques in depth with examples: zero-shot, few-shot, chain of thought, system prompts, structured output, and ReAct. I'm learning for an AI engineer interview."
+  },
+  {
+    num: "3",
+    color: "#EEEDFE", textColor: "#3C3489", borderColor: "#7F77DD",
+    title: "RAG & Vector Search",
+    subtitle: "Giving LLMs access to your own data",
+    weeks: "Week 5–6",
+    concepts: [
+      { name: "RAG", desc: "Retrieval-Augmented Generation" },
+      { name: "Vector databases", desc: "Pinecone, Weaviate, Chroma" },
+      { name: "Semantic search", desc: "Search by meaning, not keywords" },
+      { name: "Chunking", desc: "Splitting docs for retrieval" },
+      { name: "Reranking", desc: "Improving retrieved results" },
+      { name: "Hybrid search", desc: "Keyword + semantic combined" },
+    ],
+    project: "Build a Q&A bot over a PDF document using LangChain + ChromaDB. Ask it questions about your doc.",
+    projectColor: "#EEEDFE", projectBorder: "#CECBF6", projectText: "#534AB7",
+    askLabel: "Explain RAG and vector search in depth ↗",
+    askPrompt: "Explain RAG (Retrieval-Augmented Generation) and vector databases in depth with examples. Cover chunking, embeddings, semantic search, and how to build a basic RAG pipeline. I'm learning for an AI engineer interview."
+  },
+  {
+    num: "4",
+    color: "#FAEEDA", textColor: "#633806", borderColor: "#EF9F27",
+    title: "AI Agents",
+    subtitle: "LLMs that can take actions and use tools",
+    weeks: "Week 7–9",
+    concepts: [
+      { name: "Tool use / Function calling", desc: "Give LLM access to code/APIs" },
+      { name: "Planning", desc: "Breaking goals into steps" },
+      { name: "Memory types", desc: "Short-term vs long-term" },
+      { name: "Agent loop", desc: "Think → Act → Observe → Repeat" },
+      { name: "LangGraph / CrewAI", desc: "Frameworks for building agents" },
+      { name: "Human-in-the-loop", desc: "When to pause and ask human" },
+    ],
+    project: "Build a research agent that searches the web, summarizes results, and saves to a file — all autonomously.",
+    projectColor: "#FAEEDA", projectBorder: "#FAC775", projectText: "#854F0B",
+    askLabel: "Explain AI agents in depth ↗",
+    askPrompt: "Explain AI agents in depth: the agent loop, tool use/function calling, memory types, planning, and frameworks like LangGraph and CrewAI. Show me how a simple agent works. I'm preparing for an AI engineer interview."
+  },
+  {
+    num: "5",
+    color: "#FAECE7", textColor: "#4A1B0C", borderColor: "#D85A30",
+    title: "Multi-Agent Systems + Fine-tuning",
+    subtitle: "Coordinating multiple AI agents + training on custom data",
+    weeks: "Week 10–12",
+    concepts: [
+      { name: "Multi-agent orchestration", desc: "Supervisor + worker agents" },
+      { name: "Agent communication", desc: "How agents pass info between them" },
+      { name: "Fine-tuning", desc: "Training a model on your data" },
+      { name: "LoRA / PEFT", desc: "Efficient fine-tuning methods" },
+      { name: "Evaluation", desc: "Measuring agent performance" },
+      { name: "Guardrails", desc: "Keeping agents safe and on-task" },
+    ],
+    project: "Build a multi-agent system: one agent researches a topic, one writes a summary, one reviews it — coordinated by a supervisor agent.",
+    projectColor: "#FAECE7", projectBorder: "#F5C4B3", projectText: "#993C1D",
+    askLabel: "Explain multi-agent systems and fine-tuning ↗",
+    askPrompt: "Explain multi-agent systems and fine-tuning in depth: how to orchestrate multiple agents, supervisor/worker patterns, agent communication, and fine-tuning concepts like LoRA and PEFT. I'm preparing for an AI engineer interview with 3 years experience."
+  }
+];
+
+const container = document.getElementById('phases');
+
+phases.forEach((p, i) => {
+  const wrapper = document.createElement('div');
+  wrapper.style.marginBottom = '4px';
+
+  const header = document.createElement('div');
+  header.className = 'phase-header';
+  header.innerHTML = `
+    <div class="phase-num" style="background:${p.color};color:${p.textColor};">${p.num}</div>
+    <div class="phase-title">
+      <h3>${p.title}</h3>
+      <p>${p.subtitle} &nbsp;·&nbsp; ${p.weeks}</p>
+    </div>
+    <div class="phase-arrow" id="arr-${i}">›</div>
+  `;
+
+  const body = document.createElement('div');
+  body.className = 'phase-body';
+  body.id = `body-${i}`;
+
+  const grid = document.createElement('div');
+  grid.className = 'concept-grid';
+  p.concepts.forEach(c => {
+    const pill = document.createElement('div');
+    pill.className = 'concept-pill';
+    pill.innerHTML = `${c.name}<span>${c.desc}</span>`;
+    grid.appendChild(pill);
+  });
+
+  const projLabel = document.createElement('div');
+  projLabel.className = 'section-label';
+  projLabel.textContent = 'Mini project';
+
+  const proj = document.createElement('div');
+  proj.className = 'project-box';
+  proj.style.cssText = `background:${p.projectColor};border-color:${p.projectBorder};color:${p.projectText};`;
+  proj.style.fontSize = '13px';
+  proj.textContent = p.project;
+
+  const btn = document.createElement('button');
+  btn.className = 'ask-btn';
+  btn.textContent = p.askLabel;
+  btn.onclick = () => sendPrompt(p.askPrompt);
+
+  body.appendChild(grid);
+  body.appendChild(projLabel);
+  body.appendChild(proj);
+  body.appendChild(btn);
+
+  header.onclick = () => {
+    const isOpen = body.classList.contains('open');
+    document.querySelectorAll('.phase-body').forEach(b => b.classList.remove('open'));
+    document.querySelectorAll('.phase-arrow').forEach(a => a.classList.remove('open'));
+    if (!isOpen) {
+      body.classList.add('open');
+      document.getElementById(`arr-${i}`).classList.add('open');
+    }
+  };
+
+  wrapper.appendChild(header);
+  wrapper.appendChild(body);
+  container.appendChild(wrapper);
+});
+</script>

@@ -1,0 +1,333 @@
+
+<style>
+*{box-sizing:border-box}
+.tabs{display:flex;gap:5px;flex-wrap:wrap;padding:1rem 0 0}
+.tab{padding:6px 12px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-size:12px;cursor:pointer;background:transparent;color:var(--color-text-secondary);font-family:var(--font-sans);transition:all .15s}
+.tab:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.tab.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary);font-weight:500}
+.panel{display:none;padding-top:1.25rem}
+.panel.active{display:block}
+.lbl{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin:14px 0 6px}
+.code{background:var(--color-background-secondary);border-radius:10px;padding:1rem 1.25rem;font-family:var(--font-mono);font-size:12px;line-height:1.75;color:var(--color-text-primary);white-space:pre-wrap;word-break:break-word;border:0.5px solid var(--color-border-tertiary);margin-bottom:8px}
+.good{background:#E1F5EE;border-color:#9FE1CB;color:#085041}
+.bad{background:#FCEBEB;border-color:#F09595;color:#791F1F}
+.info{background:#E6F1FB;border-color:#B5D4F4;color:#0C447C}
+.warn{background:#FAEEDA;border-color:#FAC775;color:#633806}
+.note{background:#EEEDFE;border-color:#CECBF6;color:#3C3489}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+@media(max-width:520px){.two{grid-template-columns:1fr}}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.1rem}
+.tip{padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;margin-bottom:8px;border:0.5px solid}
+.row{display:flex;align-items:flex-start;gap:8px;margin:5px 0;font-size:13px;line-height:1.5}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.anno{font-size:11px;color:var(--color-text-tertiary);font-family:var(--font-mono);padding:2px 6px;background:var(--color-background-secondary);border-radius:4px;display:inline-block;margin-left:4px}
+.ask-btn{margin-top:10px;padding:7px 14px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:transparent;font-size:13px;cursor:pointer;color:var(--color-text-primary);font-family:var(--font-sans)}
+.ask-btn:hover{background:var(--color-background-secondary)}
+</style>
+
+<h2 class="sr-only">Zero-shot production prompt patterns for summarization, translation, extraction, classification, sentiment analysis, and rewriting</h2>
+
+<div class="tabs">
+  <button class="tab active" onclick="sw('summ',this)">Summarization</button>
+  <button class="tab" onclick="sw('trans',this)">Translation</button>
+  <button class="tab" onclick="sw('extract',this)">Extraction</button>
+  <button class="tab" onclick="sw('class',this)">Classification</button>
+  <button class="tab" onclick="sw('sentiment',this)">Sentiment</button>
+  <button class="tab" onclick="sw('rewrite',this)">Rewriting</button>
+</div>
+
+<!-- SUMMARIZATION -->
+<div id="panel-summ" class="panel active">
+  <div class="lbl">Weak version — what most beginners write</div>
+  <div class="code bad">Summarize this article: {article}</div>
+  <div style="font-size:12px;color:#A32D2D;margin-bottom:12px">Problems: undefined length, no audience, no format — every response will be different.</div>
+
+  <div class="lbl">Production version</div>
+  <div class="code good">You are a content summarization engine for a B2B SaaS newsletter.
+
+Summarize the article below following these rules:
+- Length: exactly 3 sentences
+- Sentence 1: the core news/finding (what happened)
+- Sentence 2: why it matters to software engineers
+- Sentence 3: one concrete takeaway or next action
+
+Tone: neutral, factual, no hype words like "revolutionary" or "game-changing"
+Output: plain text only, no bullet points, no headers
+
+&lt;article&gt;
+{article_text}
+&lt;/article&gt;</div>
+
+  <div class="lbl">Why each part earns its place</div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="row"><div class="dot" style="background:#378ADD"></div><div><code>exactly 3 sentences</code> — "brief" means 2 sentences to some models, 8 to others. Be numeric.</div></div>
+    <div class="row"><div class="dot" style="background:#1D9E75"></div><div>Defining each sentence's job forces structure without requiring JSON.</div></div>
+    <div class="row"><div class="dot" style="background:#7F77DD"></div><div>Naming the audience ("software engineers") shifts vocabulary and what counts as "important."</div></div>
+    <div class="row"><div class="dot" style="background:#D85A30"></div><div><code>&lt;article&gt;</code> delimiters separate your instruction from the user's content — prevents injection.</div></div>
+    <div class="row"><div class="dot" style="background:#888780"></div><div>Banning hype words by example is more reliable than saying "be objective."</div></div>
+  </div>
+
+  <div class="lbl">Variants for different use cases</div>
+  <div class="two">
+    <div class="card">
+      <div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px">Hierarchical summary (long docs)</div>
+      <div class="code" style="font-size:11px;padding:.75rem">Return a JSON object:
+{
+  "headline": "one sentence, &lt;15 words",
+  "summary": "2–3 sentences",
+  "key_points": ["string", ...],
+  "action_items": ["string", ...]
+}</div>
+    </div>
+    <div class="card">
+      <div style="font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px">Audience-adaptive summary</div>
+      <div class="code" style="font-size:11px;padding:.75rem">Summarize for a {audience} who has
+{expertise_level} knowledge of {domain}.
+Avoid jargon above their level.
+Max reading time: {minutes} minutes.</div>
+    </div>
+  </div>
+  <button class="ask-btn" onclick="sendPrompt('How do I handle summarizing documents that are longer than the context window? What chunking strategies work best?')">Summarizing long documents ↗</button>
+</div>
+
+<!-- TRANSLATION -->
+<div id="panel-trans" class="panel">
+  <div class="lbl">Naive version</div>
+  <div class="code bad">Translate to French: {text}</div>
+  <div style="font-size:12px;color:#A32D2D;margin-bottom:12px">Ignores tone, formality, domain vocabulary, and locale differences (French France vs French Canada).</div>
+
+  <div class="lbl">Production version</div>
+  <div class="code good">You are a professional localization engine.
+
+Translate the text below with these requirements:
+- Target language: French (France, not Canadian French)
+- Formality: formal "vous" form, not "tu"
+- Domain: legal/contract language — preserve technical legal terms, do not simplify them
+- Brand names, product names, and proper nouns: keep in original language
+- If a phrase has no direct equivalent, translate the meaning, not the words
+
+Return ONLY the translated text. Do not include the original, explanations, or notes.
+
+&lt;source_text&gt;
+{text}
+&lt;/source_text&gt;</div>
+
+  <div class="lbl">The dimensions you must control in translation</div>
+  <div class="two">
+    <div class="card">
+      <div class="row"><div class="dot" style="background:#378ADD"></div><div><strong>Locale</strong> — French (France) vs (Canada), Spanish (Spain) vs (Mexico). Different vocabulary and spelling.</div></div>
+      <div class="row"><div class="dot" style="background:#1D9E75"></div><div><strong>Formality register</strong> — formal/informal, honorifics. Critical for business comms.</div></div>
+      <div class="row"><div class="dot" style="background:#7F77DD"></div><div><strong>Domain</strong> — legal, medical, technical. Terms must match industry convention, not dictionary definition.</div></div>
+    </div>
+    <div class="card">
+      <div class="row"><div class="dot" style="background:#D85A30"></div><div><strong>What to preserve</strong> — brand names, product names, UI strings, code snippets.</div></div>
+      <div class="row"><div class="dot" style="background:#888780"></div><div><strong>Untranslatable phrases</strong> — tell the model what to do when direct translation fails.</div></div>
+      <div class="row"><div class="dot" style="background:#0F6E56"></div><div><strong>Output format</strong> — same markdown/HTML structure as input? Preserve line breaks?</div></div>
+    </div>
+  </div>
+
+  <div class="lbl">Detecting source language first (production pattern)</div>
+  <div class="code good">Step 1 — detect:
+Return the ISO 639-1 language code of the text below. Return only the code (e.g. "en", "fr", "de").
+Text: {text}
+
+Step 2 — translate (only if Step 1 ≠ "en"):
+[translation prompt above]</div>
+  <div class="tip info">Interview tip: for high-volume translation, you can skip detection by asking for it inline: "If the text is already in English, return it unchanged. Otherwise, translate to English."</div>
+  <button class="ask-btn" onclick="sendPrompt('How do I build a translation pipeline that handles 20+ languages at scale, with quality validation and fallback handling?')">Build a translation pipeline ↗</button>
+</div>
+
+<!-- EXTRACTION -->
+<div id="panel-extract" class="panel">
+  <div class="lbl">The most important zero-shot pattern in production</div>
+  <div class="code good">You are a structured data extraction engine.
+
+Extract the following fields from the contract text below.
+
+FIELDS:
+- party_a: full legal name of the first party
+- party_b: full legal name of the second party
+- effective_date: ISO 8601 format (YYYY-MM-DD), or null if not stated
+- termination_date: ISO 8601 format, or null if not stated
+- governing_law: jurisdiction/state, or null
+- payment_terms: brief description, or null
+- auto_renewal: true/false/null
+
+RULES:
+- Extract only what is explicitly stated — do not infer or assume
+- Dates mentioned as "the first of next month" → null (ambiguous)
+- Return ONLY a JSON object matching the schema above, no other text
+
+&lt;contract&gt;
+{contract_text}
+&lt;/contract&gt;</div>
+
+  <div class="lbl">The 3-part extraction formula</div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="row"><div class="dot" style="background:#378ADD"></div><div><strong>Define every field's type and null condition</strong> — "or null if not stated" prevents the model from guessing when a field is missing.</div></div>
+    <div class="row"><div class="dot" style="background:#1D9E75"></div><div><strong>Specify format for ambiguous types</strong> — dates especially. ISO 8601 is unambiguous. "June 2024" is not.</div></div>
+    <div class="row"><div class="dot" style="background:#7F77DD"></div><div><strong>State the extraction policy</strong> — "extract only what is explicit" stops hallucination of missing fields. Without this, models fill in plausible-sounding values.</div></div>
+  </div>
+
+  <div class="lbl">Named entity extraction (less structured)</div>
+  <div class="code good">Extract all named entities from the text below.
+
+Return a JSON object with these arrays:
+{
+  "people": [],        // full names of individuals
+  "organizations": [], // company/org names
+  "locations": [],     // cities, countries, addresses
+  "dates": [],         // any date or time reference
+  "monetary": []       // any amounts with currency
+}
+
+Include each entity only once (deduplicate). If an array has no entities, return [].
+
+&lt;text&gt;{text}&lt;/text&gt;</div>
+  <button class="ask-btn" onclick="sendPrompt('How do I extract data from messy, unstructured text where the format varies between documents? What techniques handle inconsistent inputs?')">Handling messy/inconsistent inputs ↗</button>
+</div>
+
+<!-- CLASSIFICATION -->
+<div id="panel-class" class="panel">
+  <div class="lbl">Single-label classification</div>
+  <div class="code good">You are a content moderation classifier.
+
+Classify the user message below into EXACTLY ONE of these categories:
+
+CATEGORIES:
+- safe: normal conversation, questions, requests
+- spam: promotional content, repetitive nonsense, bot-like patterns
+- hate: attacks on people based on identity
+- threat: explicit or implied threats of harm
+- pii: contains personal data (emails, phone numbers, SSNs, addresses)
+
+Rules:
+- If multiple categories apply, choose the highest severity (threat &gt; hate &gt; pii &gt; spam &gt; safe)
+- Return a JSON object: {"category": "...", "confidence": 0.0–1.0, "reason": "one sentence"}
+
+Message: &lt;msg&gt;{user_message}&lt;/msg&gt;</div>
+
+  <div class="lbl">Multi-label classification</div>
+  <div class="code good">You are a product feedback tagger.
+
+A piece of feedback can belong to multiple categories. Return ALL that apply.
+
+TAGS: [performance, pricing, ui, onboarding, support, feature_request, bug_report, praise]
+
+Return JSON: {"tags": ["tag1", "tag2"], "primary_tag": "most dominant tag"}
+
+Only use tags from the list above. If none fit, return {"tags": [], "primary_tag": null}
+
+Feedback: &lt;fb&gt;{feedback}&lt;/fb&gt;</div>
+
+  <div class="lbl">The confidence score pattern (interview must-know)</div>
+  <div class="tip warn">Always ask for a confidence score in classification tasks. When confidence is below a threshold (e.g. 0.7), route to human review instead of taking automated action. This is the standard pattern for human-in-the-loop AI systems — a key topic in senior AI engineer interviews.</div>
+
+  <div class="lbl">Handling unknown / out-of-scope inputs</div>
+  <div class="code good">// Always give the model an escape hatch:
+- If the input does not clearly fit any category, return {"category": "unclear", "confidence": 0.0, "reason": "..."}
+// Without this, the model will force-fit ambiguous input into a wrong category</div>
+  <button class="ask-btn" onclick="sendPrompt('How do I evaluate the accuracy of a zero-shot classification prompt? What metrics and testing strategies should I use?')">Evaluating classification accuracy ↗</button>
+</div>
+
+<!-- SENTIMENT -->
+<div id="panel-sentiment" class="panel">
+  <div class="lbl">Beyond positive/negative — production-grade sentiment</div>
+  <div class="code good">You are a customer experience analyst.
+
+Analyze the sentiment of the review below across multiple dimensions.
+
+Return a JSON object with this exact structure:
+{
+  "overall": "positive" | "negative" | "neutral" | "mixed",
+  "score": -1.0 to 1.0,  // -1 = strongly negative, 0 = neutral, 1 = strongly positive
+  "dimensions": {
+    "product_quality": "positive" | "negative" | "neutral" | "not_mentioned",
+    "customer_service": "positive" | "negative" | "neutral" | "not_mentioned",
+    "value_for_money": "positive" | "negative" | "neutral" | "not_mentioned",
+    "ease_of_use": "positive" | "negative" | "neutral" | "not_mentioned"
+  },
+  "key_phrases": {
+    "positive": ["phrase1", "phrase2"],  // direct quotes from review
+    "negative": ["phrase1", "phrase2"]
+  },
+  "churn_risk": "high" | "medium" | "low"
+}
+
+Review: &lt;review&gt;{review_text}&lt;/review&gt;</div>
+
+  <div class="lbl">Why multi-dimensional sentiment beats simple positive/negative</div>
+  <div class="two">
+    <div class="card">
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px">Example review:</div>
+      <div style="font-size:13px;font-style:italic;color:var(--color-text-primary);line-height:1.6">"The product itself is excellent but the setup was a nightmare and support took 3 days to respond."</div>
+    </div>
+    <div class="card">
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:6px">Simple model says: mixed</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px">Multi-dim model says:</div>
+      <div style="font-size:12px;font-family:var(--font-mono);color:var(--color-text-primary);line-height:1.8">product_quality: positive<br>ease_of_use: negative<br>customer_service: negative<br>churn_risk: medium</div>
+    </div>
+  </div>
+  <div class="tip note">The <code>churn_risk</code> field is a derived signal — the model reasons about whether this person is likely to cancel. This is what makes sentiment analysis actually useful for product teams, not just a vanity metric.</div>
+  <button class="ask-btn" onclick="sendPrompt('How do I build a real-time sentiment analysis pipeline for customer reviews at scale? What architecture and tools should I use?')">Build a sentiment pipeline ↗</button>
+</div>
+
+<!-- REWRITING -->
+<div id="panel-rewrite" class="panel">
+  <div class="lbl">Tone rewriting — same content, different voice</div>
+  <div class="code good">You are a professional business writing editor.
+
+Rewrite the message below to match the target tone. Do NOT change the factual content, add new information, or remove any key points.
+
+Target tone: formal and diplomatic
+Context: this is a client-facing email from a senior manager
+
+Original message:
+&lt;original&gt;
+{message}
+&lt;/original&gt;
+
+Rules:
+- Preserve all facts, dates, and numbers exactly
+- Remove casual language, contractions, and slang
+- If the original is unclear, choose the most charitable interpretation
+- Maximum length change: ±20% of original word count</div>
+
+  <div class="lbl">Reading level rewriting (Flesch–Kincaid targeting)</div>
+  <div class="code good">Rewrite the text below for a {grade_level} reading level.
+
+Target audience: {audience_description}
+
+Rules:
+- Replace technical jargon with plain-language equivalents
+- Break sentences longer than 20 words into shorter ones
+- Preserve all factual information — do not omit or simplify facts
+- Keep proper nouns and brand names unchanged
+
+&lt;text&gt;{technical_text}&lt;/text&gt;</div>
+
+  <div class="lbl">The content-preservation constraint (most important rule in rewriting)</div>
+  <div class="tip warn"><strong>Always explicitly forbid adding or removing content.</strong> Without this, models will "helpfully" pad, trim, or clarify the original — silently changing meaning. In legal, medical, and financial contexts this is dangerous. The phrase "do NOT change the factual content" is load-bearing.</div>
+
+  <div class="lbl">Diff-aware rewriting (advanced)</div>
+  <div class="code good">Rewrite the text below. After the rewrite, return a bullet list of every change you made and why.
+
+Format:
+REWRITE:
+[rewritten text]
+
+CHANGES:
+- [original phrase] → [new phrase]: [reason]
+- ...</div>
+  <div class="tip info">The changes list forces the model to be accountable for every edit. It also makes reviewing AI rewrites much faster — you scan the diff instead of reading both versions.</div>
+  <button class="ask-btn" onclick="sendPrompt('How do I build a prompt that rewrites content to match a brand voice, given a style guide document? Walk me through the approach.')">Match a brand voice with prompts ↗</button>
+</div>
+
+<script>
+function sw(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>

@@ -1,0 +1,362 @@
+
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: var(--font-sans); }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.5rem; padding: 1rem 0 0; }
+  .tab { padding: 7px 14px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); font-size: 13px; cursor: pointer; background: transparent; color: var(--color-text-secondary); transition: all .15s; }
+  .tab:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
+  .tab.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); font-weight: 500; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .demo-box { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+  .token { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 13px; font-family: var(--font-mono); margin: 2px; font-weight: 500; }
+  .row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .label { font-size: 12px; color: var(--color-text-secondary); min-width: 80px; }
+  .val { font-size: 13px; font-weight: 500; min-width: 36px; color: var(--color-text-primary); }
+  .word-pair { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: 13px; }
+  .sim-bar-wrap { flex: 1; height: 8px; background: var(--color-border-tertiary); border-radius: 4px; overflow: hidden; }
+  .sim-bar { height: 100%; border-radius: 4px; transition: width .4s; }
+  .hall-result { padding: 10px 14px; border-radius: var(--border-radius-md); font-size: 13px; line-height: 1.6; margin-top: 10px; }
+  .ctx-fill { height: 20px; border-radius: 3px; transition: width .4s; }
+  .ctx-row { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+  .ctx-label { font-size: 12px; color: var(--color-text-secondary); width: 90px; flex-shrink: 0; }
+  .ctx-bar { flex: 1; background: var(--color-border-tertiary); border-radius: 3px; overflow: hidden; }
+  .ctx-used { font-size: 12px; color: var(--color-text-secondary); width: 80px; text-align: right; flex-shrink: 0; }
+  .prob-row { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
+  .prob-word { font-size: 13px; font-family: var(--font-mono); width: 90px; color: var(--color-text-primary); }
+  .prob-bar-wrap { flex: 1; height: 18px; background: var(--color-border-tertiary); border-radius: 4px; overflow: hidden; }
+  .prob-bar { height: 100%; border-radius: 4px; transition: width .4s; display: flex; align-items: center; padding-left: 6px; }
+  .prob-pct { font-size: 11px; color: var(--color-text-secondary); width: 38px; text-align: right; }
+  .selected-token { outline: 2px solid #378ADD; outline-offset: 2px; }
+  input[type=range] { width: 100%; }
+  select { padding: 6px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); font-size: 13px; }
+</style>
+
+<h2 class="sr-only">Phase 1 AI concepts interactive playground — explore tokens, transformers, temperature, hallucinations, context window, and embeddings</h2>
+
+<div class="tabs">
+  <button class="tab active" onclick="show('tokens',this)">Tokens</button>
+  <button class="tab" onclick="show('transformer',this)">Transformers</button>
+  <button class="tab" onclick="show('temperature',this)">Temperature</button>
+  <button class="tab" onclick="show('hallucinations',this)">Hallucinations</button>
+  <button class="tab" onclick="show('context',this)">Context window</button>
+  <button class="tab" onclick="show('embeddings',this)">Embeddings</button>
+</div>
+
+<div id="panel-tokens" class="panel active">
+  <div class="demo-box">
+    <div class="row">
+      <label class="label">Sentence</label>
+      <select onchange="tokenize(this.value)">
+        <option value="The quick brown fox jumps">The quick brown fox jumps</option>
+        <option value="unhappiness">unhappiness</option>
+        <option value="ChatGPT is amazing!">ChatGPT is amazing!</option>
+        <option value="I love machine learning">I love machine learning</option>
+        <option value="2024 AI trends report">2024 AI trends report</option>
+      </select>
+    </div>
+    <div id="token-output" style="margin-top:12px;min-height:40px;"></div>
+    <div id="token-count" style="font-size:12px;color:var(--color-text-secondary);margin-top:8px;"></div>
+  </div>
+  <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;">
+    Each colored block = 1 token. Notice how punctuation, spaces, and word-parts split differently. Models count cost and limits in tokens, not words.
+  </div>
+</div>
+
+<div id="panel-transformer" class="panel">
+  <div class="demo-box">
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;">Click a word to see what it "attends to" when understanding the sentence.</div>
+    <div id="attn-tokens" style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+    <div id="attn-vis" style="font-size:13px;color:var(--color-text-secondary);min-height:30px;"></div>
+  </div>
+  <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;">
+    The transformer's "attention" mechanism lets every word look at every other word and decide what's relevant. This is how it resolves pronouns, tracks subjects, and understands context.
+  </div>
+</div>
+
+<div id="panel-temperature" class="panel">
+  <div class="demo-box">
+    <div class="row">
+      <label class="label">Temperature</label>
+      <input type="range" min="0" max="20" value="5" id="temp-range" oninput="updateTemp(this.value)" style="flex:1">
+      <span class="val" id="temp-val">0.5</span>
+    </div>
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:12px;">After "The sky is _", the model has these options:</div>
+    <div id="prob-bars"></div>
+    <div id="temp-label" style="margin-top:10px;font-size:12px;padding:8px 12px;border-radius:var(--border-radius-md);background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);"></div>
+  </div>
+  <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;">
+    Low temperature = always picks the top choice (deterministic). High temperature = spreads probability to surprising words (creative but risky). For code generation, use ~0.2. For creative writing, use ~0.8–1.0.
+  </div>
+</div>
+
+<div id="panel-hallucinations" class="panel">
+  <div class="demo-box">
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;">Pick a type of question to see how hallucinations happen:</div>
+    <select onchange="showHall(this.value)" style="margin-bottom:10px;">
+      <option value="">-- Choose a question type --</option>
+      <option value="book">Ask about a fake book</option>
+      <option value="stat">Ask for a made-up statistic</option>
+      <option value="person">Ask about a real person's details</option>
+      <option value="code">Ask for a library that doesn't exist</option>
+    </select>
+    <div id="hall-output"></div>
+  </div>
+  <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;">
+    The model doesn't "look up" facts — it generates plausible-sounding text. It's a pattern completer, not a search engine. This is why you always verify AI output for facts, numbers, and citations.
+  </div>
+</div>
+
+<div id="panel-context" class="panel">
+  <div class="demo-box">
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;">How full is the context window for different tasks?</div>
+    <div id="ctx-bars"></div>
+    <div style="margin-top:12px;font-size:12px;color:var(--color-text-secondary);">Slide to see what fits in older vs newer models:</div>
+    <div class="row" style="margin-top:8px;">
+      <label class="label" style="font-size:12px;">Context size</label>
+      <input type="range" min="0" max="3" value="2" step="1" id="ctx-range" oninput="updateCtx(this.value)" style="flex:1">
+      <span class="val" id="ctx-val" style="font-size:12px;min-width:70px;">200k tokens</span>
+    </div>
+    <div id="ctx-model-label" style="font-size:12px;color:var(--color-text-secondary);margin-top:4px;"></div>
+  </div>
+  <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;">
+    The context window is everything the model can "see" in one call — your system prompt, the conversation history, and the user's message all share it. When it's full, older messages get dropped.
+  </div>
+</div>
+
+<div id="panel-embeddings" class="panel">
+  <div class="demo-box">
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;">Word similarity in "meaning space" — closer = more similar meaning:</div>
+    <div id="embed-pairs"></div>
+    <div style="margin-top:14px;font-size:12px;color:var(--color-text-secondary);">Compare to this anchor word:</div>
+    <select onchange="updateEmbeds(this.value)" style="margin-top:6px;">
+      <option value="king">king</option>
+      <option value="doctor">doctor</option>
+      <option value="car">car</option>
+      <option value="happy">happy</option>
+    </select>
+    <div id="embed-note" style="margin-top:12px;font-size:12px;color:var(--color-text-secondary);padding:8px 12px;border-radius:var(--border-radius-md);background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);"></div>
+  </div>
+  <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;">
+    Embeddings power semantic search (find documents by meaning, not exact words), RAG systems, and recommendation engines. "king - man + woman ≈ queen" is the classic demo of how meaning arithmetic works.
+  </div>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+const tokenColors = [
+  ['#E6F1FB','#0C447C'],['#E1F5EE','#085041'],['#EEEDFE','#3C3489'],
+  ['#FAEEDA','#633806'],['#FAECE7','#712B13'],['#EAF3DE','#27500A']
+];
+
+function tokenize(text) {
+  const tokenSets = {
+    'The quick brown fox jumps': ['The', ' quick', ' brown', ' fox', ' jumps'],
+    'unhappiness': ['un', 'happi', 'ness'],
+    'ChatGPT is amazing!': ['Chat', 'G', 'PT', ' is', ' amazing', '!'],
+    'I love machine learning': ['I', ' love', ' machine', ' learning'],
+    '2024 AI trends report': ['2024', ' AI', ' trends', ' report']
+  };
+  const tokens = tokenSets[text] || text.split(' ');
+  const out = document.getElementById('token-output');
+  out.innerHTML = tokens.map((t,i) => {
+    const [bg,col] = tokenColors[i % tokenColors.length];
+    return `<span class="token" style="background:${bg};color:${col}">${t.replace(/ /g,'·')}</span>`;
+  }).join('');
+  document.getElementById('token-count').textContent = `${tokens.length} token${tokens.length>1?'s':''} · ~${(tokens.length * 0.75).toFixed(1)} words equivalent`;
+}
+tokenize('The quick brown fox jumps');
+
+const attnData = {
+  'The': {desc: '"The" is a determiner — it mostly attends to the noun it modifies.', weights: [0.5, 0.1, 0.1, 0.3, 0.0, 0.0, 0.0]},
+  'trophy': {desc: '"trophy" attends strongly to "fit" and "big" — it needs to know whether it\'s the thing that didn\'t fit.', weights: [0.05, 0.7, 0.05, 0.1, 0.05, 0.5, 0.05]},
+  "wouldn't": {desc: '"wouldn\'t" attends to the verbs around it — it modifies the action of fitting.', weights: [0.05, 0.1, 0.6, 0.2, 0.05, 0.0, 0.0]},
+  'fit': {desc: '"fit" attends back to "trophy" and forward to "suitcase" — these are the subject and object of fitting.', weights: [0.0, 0.5, 0.1, 0.6, 0.0, 0.1, 0.0]},
+  'suitcase': {desc: '"suitcase" also attends to "fit" — it\'s the container being referenced.', weights: [0.0, 0.1, 0.05, 0.5, 0.6, 0.05, 0.1]},
+  'it': {desc: '"it" must resolve to either "trophy" or "suitcase". High attention to "trophy" because of size context.', weights: [0.0, 0.8, 0.0, 0.1, 0.1, 0.4, 0.0]},
+  'big': {desc: '"big" attends to "trophy" — it\'s the property being described.', weights: [0.0, 0.7, 0.0, 0.1, 0.05, 0.0, 0.9]}
+};
+const attnWords = ['The','trophy',"wouldn't",'fit','suitcase','it','big'];
+
+function renderAttn(selected) {
+  const cont = document.getElementById('attn-tokens');
+  cont.innerHTML = attnWords.map(w => {
+    const isSel = w === selected;
+    const d = attnData[selected];
+    const idx = attnWords.indexOf(w);
+    const wt = d ? d.weights[idx] : 0;
+    const opacity = selected ? Math.max(0.15, wt) : 1;
+    const borderStyle = isSel ? '2px solid #378ADD' : '0.5px solid var(--color-border-secondary)';
+    return `<span onclick="renderAttn('${w}')" style="cursor:pointer;display:inline-block;padding:6px 12px;border-radius:var(--border-radius-md);border:${borderStyle};font-size:14px;opacity:${opacity};background:var(--color-background-primary);color:var(--color-text-primary);transition:opacity .3s;">${w}</span>`;
+  }).join('');
+  const vis = document.getElementById('attn-vis');
+  if (selected && attnData[selected]) {
+    vis.innerHTML = `<span style="color:var(--color-text-primary);">${attnData[selected].desc}</span>`;
+  } else {
+    vis.innerHTML = 'Click any word to see its attention pattern.';
+  }
+}
+renderAttn(null);
+
+const baseProbs = {
+  'blue': 42, 'clear': 28, 'dark': 12, 'cloudy': 10, 'purple': 5, 'neon': 3
+};
+const probColors = ['#378ADD','#1D9E75','#7F77DD','#888780','#D85A30','#E24B4A'];
+
+function updateTemp(v) {
+  const t = (v/20).toFixed(1);
+  document.getElementById('temp-val').textContent = t;
+  const temp = parseFloat(t);
+  const words = Object.keys(baseProbs);
+  const raw = words.map(w => Math.pow(baseProbs[w]/100, 1/Math.max(temp,0.05)));
+  const sum = raw.reduce((a,b)=>a+b,0);
+  const probs = raw.map(r => Math.round((r/sum)*100));
+  const container = document.getElementById('prob-bars');
+  container.innerHTML = words.map((w,i) => `
+    <div class="prob-row">
+      <span class="prob-word">${w}</span>
+      <div class="prob-bar-wrap">
+        <div class="prob-bar" style="width:${probs[i]}%;background:${probColors[i]};"></div>
+      </div>
+      <span class="prob-pct">${probs[i]}%</span>
+    </div>`).join('');
+  const lbl = document.getElementById('temp-label');
+  if (temp < 0.3) lbl.textContent = 'Very deterministic — will always say "blue". Good for factual tasks.';
+  else if (temp < 0.7) lbl.textContent = 'Balanced — mostly "blue" but occasionally "clear" or "dark".';
+  else if (temp < 1.2) lbl.textContent = 'Creative — meaningful chance of surprising answers.';
+  else lbl.textContent = 'Very high — even unlikely words like "neon" have real probability. Can get incoherent.';
+}
+updateTemp(5);
+
+const hallData = {
+  book: {
+    q: 'Q: "Summarize the book The Silver Labyrinth by David Farrow (2019)"',
+    a: 'A: "The Silver Labyrinth is a compelling thriller following detective Sarah Chen through the streets of Shanghai... Farrow masterfully weaves themes of identity and loss throughout the 347-page narrative..."',
+    issue: 'This book does not exist. The model invented the plot, character name, page count, and themes — all plausible-sounding, all fabricated.',
+    color: '#FCEBEB', textColor: '#A32D2D', borderColor: '#F09595'
+  },
+  stat: {
+    q: 'Q: "What percentage of CEOs have ADHD?"',
+    a: 'A: "Studies suggest approximately 21% of CEOs have ADHD, compared to 5% in the general population, according to a 2019 Harvard Business Review analysis..."',
+    issue: 'The 21% figure is invented. The HBR citation is invented. The model generated a believable-sounding statistic with a credible source — neither exists.',
+    color: '#FAEEDA', textColor: '#854F0B', borderColor: '#FAC775'
+  },
+  person: {
+    q: 'Q: "What university did Elon Musk attend for his PhD?"',
+    a: 'A: "Elon Musk attended Stanford University, where he was enrolled in the PhD program for energy physics in 1995 before leaving after two days to co-found Zip2..."',
+    issue: 'He was in the Stanford PhD program for Applied Physics and Materials Science — not "energy physics". Small hallucination, but wrong. This happens with real facts the model partially knows.',
+    color: '#E1F5EE', textColor: '#085041', borderColor: '#9FE1CB'
+  },
+  code: {
+    q: 'Q: "How do I use the pandas.dataframe.autoclean() method?"',
+    a: 'A: "The autoclean() method automatically removes null values and normalizes column types. Use it like: df.autoclean(strategy=\'median\', inplace=True)..."',
+    issue: 'pandas.DataFrame.autoclean() does not exist. The model invented a plausible method name with realistic-looking syntax. Developers copy this into code and get confusing errors.',
+    color: '#EEEDFE', textColor: '#3C3489', borderColor: '#CECBF6'
+  }
+};
+
+function showHall(v) {
+  const out = document.getElementById('hall-output');
+  if (!v) { out.innerHTML = ''; return; }
+  const d = hallData[v];
+  out.innerHTML = `
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:6px;">${d.q}</div>
+    <div class="hall-result" style="background:${d.color};color:${d.textColor};border:0.5px solid ${d.borderColor};">${d.a}</div>
+    <div style="margin-top:8px;font-size:12px;color:var(--color-text-secondary);padding:8px 12px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);">
+      <strong>What's wrong:</strong> ${d.issue}
+    </div>`;
+}
+
+const ctxSizes = [
+  {label:'GPT-3 (2020)', tokens:4000, model:'4k tokens'},
+  {label:'GPT-3.5 (2022)', tokens:16000, model:'16k tokens'},
+  {label:'Claude 3 (2024)', tokens:200000, model:'200k tokens'},
+  {label:'Claude 3.5+ (2025)', tokens:200000, model:'200k tokens'}
+];
+const ctxItems = [
+  {name:'This conversation so far', tokens:800, color:'#378ADD'},
+  {name:'A short PDF (10 pages)', tokens:5000, color:'#1D9E75'},
+  {name:'A novel (300 pages)', tokens:75000, color:'#7F77DD'},
+  {name:'Entire codebase (medium app)', tokens:120000, color:'#D85A30'},
+];
+
+function updateCtx(v) {
+  const size = ctxSizes[v];
+  document.getElementById('ctx-val').textContent = size.tokens >= 1000 ? Math.round(size.tokens/1000)+'k tokens' : size.tokens+' tokens';
+  document.getElementById('ctx-model-label').textContent = size.label;
+  const container = document.getElementById('ctx-bars');
+  container.innerHTML = ctxItems.map(item => {
+    const pct = Math.min(100, Math.round((item.tokens / size.tokens) * 100));
+    const fits = item.tokens <= size.tokens;
+    return `<div class="ctx-row">
+      <span class="ctx-label">${item.name}</span>
+      <div class="ctx-bar"><div class="ctx-fill" style="width:${pct}%;background:${fits ? item.color : '#E24B4A'};"></div></div>
+      <span class="ctx-used" style="color:${fits ? 'var(--color-text-secondary)' : '#A32D2D'}">${fits ? item.tokens.toLocaleString()+' tok' : 'TOO BIG'}</span>
+    </div>`;
+  }).join('');
+}
+updateCtx(2);
+
+const embedData = {
+  king: [
+    {word:'queen', sim:0.89, color:'#378ADD'},
+    {word:'prince', sim:0.82, color:'#378ADD'},
+    {word:'monarch', sim:0.78, color:'#1D9E75'},
+    {word:'crown', sim:0.65, color:'#1D9E75'},
+    {word:'kingdom', sim:0.60, color:'#1D9E75'},
+    {word:'apple', sim:0.12, color:'#888780'},
+    {word:'running', sim:0.08, color:'#888780'},
+  ],
+  doctor: [
+    {word:'physician', sim:0.94, color:'#378ADD'},
+    {word:'nurse', sim:0.82, color:'#378ADD'},
+    {word:'hospital', sim:0.75, color:'#1D9E75'},
+    {word:'medicine', sim:0.70, color:'#1D9E75'},
+    {word:'patient', sim:0.68, color:'#1D9E75'},
+    {word:'guitar', sim:0.09, color:'#888780'},
+    {word:'ocean', sim:0.06, color:'#888780'},
+  ],
+  car: [
+    {word:'vehicle', sim:0.91, color:'#378ADD'},
+    {word:'truck', sim:0.85, color:'#378ADD'},
+    {word:'engine', sim:0.74, color:'#1D9E75'},
+    {word:'drive', sim:0.69, color:'#1D9E75'},
+    {word:'road', sim:0.63, color:'#1D9E75'},
+    {word:'poetry', sim:0.10, color:'#888780'},
+    {word:'cloud', sim:0.07, color:'#888780'},
+  ],
+  happy: [
+    {word:'joyful', sim:0.93, color:'#378ADD'},
+    {word:'cheerful', sim:0.88, color:'#378ADD'},
+    {word:'content', sim:0.79, color:'#1D9E75'},
+    {word:'sad', sim:0.55, color:'#D85A30'},
+    {word:'angry', sim:0.48, color:'#D85A30'},
+    {word:'table', sim:0.11, color:'#888780'},
+    {word:'rocket', sim:0.05, color:'#888780'},
+  ]
+};
+const embedNotes = {
+  king: 'king − man + woman ≈ queen — you can do math with meaning. This is the classic proof that embeddings capture semantic relationships.',
+  doctor: 'Medical words cluster together. "physician" is nearly identical to "doctor" in meaning-space.',
+  car: '"sad" has moderate similarity to "happy" because they\'re both emotions — even though they\'re opposites, they\'re in the same semantic neighborhood.',
+  happy: '"sad" has moderate similarity because they\'re both emotions — antonyms are often close in embedding space.',
+};
+
+function updateEmbeds(anchor) {
+  const items = embedData[anchor];
+  document.getElementById('embed-pairs').innerHTML = items.map(d => `
+    <div class="word-pair">
+      <span style="font-size:13px;font-family:var(--font-mono);width:90px;color:var(--color-text-primary);">${anchor} ↔ ${d.word}</span>
+      <div class="sim-bar-wrap"><div class="sim-bar" style="width:${d.sim*100}%;background:${d.color};"></div></div>
+      <span style="font-size:12px;color:var(--color-text-secondary);width:38px;text-align:right;">${(d.sim*100).toFixed(0)}%</span>
+    </div>`).join('');
+  document.getElementById('embed-note').textContent = embedNotes[anchor];
+}
+updateEmbeds('king');
+</script>

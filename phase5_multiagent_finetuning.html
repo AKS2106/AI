@@ -1,0 +1,421 @@
+
+<style>
+*{box-sizing:border-box}
+.tabs{display:flex;gap:5px;flex-wrap:wrap;padding:1rem 0 0}
+.tab{padding:6px 12px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-size:12px;cursor:pointer;background:transparent;color:var(--color-text-secondary);font-family:var(--font-sans);transition:all .15s}
+.tab:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.tab.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary);font-weight:500}
+.panel{display:none;padding-top:1.25rem}
+.panel.active{display:block}
+.lbl{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin:14px 0 6px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.1rem;margin-bottom:8px}
+.tip{padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;margin-bottom:8px;border:0.5px solid}
+.code{background:var(--color-background-secondary);border-radius:10px;padding:1rem;font-family:var(--font-mono);font-size:12px;line-height:1.75;color:var(--color-text-primary);white-space:pre-wrap;word-break:break-word;border:0.5px solid var(--color-border-tertiary);margin-bottom:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+@media(max-width:500px){.two{grid-template-columns:1fr}}
+.row{display:flex;align-items:flex-start;gap:8px;margin:5px 0;font-size:13px;line-height:1.5}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.ask-btn{padding:7px 14px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:transparent;font-size:13px;cursor:pointer;color:var(--color-text-primary);font-family:var(--font-sans);margin-top:8px;margin-right:6px}
+.ask-btn:hover{background:var(--color-background-secondary)}
+.step-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0}
+.step-row{display:flex;gap:10px;align-items:flex-start;margin:6px 0}
+.nav-btn{padding:5px 12px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:transparent;font-size:12px;cursor:pointer;color:var(--color-text-primary);font-family:var(--font-sans)}
+.nav-btn.on{background:var(--color-background-secondary);border-color:var(--color-border-primary)}
+.bar-wrap{height:10px;border-radius:5px;background:var(--color-border-tertiary);overflow:hidden;flex:1}
+.bar-fill{height:100%;border-radius:5px;transition:width .4s}
+</style>
+
+<h2 class="sr-only">Phase 5 complete guide — multi-agent systems, supervisor patterns, agent communication, fine-tuning, LoRA, PEFT</h2>
+
+<div class="tabs">
+  <button class="tab active" onclick="sw('patterns',this)">Multi-agent patterns</button>
+  <button class="tab" onclick="sw('comms',this)">Agent communication</button>
+  <button class="tab" onclick="sw('ft',this)">Fine-tuning concepts</button>
+  <button class="tab" onclick="sw('lora',this)">LoRA / PEFT</button>
+  <button class="tab" onclick="sw('eval',this)">Evaluation</button>
+  <button class="tab" onclick="sw('interview',this)">Interview answers</button>
+</div>
+
+<!-- MULTI-AGENT PATTERNS -->
+<div id="panel-patterns" class="panel active">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">There are 4 orchestration patterns. Each solves a different coordination problem. Knowing when to use each is what separates senior candidates from junior ones.</div>
+
+  <div id="pat-nav" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+    <button class="nav-btn on" onclick="showPat(0,this)">Supervisor/worker</button>
+    <button class="nav-btn" onclick="showPat(1,this)">Sequential pipeline</button>
+    <button class="nav-btn" onclick="showPat(2,this)">Hierarchical</button>
+    <button class="nav-btn" onclick="showPat(3,this)">Peer-to-peer</button>
+  </div>
+  <div id="pat-detail"></div>
+
+  <div class="tip" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C;margin-top:4px">
+    In practice: most production systems use the supervisor pattern. It's the most debuggable and the most common in LangGraph codebases. If an interviewer asks you to design a multi-agent system, default to supervisor unless there's a specific reason not to.
+  </div>
+</div>
+
+<!-- AGENT COMMUNICATION -->
+<div id="panel-comms" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">How agents pass information between each other is the most underspecified part of most tutorials. There are three mechanisms, each with different tradeoffs.</div>
+
+  <div class="lbl">Mechanism 1 — shared state (LangGraph default)</div>
+  <div class="card" style="border-left:3px solid #378ADD">
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px;line-height:1.6">All agents read from and write to a single <code>AgentState</code> object. The supervisor and all workers see the same data. LangGraph's reducers handle concurrent writes safely.</div>
+    <div class="code" style="margin-bottom:6px">class SharedState(TypedDict):
+    messages:        Annotated[list, add_messages]  # append-only
+    research_output: str       # researcher writes, writer reads
+    draft:           str       # writer writes, reviewer reads
+    review_notes:    list[str] # reviewer writes, writer re-reads
+    final_output:    str       # completed artifact
+    next_agent:      str       # supervisor writes who goes next</div>
+    <div style="font-size:12px;color:var(--color-text-secondary)">Best for: sequential pipelines where output of one agent is input to next. Simplest to reason about — one source of truth.</div>
+  </div>
+
+  <div class="lbl">Mechanism 2 — message passing (human-readable handoffs)</div>
+  <div class="card" style="border-left:3px solid #7F77DD">
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px;line-height:1.6">Agents communicate by adding structured messages to the shared message list. Each agent reads the conversation history and extracts what it needs. More flexible but harder to parse reliably.</div>
+    <div class="code" style="margin-bottom:6px">class AgentHandoff(BaseModel):
+    target_agent: str     # "researcher" | "writer" | "reviewer"
+    task:         str     # what to do
+    context:      str     # relevant background
+    deliverable:  str     # exact output expected
+
+# Supervisor emits this as a ToolMessage
+# Target agent sees it as part of message history</div>
+    <div style="font-size:12px;color:var(--color-text-secondary)">Best for: dynamic routing where the supervisor decides mid-run who to involve next.</div>
+  </div>
+
+  <div class="lbl">Mechanism 3 — subgraph invocation (strongest isolation)</div>
+  <div class="card" style="border-left:3px solid #1D9E75">
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px;line-height:1.6">Each agent is a compiled subgraph. The supervisor calls a subgraph like a function, passing input state and receiving output state. Agent internals are fully hidden from the supervisor.</div>
+    <div class="code" style="margin-bottom:6px">researcher_graph = build_researcher().compile()
+writer_graph     = build_writer().compile()
+
+def supervisor_node(state):
+    # Call researcher as a black box
+    research = researcher_graph.invoke({"task": state["task"]})
+    # Pass its output to the writer
+    draft = writer_graph.invoke({
+        "research": research["output"],
+        "style":    state["style_guide"]
+    })
+    return {"draft": draft["output"]}</div>
+    <div style="font-size:12px;color:var(--color-text-secondary)">Best for: reusable agent components, independent testing of each agent, large teams where different engineers own different agents.</div>
+  </div>
+
+  <div class="tip" style="background:#FAEEDA;border-color:#FAC775;color:#633806">
+    Interview answer for "how do agents communicate in your system?": "I use shared state as the primary mechanism — it's a single TypedDict everyone reads and writes with LangGraph reducers handling conflicts. For complex handoffs I add structured Pydantic models to the state so the compiler catches type errors at build time, not runtime."
+  </div>
+</div>
+
+<!-- FINE-TUNING CONCEPTS -->
+<div id="panel-ft" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">Fine-tuning is a continuum, not a binary choice. From lightest to heaviest intervention — each level adds quality and removes flexibility.</div>
+
+  <div class="lbl">The fine-tuning spectrum</div>
+
+  <div class="card" style="border-left:3px solid #B5D4F4;margin-bottom:6px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">1. Prompt engineering</span>
+      <span style="font-size:11px;padding:2px 8px;background:#E6F1FB;color:#0C447C;border-radius:6px">zero training cost</span>
+    </div>
+    <div style="font-size:12px;color:var(--color-text-secondary)">No weight updates. Instructions in system prompt. Deploy in hours. Loses effect if model changes.</div>
+  </div>
+
+  <div class="card" style="border-left:3px solid #9FE1CB;margin-bottom:6px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">2. LoRA / PEFT fine-tuning</span>
+      <span style="font-size:11px;padding:2px 8px;background:#E1F5EE;color:#085041;border-radius:6px">low cost, days</span>
+    </div>
+    <div style="font-size:12px;color:var(--color-text-secondary)">Train small adapter layers only. 100–10k examples. Single GPU viable. The industry standard for open-source models.</div>
+  </div>
+
+  <div class="card" style="border-left:3px solid #FAC775;margin-bottom:6px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">3. Full fine-tuning</span>
+      <span style="font-size:11px;padding:2px 8px;background:#FAEEDA;color:#633806;border-radius:6px">high cost, weeks</span>
+    </div>
+    <div style="font-size:12px;color:var(--color-text-secondary)">Update all weights. Needs thousands of examples, multi-GPU clusters. Risk of catastrophic forgetting. Used sparingly.</div>
+  </div>
+
+  <div class="card" style="border-left:3px solid #F09595;margin-bottom:6px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">4. RLHF / DPO alignment</span>
+      <span style="font-size:11px;padding:2px 8px;background:#FCEBEB;color:#A32D2D;border-radius:6px">very high cost</span>
+    </div>
+    <div style="font-size:12px;color:var(--color-text-secondary)">Train a reward model on human preference data, then optimize the LLM against it. How Claude and ChatGPT are aligned. Not for application engineers.</div>
+  </div>
+
+  <div class="lbl">Training data format (what your JSONL file looks like)</div>
+  <div class="code">{"messages": [
+  {"role": "system",    "content": "You are a SQL expert..."},
+  {"role": "user",      "content": "Get all users created after 2024-01-01"},
+  {"role": "assistant", "content": "SELECT * FROM users WHERE created_at > '2024-01-01'"}
+]}
+{"messages": [
+  {"role": "system",    "content": "You are a SQL expert..."},
+  {"role": "user",      "content": "Count orders by status"},
+  {"role": "assistant", "content": "SELECT status, COUNT(*) as count FROM orders GROUP BY status"}
+]}</div>
+
+  <div class="tip" style="background:#EEEDFE;border-color:#CECBF6;color:#3C3489">
+    <strong>Catastrophic forgetting</strong> — when you fine-tune aggressively on a narrow task, the model partially "forgets" general capabilities. Example: fine-tune a coding assistant on Python snippets and it starts struggling with English explanations. LoRA avoids this because general weights stay frozen. For full fine-tuning, use a low learning rate and mix in ~10% general data.
+  </div>
+  <button class="ask-btn" onclick="sendPrompt('What is DPO (Direct Preference Optimization) and how does it differ from RLHF? When would I use it?')">DPO vs RLHF ↗</button>
+</div>
+
+<!-- LORA / PEFT -->
+<div id="panel-lora" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">LoRA is the most important fine-tuning technique for application engineers. It makes fine-tuning feasible on a single GPU by training only a tiny fraction of the total parameters.</div>
+
+  <div class="lbl">The core idea — low-rank decomposition</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;margin-bottom:10px">A weight matrix W in a transformer layer might be 4096×4096 = 16.7M parameters. Instead of updating all of them, LoRA adds two small matrices A (4096×r) and B (r×4096) where r is the "rank" — typically 4–64. The update becomes W + AB, where A and B together have only 2×4096×r parameters.</div>
+    <div id="lora-slider-wrap" style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <span style="font-size:12px;color:var(--color-text-secondary);width:60px">Rank (r)</span>
+        <input type="range" min="1" max="64" step="1" value="8" id="rank-range" oninput="updateLora(this.value)" style="flex:1">
+        <span id="rank-val" style="font-size:13px;font-weight:500;color:var(--color-text-primary);min-width:24px">8</span>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px">
+        <div style="background:var(--color-background-secondary);border-radius:8px;padding:.75rem 1rem;flex:1;text-align:center">
+          <div id="orig-params" style="font-size:18px;font-weight:500;color:var(--color-text-primary)">16.8M</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">original params</div>
+        </div>
+        <div style="background:var(--color-background-secondary);border-radius:8px;padding:.75rem 1rem;flex:1;text-align:center">
+          <div id="lora-params" style="font-size:18px;font-weight:500;color:#0C447C">65.5K</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">LoRA params</div>
+        </div>
+        <div style="background:var(--color-background-secondary);border-radius:8px;padding:.75rem 1rem;flex:1;text-align:center">
+          <div id="lora-pct" style="font-size:18px;font-weight:500;color:#085041">0.39%</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">of total weights</div>
+        </div>
+      </div>
+    </div>
+    <div id="lora-note" style="font-size:12px;color:var(--color-text-secondary);padding:8px 10px;background:var(--color-background-secondary);border-radius:8px"></div>
+  </div>
+
+  <div class="lbl">PEFT techniques — the family LoRA belongs to</div>
+  <div class="card">
+    <div class="row"><div class="dot" style="background:#378ADD"></div><div><strong>LoRA</strong> — Low-Rank Adaptation. Adds trainable rank decomposition matrices to attention layers. The standard choice for most tasks.</div></div>
+    <div class="row"><div class="dot" style="background:#1D9E75"></div><div><strong>QLoRA</strong> — Quantized LoRA. First quantizes the base model to 4-bit (halving memory), then applies LoRA. Enables fine-tuning 70B models on a single 48GB GPU. The default for resource-constrained environments.</div></div>
+    <div class="row"><div class="dot" style="background:#7F77DD"></div><div><strong>Prefix tuning</strong> — Prepends learnable "soft tokens" to every layer. No weight changes at all. Faster training, weaker adaptation. Good for very small datasets (&lt;100 examples).</div></div>
+    <div class="row"><div class="dot" style="background:#D85A30"></div><div><strong>IA³</strong> — Infused Adapter by Inhibiting and Amplifying Inner Activations. Trains even fewer parameters than LoRA by scaling activations. Extreme efficiency for very large models.</div></div>
+  </div>
+
+  <div class="lbl">Key hyperparameters (you'll be asked to explain these)</div>
+  <div class="card">
+    <div class="row"><div class="dot" style="background:#378ADD"></div><div><strong>r (rank)</strong> — higher = more expressiveness = more params. Start at 8–16. Double if results are poor. Rarely need above 64.</div></div>
+    <div class="row"><div class="dot" style="background:#1D9E75"></div><div><strong>alpha (α)</strong> — scaling factor for the LoRA update. Usually set to 2×r or equal to r. Controls how strongly the adapter influences the base model.</div></div>
+    <div class="row"><div class="dot" style="background:#7F77DD"></div><div><strong>target_modules</strong> — which layers to adapt. Default: q_proj and v_proj (query + value in attention). Adding more layers (k_proj, o_proj, mlp) increases quality and cost.</div></div>
+    <div class="row"><div class="dot" style="background:#D85A30"></div><div><strong>dropout</strong> — regularization on LoRA layers. Set 0.05–0.1 to prevent overfitting on small datasets. Set 0 for large datasets (&gt;10k examples).</div></div>
+  </div>
+</div>
+
+<!-- EVALUATION -->
+<div id="panel-eval" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">Evaluation is what makes multi-agent systems and fine-tuned models trustworthy in production. Without evals, you're deploying blind.</div>
+
+  <div class="lbl">Multi-agent system evaluation</div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="row"><div class="dot" style="background:#378ADD"></div><div><strong>Task completion rate</strong> — did the agent system complete the task without hitting max_iterations or erroring out? Track this per task type and per agent.</div></div>
+    <div class="row"><div class="dot" style="background:#1D9E75"></div><div><strong>Step efficiency</strong> — how many LLM calls did it take? A task that should take 3 steps but averages 8 has a planning or tool-use problem.</div></div>
+    <div class="row"><div class="dot" style="background:#7F77DD"></div><div><strong>Handoff accuracy</strong> — did the supervisor route to the right sub-agent? Track cases where the wrong agent was invoked. This reveals flaws in routing prompts.</div></div>
+    <div class="row"><div class="dot" style="background:#D85A30"></div><div><strong>Error cascade rate</strong> — when one agent fails, how often does the whole system fail vs. recover? Good systems have explicit fallback paths.</div></div>
+  </div>
+
+  <div class="lbl">Fine-tuning evaluation metrics</div>
+  <div class="card" style="margin-bottom:8px">
+    <div class="row"><div class="dot" style="background:#378ADD"></div><div><strong>Task-specific accuracy</strong> — does it do the thing you fine-tuned it for? For SQL generation: does the query run and return correct results? For classification: precision/recall/F1.</div></div>
+    <div class="row"><div class="dot" style="background:#1D9E75"></div><div><strong>Format compliance rate</strong> — does it always output valid JSON / follow the schema? Should be close to 100% after fine-tuning — if not, add more format examples.</div></div>
+    <div class="row"><div class="dot" style="background:#7F77DD"></div><div><strong>General capability retention</strong> — run MMLU or HellaSwag benchmarks on your fine-tuned model vs. the base. Catastrophic forgetting shows up as drops here. Flag anything &gt;5% degradation.</div></div>
+    <div class="row"><div class="dot" style="background:#D85A30"></div><div><strong>Held-out eval set</strong> — 10–20% of your labeled data never used in training. This is the only honest measure. If train accuracy is high but eval accuracy is low, you've overfit.</div></div>
+  </div>
+
+  <div class="tip" style="background:#E1F5EE;border-color:#9FE1CB;color:#085041">
+    The evaluation cadence that works in production: run evals on every PR that changes a prompt, agent graph, or training dataset. Gate deployments on eval score ≥ threshold. Store eval results in a time-series DB so you can see regressions over time. LangSmith and Braintrust are the standard tools for this.
+  </div>
+  <button class="ask-btn" onclick="sendPrompt('How do I set up LangSmith for tracing and evaluating a multi-agent LangGraph system in production?')">LangSmith tracing setup ↗</button>
+</div>
+
+<!-- INTERVIEW ANSWERS -->
+<div id="panel-interview" class="panel">
+  <div class="lbl">The 7 hardest questions at senior level</div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Q: "How do you prevent error cascades in a multi-agent system?"</div>
+    <div class="tip" style="background:#E1F5EE;border-color:#9FE1CB;color:#085041;margin:0;font-size:13px">"Three layers: (1) Each agent returns a structured result with a success flag and error field — the supervisor reads these instead of assuming success. (2) Explicit retry logic in the supervisor: if a worker fails, retry once with a rephrased task before escalating. (3) Fallback paths: for critical steps, the supervisor has an alternative agent or a simplified version of the task. The goal is that any single agent failure degrades performance, not crashes the system."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Q: "How do you debug a multi-agent system when something goes wrong?"</div>
+    <div class="tip" style="background:#FAEEDA;border-color:#FAC775;color:#633806;margin:0;font-size:13px">"Full trace logging is non-negotiable. Every supervisor decision, every handoff, every agent's Thought/Action/Observation chain gets logged with timestamps and token counts. I use LangSmith for this — it captures the entire execution tree so I can replay any run, see exactly which agent produced the wrong output, and trace it back to the prompt or tool that caused it. Without this you're debugging distributed systems blind."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Q: "What's the difference between LoRA rank 8 and rank 64?"</div>
+    <div class="tip" style="background:#EEEDFE;border-color:#CECBF6;color:#3C3489;margin:0;font-size:13px">"Higher rank = more trainable parameters = more expressive adaptation but more risk of overfitting on small datasets. Rank 8 is ~0.4% of a large attention layer's parameters — enough to learn format and domain-specific vocabulary. Rank 64 is ~3% — better for learning complex reasoning patterns or code generation on a specific framework. I start at r=8, evaluate on held-out data, and double if the model clearly hasn't converged. Going above r=64 rarely helps for instruction-following tasks."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Q: "When would you use a multi-agent system vs a single agent with many tools?"</div>
+    <div class="tip" style="background:#FAECE7;border-color:#F5C4B3;color:#712B13;margin:0;font-size:13px">"Single agent when: the task is bounded, tools are independent, and context fits in one window. Multi-agent when: subtasks are long enough to fill a context window on their own, subtasks need different expertise (researcher vs. writer vs. code reviewer), or subtasks can run in parallel to reduce latency. The coordination overhead of multi-agent only pays off when the task genuinely can't fit in one context window or when parallelism provides meaningful speedup."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Q: "What is QLoRA and why is it important?"</div>
+    <div class="tip" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C;margin:0;font-size:13px">"QLoRA = quantized LoRA. It first compresses the base model to 4-bit precision using NF4 quantization — roughly halving memory usage with minimal quality loss — then applies LoRA adapters on top. The practical result: you can fine-tune a 70B parameter model on a single 48GB A100 GPU that would otherwise require 8×80GB GPUs. This is the technique that made fine-tuning large open-source models accessible to small teams. The paper (Dettmers et al., 2023) is worth reading."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Q: "How do you handle long-running multi-agent tasks that might take minutes or hours?"</div>
+    <div class="tip" style="background:#F1EFE8;border-color:#D3D1C7;color:#444441;margin:0;font-size:13px">"Three things: (1) Async execution — run the graph in a background task, return a job ID immediately, poll for completion. (2) Checkpointing — LangGraph's persistence layer saves state after every node execution. If the process crashes, it resumes from the last checkpoint, not from scratch. (3) Human-in-the-loop breakpoints — for tasks over 5 minutes, add interrupt_before checkpoints so a human can review intermediate outputs and redirect before wasted computation."</div>
+  </div>
+
+  <div class="card" style="margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Q: "What data do you need to fine-tune a model, and how do you get it?"</div>
+    <div class="tip" style="background:#E1F5EE;border-color:#9FE1CB;color:#085041;margin:0;font-size:13px">"You need (input, ideal_output) pairs in the task format. Sources: (1) Existing labeled data in your system — support tickets with resolutions, code reviews with comments. (2) LLM-generated data — use GPT-4 to generate 500 examples, human-review 10% for quality. (3) Few-shot bootstrapping — build a working few-shot system first, capture its outputs + human corrections as training data. The minimum viable dataset is 100–200 high-quality examples for format learning, 500+ for behavioral change, 5k+ for reliable knowledge injection."</div>
+  </div>
+
+  <div class="lbl">The answer that closes the interview</div>
+  <div class="tip" style="background:#F1EFE8;border-color:#D3D1C7;color:#444441">
+    "The pattern I've seen work in production is: start with a single ReAct agent and good prompts. Add multi-agent structure only when you hit a concrete scaling limit — context window, latency, or expertise isolation. Fine-tune only when you've validated the task with prompting and need consistency at scale. Each layer of complexity has a real cost: multi-agent adds coordination failures and debugging surface area; fine-tuning adds a training pipeline, eval infrastructure, and redeployment cycles. The best AI engineers I know are conservative about adding these layers — they're not inherently better, just better for specific problems."
+  </div>
+</div>
+
+<script>
+function sw(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+const patData=[
+  {title:'Supervisor / worker',color:'#E6F1FB',bc:'#B5D4F4',tc:'#0C447C',
+   desc:'A supervisor LLM reads the task and routes it to specialist worker agents. Workers report results back to the supervisor, which decides next steps or synthesizes the final output.',
+   pros:['Supervisor can adapt routing based on intermediate results','Easy to add new workers without changing the graph','Failures are isolated — one worker failing doesn\'t break others','Most debuggable — all decisions flow through one node'],
+   cons:['Supervisor is a single point of failure','Supervisor context grows with every worker result','Latency is additive — supervisor calls + worker calls'],
+   code:`# LangGraph supervisor pattern
+def supervisor_node(state):
+    # Decide which worker to call next
+    decision = llm.invoke(state["messages"])
+    return {"next_agent": decision.next, "messages": [decision]}
+
+def route(state):
+    if state["next_agent"] == "FINISH": return END
+    return state["next_agent"]   # → "researcher" | "writer"
+
+graph.add_conditional_edges("supervisor", route,
+    {"researcher":"researcher","writer":"writer", END:END})
+graph.add_edge("researcher", "supervisor")  # always report back
+graph.add_edge("writer",     "supervisor")`,
+   usecase:'Content pipelines, code generation + review, research + synthesis'},
+
+  {title:'Sequential pipeline',color:'#E1F5EE',bc:'#9FE1CB',tc:'#085041',
+   desc:'Agents are chained in a fixed order. Agent A\'s output is Agent B\'s input. No dynamic routing — the flow is predetermined. Simple, predictable, fast to implement.',
+   pros:['Deterministic — same input always follows same path','Easy to test each stage independently','Low overhead — no supervisor LLM calls needed'],
+   cons:['Rigid — can\'t adapt if an early stage produces unexpected output','All stages run even if later ones aren\'t needed','Single failure breaks the entire chain'],
+   code:`# Sequential pipeline — fixed order
+graph.add_edge(START,        "researcher")
+graph.add_edge("researcher", "writer")
+graph.add_edge("writer",     "reviewer")
+graph.add_edge("reviewer",   "formatter")
+graph.add_edge("formatter",  END)
+
+# State carries output forward
+class State(TypedDict):
+    task:     str          # input
+    research: str          # researcher output → writer input
+    draft:    str          # writer output → reviewer input
+    reviewed: str          # reviewer output → formatter input
+    final:    str          # formatter output`,
+   usecase:'ETL pipelines, document processing, any workflow with fixed stages'},
+
+  {title:'Hierarchical',color:'#EEEDFE',bc:'#CECBF6',tc:'#3C3489',
+   desc:'Multiple supervisor layers. A top-level supervisor manages mid-level supervisors, each of which manages specialist workers. Mirrors org charts — used for truly complex tasks.',
+   pros:['Scales to very complex, long-running tasks','Each layer only sees what it needs — clean abstraction','Sub-teams can run in parallel'],
+   cons:['Very high coordination overhead','Errors are harder to trace through 3+ layers','Context explosion at each supervisor layer'],
+   code:`# Hierarchical — supervisor of supervisors
+top_supervisor → research_team_supervisor → [web_agent, pdf_agent]
+             ↘ writing_team_supervisor  → [drafter, editor, formatter]
+
+# In LangGraph: each team is a compiled subgraph
+research_team = build_research_team().compile()
+writing_team  = build_writing_team().compile()
+
+def top_supervisor(state):
+    research = research_team.invoke({"task": state["task"]})
+    final    = writing_team.invoke({"research": research})
+    return {"output": final}`,
+   usecase:'Long autonomous tasks, large codebase generation, enterprise workflows'},
+
+  {title:'Peer-to-peer',color:'#FAEEDA',bc:'#FAC775',tc:'#633806',
+   desc:'Agents communicate directly with each other without a central supervisor. Each agent decides who to talk to next. Used in simulation, debate, and adversarial workflows.',
+   pros:['No single point of failure','Natural for debate / critique patterns','Can discover solutions the designer didn\'t anticipate'],
+   cons:['Hardest to debug — message chains are non-linear','Risk of circular conversations','Hard to guarantee termination'],
+   code:`# Peer-to-peer debate pattern
+def debater_a(state):
+    response = llm_a.invoke(state["messages"])
+    return {"messages": [response], "round": state["round"]+1}
+
+def debater_b(state):
+    response = llm_b.invoke(state["messages"])
+    return {"messages": [response]}
+
+def judge(state):
+    verdict = judge_llm.invoke(state["messages"])
+    return {"verdict": verdict.content}
+
+def should_continue(state):
+    if state["round"] >= 3: return "judge"
+    return "debater_b" if state turns else "debater_a"`,
+   usecase:'Code review adversarial testing, debate/red-teaming, simulation'},
+];
+
+function showPat(i,btn){
+  document.querySelectorAll('#pat-nav .nav-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const d=patData[i];
+  document.getElementById('pat-detail').innerHTML=`
+    <div class="card" style="border-left:3px solid ${d.bc}">
+      <div style="font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">${d.title}</div>
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;line-height:1.6">${d.desc}</div>
+      <div class="two" style="margin-bottom:10px">
+        <div>
+          <div style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Strengths</div>
+          ${d.pros.map(p=>`<div class="row"><div class="dot" style="background:#1D9E75"></div><div style="font-size:12px">${p}</div></div>`).join('')}
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Limitations</div>
+          ${d.cons.map(c=>`<div class="row"><div class="dot" style="background:#E24B4A"></div><div style="font-size:12px">${c}</div></div>`).join('')}
+        </div>
+      </div>
+      <div style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Code skeleton</div>
+      <div class="code" style="margin-bottom:6px">${d.code}</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)"><strong>Best for:</strong> ${d.usecase}</div>
+    </div>`;
+}
+showPat(0,document.querySelector('#pat-nav .nav-btn'));
+
+function updateLora(r){
+  r=parseInt(r);
+  document.getElementById('rank-val').textContent=r;
+  const dim=4096;
+  const orig=dim*dim;
+  const lora=2*dim*r;
+  const pct=(lora/orig*100);
+  document.getElementById('orig-params').textContent=(orig/1e6).toFixed(1)+'M';
+  document.getElementById('lora-params').textContent=lora>=1000?(lora/1000).toFixed(1)+'K':lora;
+  document.getElementById('lora-pct').textContent=pct.toFixed(2)+'%';
+  const notes={
+    1:'Rank 1 — barely any expressiveness. Almost no adaptation possible. Only useful for very simple style changes.',
+    8:'Rank 8 — the safe default. Enough to learn new output formats, domain vocabulary, and instruction following patterns.',
+    16:'Rank 16 — good balance. Recommended for code generation and structured output tasks.',
+    32:'Rank 32 — strong adaptation. Good for complex domain knowledge. Watch for overfitting on small datasets.',
+    64:'Rank 64 — high expressiveness. Use when r=32 clearly underperforms. Diminishing returns above this for most tasks.',
+  };
+  const closest=[1,8,16,32,64].reduce((a,b)=>Math.abs(b-r)<Math.abs(a-r)?b:a);
+  document.getElementById('lora-note').textContent=notes[closest]||`Rank ${r}: ${pct.toFixed(1)}% of the original layer's parameters are trainable.`;
+}
+updateLora(8);
+</script>

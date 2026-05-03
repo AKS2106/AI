@@ -1,0 +1,295 @@
+
+<style>
+*{box-sizing:border-box}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+body{font-family:var(--font-sans)}
+.tabs{display:flex;gap:5px;flex-wrap:wrap;padding:1rem 0 0}
+.tab{padding:6px 12px;border-radius:8px;border:0.5px solid var(--color-border-secondary);font-size:12px;cursor:pointer;background:transparent;color:var(--color-text-secondary);transition:all .15s}
+.tab:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.tab.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary);font-weight:500}
+.panel{display:none;padding-top:1.25rem}
+.panel.active{display:block}
+.lbl{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin:14px 0 6px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:1rem 1.1rem;margin-bottom:8px}
+.tip{padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;margin-bottom:8px;border:0.5px solid}
+.problem-card{border-radius:12px;padding:1.25rem;margin-bottom:10px;border:0.5px solid}
+.difficulty{display:inline-block;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:500;margin-bottom:8px}
+.row{display:flex;align-items:flex-start;gap:8px;margin:5px 0;font-size:13px;line-height:1.5}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.ask-btn{padding:7px 14px;border-radius:8px;border:0.5px solid var(--color-border-secondary);background:transparent;font-size:13px;cursor:pointer;color:var(--color-text-primary);margin-top:8px;margin-right:6px}
+.ask-btn:hover{background:var(--color-background-secondary)}
+.q-card{border-radius:10px;padding:1rem 1.1rem;margin:8px 0;border:0.5px solid;cursor:pointer;transition:border-color .15s}
+.q-card:hover{border-color:var(--color-border-primary)}
+.rubric-row{display:flex;align-items:center;gap:10px;margin:5px 0}
+.rubric-label{font-size:12px;color:var(--color-text-secondary);width:180px;flex-shrink:0}
+.rubric-track{flex:1;height:8px;background:var(--color-border-tertiary);border-radius:4px;overflow:hidden}
+.rubric-fill{height:100%;border-radius:4px}
+.score-pill{font-size:11px;color:var(--color-text-secondary);width:36px;text-align:right}
+</style>
+
+<h2 class="sr-only">AI engineer interview simulator — system design problems, behavioral questions, scoring rubric</h2>
+
+<div class="tabs">
+  <button class="tab active" onclick="sw('design',this)">System design</button>
+  <button class="tab" onclick="sw('behavioral',this)">Behavioral</button>
+  <button class="tab" onclick="sw('technical',this)">Technical depth</button>
+  <button class="tab" onclick="sw('rubric',this)">Scoring rubric</button>
+  <button class="tab" onclick="sw('tips',this)">Interview tips</button>
+</div>
+
+<!-- SYSTEM DESIGN PROBLEMS -->
+<div id="panel-design" class="panel active">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">5 real problems from senior AI engineer interviews. Click any to get the full brief + evaluation criteria. Then answer in the chat — I'll give specific feedback.</div>
+
+  <div id="design-list"></div>
+</div>
+
+<!-- BEHAVIORAL -->
+<div id="panel-behavioral" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">Behavioral questions test whether you've actually shipped AI systems, not just studied them. Use the STAR format: Situation, Task, Action, Result. Click any to practice.</div>
+
+  <div id="behavioral-list"></div>
+</div>
+
+<!-- TECHNICAL DEPTH -->
+<div id="panel-technical" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">These probe whether you understand the internals — not just how to call an API. Senior engineers are expected to explain trade-offs, failure modes, and alternatives.</div>
+
+  <div id="technical-list"></div>
+</div>
+
+<!-- RUBRIC -->
+<div id="panel-rubric" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:12px;line-height:1.7">How a senior AI engineer interview is actually scored. Each dimension is weighted. Knowing the rubric lets you calibrate where to spend your answer time.</div>
+
+  <div id="rubric-content"></div>
+</div>
+
+<!-- TIPS -->
+<div id="panel-tips" class="panel">
+  <div class="lbl">What separates a hire from a no-hire at senior level</div>
+
+  <div class="card" style="border-left:3px solid #378ADD;margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Start with clarifying questions, not solutions</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.6">Before touching a design: ask about scale (100 users? 10M?), latency requirements (real-time? batch?), accuracy vs. cost trade-off, and whether there's existing infrastructure. Juniors jump to "I'd use RAG with Pinecone." Seniors ask "what's the query volume and what does a failed answer cost the business?"</div>
+  </div>
+
+  <div class="card" style="border-left:3px solid #1D9E75;margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Name failure modes before being asked</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.6">For every component you propose, say what breaks it. "I'd use a ReAct agent — the failure mode is infinite loops, which I'd handle with a max_iterations guard and soft-limit prompt injection." Interviewers probe failure modes anyway. Getting there first shows experience.</div>
+  </div>
+
+  <div class="card" style="border-left:3px solid #7F77DD;margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Quantify everything you can</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.6">"RAG reduces hallucinations" is weak. "RAG on a 10k-document knowledge base with reranking reduces hallucination rate from ~30% (vanilla LLM) to ~8% in our evals, at a cost of ~200ms additional latency per query" is strong. Even rough estimates show you think in production terms.</div>
+  </div>
+
+  <div class="card" style="border-left:3px solid #D85A30;margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Propose the simple thing first, then iterate</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.6">Start with the MVP architecture, then say "I'd evolve this if X happens." This signals engineering judgment — you know when a complex solution is premature. A candidate who jumps straight to a 5-agent hierarchical system with custom fine-tuning for a simple chatbot fails the judgment test.</div>
+  </div>
+
+  <div class="card" style="border-left:3px solid #EF9F27;margin-bottom:8px">
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:5px">Evaluation is always part of the answer</div>
+    <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.6">No AI system design is complete without saying how you'd measure it. "I'd set up an eval pipeline with 200 labeled examples, measuring retrieval recall@3 and answer faithfulness using RAGAS, gated to CI so any prompt change runs the eval before deployment." If you don't mention evals, the interviewer will ask — and now you look reactive instead of proactive.</div>
+  </div>
+
+  <div class="tip" style="background:#F1EFE8;border-color:#D3D1C7;color:#444441;margin-top:4px">
+    The one thing that ends interviews early: confidently stating something technically wrong without hedging. "I'm not 100% sure on the exact numbers but my understanding is..." is far better than a confident wrong answer. Interviewers know you can look things up — they're testing how you reason under uncertainty.
+  </div>
+</div>
+
+<script>
+function sw(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+const designProblems=[
+  {
+    title:'Customer support AI system',
+    difficulty:'Medium',diffBg:'#E1F5EE',diffTc:'#085041',
+    company:'Fintech / SaaS',
+    prompt:'Design an AI-powered customer support system for a fintech company with 500k active users. The system should handle billing questions, account issues, and technical support. It must escalate to human agents when needed and never hallucinate financial information.',
+    constraints:['P95 latency < 3 seconds','Hallucination on financial data = business-critical failure','10k support tickets/day, 30% handled by AI today, target 70%','Must integrate with existing Zendesk + Salesforce CRM','Regulatory requirement: all AI decisions must be auditable'],
+    mustCover:['RAG over knowledge base + CRM data','Confidence scoring + escalation logic','Guardrails for financial data','Human-in-the-loop handoff design','Eval pipeline with domain-specific metrics','Cost model at 10k tickets/day'],
+    promptStr:'I want to practice the customer support AI system design question. Ask me clarifying questions first, then evaluate my answer against the must-cover criteria.',
+  },
+  {
+    title:'Code review agent',
+    difficulty:'Hard',diffBg:'#FAEEDA',diffTc:'#633806',
+    company:'Developer tools',
+    prompt:'Design an AI code review agent for a developer tools company. The agent reviews PRs, identifies bugs and security issues, suggests improvements, and learns from developer feedback over time. It should handle a repository of 500+ files and review PRs within 5 minutes.',
+    constraints:['PR review must complete in < 5 minutes','False positive rate must be < 10% (dev trust is critical)','Must understand repo-specific conventions, not just generic best practices','Developer feedback should improve future reviews','Handles Python, TypeScript, Go, Rust'],
+    mustCover:['Chunking + retrieval strategy for large codebases','Multi-agent: security agent + style agent + logic agent','Learning from feedback (fine-tuning vs. few-shot)','False positive reduction strategies','Latency budget allocation across agents','Incremental review (only changed files + context)'],
+    promptStr:'I want to practice the code review agent system design. Ask me clarifying questions, then evaluate my answer.',
+  },
+  {
+    title:'RAG system at scale',
+    difficulty:'Hard',diffBg:'#FAEEDA',diffTc:'#633806',
+    company:'Enterprise SaaS',
+    prompt:'Design a RAG system for an enterprise knowledge management platform. The system must search across 10 million documents from multiple sources (Confluence, Notion, Google Drive, Salesforce), handle 50k queries/day, and return answers in under 2 seconds with source citations.',
+    constraints:['10M documents, 50k queries/day','< 2 second end-to-end latency','Multi-tenant: data from Company A must never appear in Company B answers','Documents update continuously — knowledge base must stay current','Answers must cite specific source documents'],
+    mustCover:['Vector DB selection and sharding strategy','Chunking strategy for heterogeneous document types','Hybrid search (vector + BM25) architecture','Multi-tenancy isolation in vector space','Incremental indexing pipeline','Caching strategy for common queries','Eval metrics: retrieval recall, answer faithfulness, latency p95'],
+    promptStr:'I want to practice the enterprise RAG system design. Walk me through it with clarifying questions first.',
+  },
+  {
+    title:'LLM output evaluation pipeline',
+    difficulty:'Medium',diffBg:'#E1F5EE',diffTc:'#085041',
+    company:'AI platform',
+    prompt:'Design an automated evaluation pipeline for an AI product that generates marketing copy. The pipeline must catch regressions when prompts or models change, measure quality across 5 dimensions (accuracy, tone, brand voice, length, CTR potential), and run in CI/CD before every deployment.',
+    constraints:['CI pipeline must complete in < 10 minutes','5 quality dimensions, some subjective (brand voice, tone)','100+ prompt/model changes per week','Human labeling budget: 20 hours/week','Must detect regressions before they reach production'],
+    mustCover:['LLM-as-judge for subjective metrics','Golden dataset curation and maintenance','Statistical significance for detecting regressions','Fast vs. deep eval tiers for CI','Human-in-the-loop for ambiguous cases','Cost model for LLM-as-judge at scale','A/B testing framework for prompt changes'],
+    promptStr:'I want to practice the LLM evaluation pipeline design. Evaluate my answer on all must-cover criteria.',
+  },
+  {
+    title:'Multi-agent research assistant',
+    difficulty:'Hard',diffBg:'#FAEEDA',diffTc:'#633806',
+    company:'Legal / consulting',
+    prompt:'Design a multi-agent research assistant for a legal firm. Given a legal question, the system must find relevant case law, summarize key precedents, identify potential arguments on both sides, and produce a structured memo — all within 10 minutes. The firm handles 200 research requests/day.',
+    constraints:['10-minute end-to-end SLA for complex research tasks','Legal accuracy is critical — hallucinated citations = malpractice risk','Sources must be verifiable and linked to original documents','System must handle confidential client information (no external APIs for sensitive queries)','Lawyers need to see the reasoning chain, not just the answer'],
+    mustCover:['Multi-agent architecture: case finder + summarizer + analyst + writer','Citation verification before including in output','RAG over legal database vs. web search trade-off','Confidentiality: self-hosted models vs. cloud API decision','Human review checkpoint before memo delivery','Parallelism: independent research streams run simultaneously','Audit trail for all agent decisions'],
+    promptStr:'I want to practice the legal research multi-agent system design. Be rigorous — this is a hard problem.',
+  },
+];
+
+const behavioralQs=[
+  {q:'Tell me about a time an AI system you built failed in production. What happened and what did you change?',
+   why:'Tests whether you\'ve actually shipped, whether you learned from failure, and whether you have good incident response instincts. Candidates who\'ve only worked in notebooks rarely have a good answer.',
+   green:['Specific failure mode (hallucination, latency spike, retrieval miss)','Quantified impact','Root cause identified quickly','Concrete fix deployed','Process change to prevent recurrence'],
+   red:['Vague answer ("it wasn\'t accurate enough")','No metrics on impact','Blaming the model/vendor without owning it'],
+   promptStr:'Give me feedback on my answer to: "Tell me about a time an AI system you built failed in production."'},
+  {q:'How do you decide when to use a simple prompt vs. RAG vs. fine-tuning for a new feature?',
+   why:'Tests decision-making framework and whether you default to complexity. A senior engineer has a systematic approach; a junior engineer defaults to whatever they last learned.',
+   green:['Clear framework: start simple, add complexity only when needed','Specific thresholds (volume, accuracy, latency)','Mention of evaluation-driven decisions','Awareness of total cost of ownership'],
+   red:['Always recommends the same approach regardless of context','No mention of trade-offs','Framework doesn\'t include evaluation step'],
+   promptStr:'Give me feedback on my answer to the prompt/RAG/fine-tuning decision framework question.'},
+  {q:'Describe a time you had to convince your team to adopt a new AI tool or approach. How did you build buy-in?',
+   why:'Tests influence without authority — a critical senior skill. Also reveals whether you understand that AI adoption is as much a people problem as a technical one.',
+   green:['Started with a small proof-of-concept with real metrics','Addressed the skeptics\' specific concerns','Tied the tool to a business outcome the team cared about','Gave teammates ownership of part of the rollout'],
+   red:['Relies on authority ("I just told them to")','Only talks about technical merits, ignores people concerns','No mention of measuring success'],
+   promptStr:'Give me feedback on my answer to the influencing without authority question about AI adoption.'},
+  {q:'Tell me about the most complex AI system you\'ve designed or built. Walk me through the architecture decisions.',
+   why:'This is the "show your work" question. It\'s the single best signal of actual experience. Candidates who\'ve only done tutorials and never shipped struggle here.',
+   green:['Specific component choices with reasoning','Named failure modes and how they were handled','Discussed what they\'d do differently in hindsight','Quantified outcomes (latency, accuracy, cost)'],
+   red:['Generic architecture that could apply to anything','No mention of what was hard','Claims success with no metrics'],
+   promptStr:'Give me feedback on my answer to the "most complex AI system you\'ve built" question.'},
+  {q:'How do you balance moving fast with making sure your AI systems are reliable and safe?',
+   why:'Tests maturity. Junior engineers see this as a binary. Senior engineers have frameworks: tiered risk assessment, eval gates, gradual rollouts, feature flags.',
+   green:['Eval-gated CI/CD pipeline','Risk tiers based on blast radius of failure','Gradual rollout + monitoring before full release','Different standards for different risk levels'],
+   red:['Binary thinking ("you can\'t do both")','No mention of measurement','Relies only on manual testing'],
+   promptStr:'Give me feedback on my answer to the speed vs. reliability question for AI systems.'},
+];
+
+const technicalQs=[
+  {q:'Explain exactly what happens when you call the OpenAI embeddings API with a 500-word document. What is returned and how is it used?',
+   depth:'The API tokenizes the text, runs it through an encoder-only transformer, takes the mean pooling of the last hidden layer across all token positions, L2-normalizes the resulting vector, and returns a list of ~1536 floats. This vector represents the semantic meaning of the entire document in a high-dimensional space. To use it for retrieval: store it in a vector DB alongside the original text. At query time, embed the query the same way and find stored vectors with highest cosine similarity.',
+   promptStr:'Evaluate my answer to: explain what happens when you call the embeddings API.'},
+  {q:'What is the difference between cosine similarity and dot product similarity in vector search? When would you use each?',
+   depth:'Cosine similarity = dot product divided by the product of vector norms — it measures the angle between vectors, ignoring magnitude. Dot product measures both direction and magnitude. Use cosine when vector magnitudes are meaningless (normalized embeddings) — this is standard for semantic search. Use dot product when magnitude encodes information (e.g., document importance or frequency-weighted embeddings). Most vector DBs default to cosine. OpenAI recommends using dot product with their text-embedding-3 models since they\'re already normalized.',
+   promptStr:'Evaluate my answer to the cosine vs dot product similarity question.'},
+  {q:'You\'re seeing your RAG system return correct chunks but the LLM still gives wrong answers. What are the possible causes and how do you diagnose each?',
+   depth:'Causes: (1) Lost-in-the-middle — relevant chunk is buried in position 3-7 of a long context, LLM attention drops. Fix: fewer chunks (k=3 not k=10), put most relevant first. (2) Context-answer gap — the chunk contains the right facts but the LLM misreads or miscombines them. Fix: prompt engineering, CoT. (3) Conflicting chunks — two retrieved chunks contradict each other. Fix: add a deduplication/conflict-resolution step. (4) Answer requires synthesis across chunks — the question can\'t be answered from any single chunk. Fix: map-reduce or iterative refinement pattern.',
+   promptStr:'Evaluate my answer to the "correct chunks, wrong answer" RAG debugging question.'},
+  {q:'How does RLHF work, and what problem does it solve that standard fine-tuning doesn\'t?',
+   depth:'Standard fine-tuning optimizes for reproducing training examples — it doesn\'t optimize for whether the output is actually preferred by humans. RLHF solves this by: (1) Training a reward model on human preference pairs (response A vs B, human picks A). (2) Using PPO (or DPO as a simpler alternative) to update the LLM to maximize expected reward while staying close to the original model via KL divergence penalty. This teaches the model to be helpful, harmless, and honest beyond what supervised data alone captures. DPO simplifies RLHF by eliminating the separate reward model — directly optimizing on preference pairs.',
+   promptStr:'Evaluate my answer to the RLHF question.'},
+  {q:'An agent you built is working fine in testing but performing poorly on 20% of production queries. You have logs showing the Thought/Action/Observation trace. Walk me through your debugging process.',
+   depth:'Step 1: Cluster the failing 20% — do they share a pattern? (query length, topic, phrasing, required tool). Step 2: Read the traces — is the failure in Thought (wrong plan), Action (wrong tool/args), or Observation (tool returned bad data)? Step 3: For Thought failures: prompt engineering or few-shot examples showing the correct reasoning. For Action failures: improve tool descriptions, add input validation. For Observation failures: tool is returning bad data — fix the tool or add result validation. Step 4: Add the failing cases to your eval set so they\'re caught in CI going forward. Step 5: Shadow-deploy the fix and measure the failure rate on a traffic slice before full rollout.',
+   promptStr:'Evaluate my answer to the agent debugging question.'},
+];
+
+const rubricData=[
+  {dim:'Technical accuracy',weight:30,desc:'Gets the facts right. Correct about how embeddings, RAG, fine-tuning, and agents work at a mechanistic level.'},
+  {dim:'System design judgment',weight:25,desc:'Chooses the right tool for the stated constraints. Doesn\'t over-engineer. Starts simple, evolves toward complexity only when justified.'},
+  {dim:'Failure mode awareness',weight:20,desc:'Proactively names what can go wrong and how to handle it. Doesn\'t need to be prompted for this.'},
+  {dim:'Production mindset',weight:15,desc:'Mentions evaluation, monitoring, latency budgets, cost models. Understands the gap between "it works in a notebook" and "it works at scale."'},
+  {dim:'Communication clarity',weight:10,desc:'Explains trade-offs clearly without jargon overload. Can adjust depth based on interviewer signals.'},
+];
+
+function buildDesign(){
+  const el=document.getElementById('design-list');
+  el.innerHTML=designProblems.map((p,i)=>`
+    <div class="problem-card" style="background:var(--color-background-secondary);border-color:var(--color-border-tertiary);margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">${p.title}</div>
+        <div style="display:flex;gap:6px">
+          <span class="difficulty" style="background:${p.diffBg};color:${p.diffTc}">${p.difficulty}</span>
+          <span class="difficulty" style="background:var(--color-background-primary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary)">${p.company}</span>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;line-height:1.6">${p.prompt}</div>
+      <div style="margin-bottom:8px">
+        <div style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Constraints</div>
+        ${p.constraints.map(c=>`<div class="row"><div class="dot" style="background:#D85A30"></div><div style="font-size:12px">${c}</div></div>`).join('')}
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Must cover to pass</div>
+        ${p.mustCover.map(c=>`<div class="row"><div class="dot" style="background:#378ADD"></div><div style="font-size:12px">${c}</div></div>`).join('')}
+      </div>
+      <button class="ask-btn" onclick="sendPrompt('${p.promptStr}')">Practice this problem ↗</button>
+    </div>`).join('');
+}
+
+function buildBehavioral(){
+  const el=document.getElementById('behavioral-list');
+  el.innerHTML=behavioralQs.map((q,i)=>`
+    <div class="card" style="margin-bottom:8px">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">"${q.q}"</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;line-height:1.6"><em>Why they ask this:</em> ${q.why}</div>
+      <div class="two" style="margin-bottom:8px">
+        <div>
+          <div style="font-size:11px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Strong answer includes</div>
+          ${q.green.map(g=>`<div class="row"><div class="dot" style="background:#1D9E75"></div><div style="font-size:12px">${g}</div></div>`).join('')}
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Weak answer signals</div>
+          ${q.red.map(r=>`<div class="row"><div class="dot" style="background:#E24B4A"></div><div style="font-size:12px">${r}</div></div>`).join('')}
+        </div>
+      </div>
+      <button class="ask-btn" onclick="sendPrompt('${q.promptStr}')">Practice ↗</button>
+    </div>`).join('');
+}
+
+function buildTechnical(){
+  const el=document.getElementById('technical-list');
+  el.innerHTML=technicalQs.map((q,i)=>`
+    <div class="card" style="margin-bottom:8px">
+      <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px">"${q.q}"</div>
+      <details>
+        <summary style="font-size:12px;color:var(--color-text-secondary);cursor:pointer;margin-bottom:6px">See model answer</summary>
+        <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.7;margin-top:6px;padding:10px;background:var(--color-background-secondary);border-radius:8px">${q.depth}</div>
+      </details>
+      <button class="ask-btn" onclick="sendPrompt('${q.promptStr}')">Get feedback on my answer ↗</button>
+    </div>`).join('');
+}
+
+function buildRubric(){
+  const colors=['#378ADD','#1D9E75','#7F77DD','#D85A30','#888780'];
+  document.getElementById('rubric-content').innerHTML=`
+    <div class="card" style="margin-bottom:12px">
+      ${rubricData.map((r,i)=>`
+        <div style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">${r.dim}</span>
+            <span style="font-size:12px;color:var(--color-text-secondary)">${r.weight}% of score</span>
+          </div>
+          <div style="height:8px;background:var(--color-border-tertiary);border-radius:4px;margin-bottom:5px;overflow:hidden">
+            <div style="width:${r.weight*3}%;height:100%;background:${colors[i]};border-radius:4px"></div>
+          </div>
+          <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.5">${r.desc}</div>
+        </div>`).join('')}
+    </div>
+    <div class="tip" style="background:#E6F1FB;border-color:#B5D4F4;color:#0C447C">
+      <strong>Where most candidates lose points:</strong> Technical accuracy (they know the concepts but get details wrong) and Production mindset (they solve the happy path but don't mention monitoring, evals, or failure handling). These two account for 45% of the score — and are exactly what this course has been building.
+    </div>
+    <button class="ask-btn" onclick="sendPrompt('Give me a full mock interview: ask me a system design question, evaluate my answer across all 5 rubric dimensions with specific scores and improvement suggestions')">Run a full scored mock interview ↗</button>`;
+}
+
+buildDesign();
+buildBehavioral();
+buildTechnical();
+buildRubric();
+</script>

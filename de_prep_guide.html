@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DE Interview Prep — Complete Guide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --bg: #0a0a0f;
+  --bg2: #111118;
+  --bg3: #1a1a24;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e8e8f0;
+  --text2: #9090a8;
+  --text3: #5a5a72;
+  --accent: #6c63ff;
+  --accent2: #a78bfa;
+  --green: #34d399;
+  --amber: #fbbf24;
+  --red: #f87171;
+  --blue: #60a5fa;
+  --cyan: #22d3ee;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;overflow-x:hidden}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
+
+/* ── Layout ── */
+.layout{display:flex;min-height:100vh}
+.sidebar{width:260px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;transition:transform .3s}
+.main{margin-left:260px;flex:1;min-height:100vh}
+
+/* ── Sidebar ── */
+.sidebar-header{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-logo{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--accent2)}
+.sidebar-tagline{font-size:11px;color:var(--text3);margin-top:3px}
+.sidebar-nav{padding:12px 0}
+.nav-section{padding:8px 20px 4px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 20px;font-size:12.5px;color:var(--text2);text-decoration:none;transition:all .15s;border-left:2px solid transparent;cursor:pointer}
+.nav-item:hover{color:var(--text);background:rgba(108,99,255,.08);border-left-color:var(--accent)}
+.nav-item.active{color:var(--accent2);background:rgba(108,99,255,.12);border-left-color:var(--accent)}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .15s}
+.nav-item.active .nav-dot,.nav-item:hover .nav-dot{background:var(--accent)}
+.nav-badge{margin-left:auto;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:500}
+.nb-green{background:rgba(52,211,153,.15);color:var(--green)}
+.nb-amber{background:rgba(251,191,36,.15);color:var(--amber)}
+.nb-blue{background:rgba(96,165,250,.15);color:var(--blue)}
+
+/* ── Hero ── */
+.hero{padding:80px 60px 60px;position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
+.hero::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(108,99,255,.15) 0%,transparent 70%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-50px;left:200px;width:300px;height:300px;background:radial-gradient(circle,rgba(34,211,238,.08) 0%,transparent 70%);pointer-events:none}
+.hero-eyebrow{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+.hero-title{font-family:'Syne',sans-serif;font-size:52px;font-weight:800;line-height:1.05;margin-bottom:16px;background:linear-gradient(135deg,var(--text) 0%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:16px;color:var(--text2);max-width:560px;line-height:1.7;margin-bottom:32px}
+.hero-stats{display:flex;gap:32px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column}
+.stat-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;color:var(--accent2)}
+.stat-label{font-size:12px;color:var(--text3)}
+
+/* ── Progress bar ── */
+.progress-section{padding:24px 60px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.progress-title{font-size:12px;font-weight:500;color:var(--text2)}
+.progress-pct{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--green)}
+.progress-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan));border-radius:2px;transition:width 1s ease;animation:fillBar 2s ease forwards}
+@keyframes fillBar{from{width:0%}to{width:var(--target)}}
+.checklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:16px}
+.check-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)}
+.check-icon{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+.ci-done{background:rgba(52,211,153,.2);color:var(--green)}
+.ci-prog{background:rgba(251,191,36,.2);color:var(--amber)}
+.ci-todo{background:rgba(255,255,255,.05);color:var(--text3)}
+
+/* ── Content sections ── */
+.content{padding:48px 60px}
+.section{margin-bottom:64px;scroll-margin-top:24px}
+.section-header{display:flex;align-items:center;gap:14px;margin-bottom:28px}
+.section-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.si-purple{background:rgba(108,99,255,.2)}
+.si-green{background:rgba(52,211,153,.2)}
+.si-amber{background:rgba(251,191,36,.2)}
+.si-blue{background:rgba(96,165,250,.2)}
+.si-red{background:rgba(248,113,113,.2)}
+.si-cyan{background:rgba(34,211,238,.2)}
+.section-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--text)}
+.section-desc{font-size:13px;color:var(--text3);margin-top:2px}
+
+/* ── Cards ── */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;transition:all .2s;cursor:pointer}
+.card:hover{border-color:var(--border2);background:var(--bg3);transform:translateY(-2px)}
+.card-tag{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.ct-purple{color:var(--accent2)}
+.ct-green{color:var(--green)}
+.ct-amber{color:var(--amber)}
+.ct-blue{color:var(--blue)}
+.ct-red{color:var(--red)}
+.ct-cyan{color:var(--cyan)}
+.card-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;line-height:1.3}
+.card-body{font-size:12.5px;color:var(--text2);line-height:1.6;margin-bottom:14px}
+.card-footer{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pill{font-size:10px;padding:3px 8px;border-radius:6px;font-weight:500}
+.pl-purple{background:rgba(108,99,255,.15);color:var(--accent2)}
+.pl-green{background:rgba(52,211,153,.12);color:var(--green)}
+.pl-amber{background:rgba(251,191,36,.12);color:var(--amber)}
+.pl-blue{background:rgba(96,165,250,.12);color:var(--blue)}
+.pl-red{background:rgba(248,113,113,.12);color:var(--red)}
+.pl-cyan{background:rgba(34,211,238,.12);color:var(--cyan)}
+
+/* ── Expandable cards ── */
+.exp-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:border-color .2s}
+.exp-card:hover{border-color:var(--border2)}
+.exp-head{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;user-select:none}
+.exp-num{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:3px 8px;border-radius:6px;flex-shrink:0}
+.en-purple{background:rgba(108,99,255,.15);color:var(--accent2)}
+.en-green{background:rgba(52,211,153,.12);color:var(--green)}
+.en-amber{background:rgba(251,191,36,.12);color:var(--amber)}
+.en-red{background:rgba(248,113,113,.12);color:var(--red)}
+.en-blue{background:rgba(96,165,250,.12);color:var(--blue)}
+.exp-title{font-size:13.5px;font-weight:500;color:var(--text);flex:1}
+.exp-arrow{font-size:10px;color:var(--text3);transition:transform .2s}
+.exp-arrow.open{transform:rotate(180deg)}
+.exp-body{display:none;padding:0 20px 20px;border-top:1px solid var(--border)}
+.exp-body.open{display:block}
+.exp-lbl{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:14px 0 6px}
+.exp-p{font-size:12.5px;color:var(--text2);line-height:1.7;margin-bottom:8px}
+.code-block{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:'DM Mono',monospace;font-size:11px;color:#c9d1d9;white-space:pre;overflow-x:auto;line-height:1.8;margin-bottom:10px}
+.say-box{background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.2);border-radius:10px;padding:12px 14px;margin:10px 0}
+.say-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:5px}
+.say-text{font-size:12.5px;color:rgba(52,211,153,.9);line-height:1.7}
+.tip-box{background:rgba(251,191,36,.07);border-left:3px solid var(--amber);padding:8px 12px;border-radius:0 8px 8px 0;font-size:12px;color:rgba(251,191,36,.9);line-height:1.6;margin:8px 0}
+.info-box{background:rgba(96,165,250,.07);border-left:3px solid var(--blue);padding:8px 12px;border-radius:0 8px 8px 0;font-size:12px;color:rgba(96,165,250,.9);line-height:1.6;margin:8px 0}
+
+/* ── Bucket grid ── */
+.bucket-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.bucket{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;transition:all .2s}
+.bucket:hover{border-color:var(--border2);transform:translateY(-2px)}
+.bucket-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;opacity:.15;line-height:1}
+.bucket-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--text);margin:6px 0 6px}
+.bucket-phrase{font-size:11px;font-style:italic;color:var(--accent2);margin-bottom:10px;font-family:'DM Mono',monospace}
+.bucket-qs{font-size:12px;color:var(--text2);line-height:1.6}
+.bucket-count{display:inline-block;margin-top:10px;font-size:10px;font-weight:600;padding:3px 9px;border-radius:10px;background:rgba(108,99,255,.15);color:var(--accent2)}
+
+/* ── Project cards ── */
+.proj-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:16px;position:relative;overflow:hidden;transition:all .2s}
+.proj-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.proj-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.pc-1::before{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.pc-2::before{background:linear-gradient(90deg,var(--amber),#f97316)}
+.pc-3::before{background:linear-gradient(90deg,var(--cyan),var(--green))}
+.proj-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+.proj-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--text3)}
+.proj-status{font-size:10px;font-weight:600;padding:3px 10px;border-radius:10px}
+.ps-done{background:rgba(52,211,153,.15);color:var(--green)}
+.ps-prog{background:rgba(251,191,36,.15);color:var(--amber)}
+.ps-ready{background:rgba(108,99,255,.15);color:var(--accent2)}
+.proj-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px}
+.proj-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px}
+.proj-stack{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.proj-flow{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:12px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border)}
+.pf-step{font-size:11px;color:var(--text2);background:var(--bg2);padding:3px 10px;border-radius:6px}
+.pf-arr{font-size:10px;color:var(--text3)}
+
+/* ── Timeline ── */
+.timeline{position:relative;padding-left:28px}
+.timeline::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:1px;background:var(--border2)}
+.tl-item{position:relative;margin-bottom:20px}
+.tl-dot{position:absolute;left:-25px;top:4px;width:12px;height:12px;border-radius:50%;border:2px solid var(--bg2)}
+.tl-d-done{background:var(--green);border-color:rgba(52,211,153,.3)}
+.tl-d-prog{background:var(--amber);border-color:rgba(251,191,36,.3)}
+.tl-d-todo{background:var(--bg3);border-color:var(--border2)}
+.tl-week{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+.tl-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.tl-desc{font-size:12px;color:var(--text2)}
+
+/* ── Table ── */
+.table-wrap{overflow-x:auto;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:var(--bg3);color:var(--text2);font-weight:500;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border2)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2)}
+tr:hover td{background:var(--bg3)}
+
+/* ── Daily plan ── */
+.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:16px 0}
+.day-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center}
+.day-name{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.day-task{font-size:11px;color:var(--text2);line-height:1.5}
+.day-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);margin-top:4px}
+.day-rest{background:rgba(52,211,153,.05);border-color:rgba(52,211,153,.15)}
+.day-rest .day-name{color:var(--green)}
+.day-rest .day-task{color:rgba(52,211,153,.7)}
+
+/* ── Phrase cards ── */
+.phrase-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.phrase-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px}
+.phrase-bucket{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.phrase-text{font-family:'DM Mono',monospace;font-size:12px;color:var(--accent2);line-height:1.5}
+
+/* ── Mobile menu ── */
+.menu-btn{display:none;position:fixed;top:16px;left:16px;z-index:200;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);cursor:pointer;font-size:16px}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .hero{padding:60px 24px 40px}
+  .hero-title{font-size:32px}
+  .content{padding:32px 24px}
+  .menu-btn{display:block}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+  .overlay.show{display:block}
+}
+
+/* ── Animations ── */
+.fade-in{opacity:0;transform:translateY(16px);animation:fadeUp .5s ease forwards}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+.fade-in:nth-child(1){animation-delay:.05s}
+.fade-in:nth-child(2){animation-delay:.1s}
+.fade-in:nth-child(3){animation-delay:.15s}
+.fade-in:nth-child(4){animation-delay:.2s}
+.fade-in:nth-child(5){animation-delay:.25s}
+.fade-in:nth-child(6){animation-delay:.3s}
+
+/* ── Misc ── */
+.divider{height:1px;background:var(--border);margin:32px 0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}.day-grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+
+<button class="menu-btn" onclick="toggleMenu()">☰</button>
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<div class="layout">
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">DE Prep Guide</div>
+    <div class="sidebar-tagline">PySpark · SQL · AWS · Portfolio</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <a class="nav-item active" onclick="scrollTo('home')"><span class="nav-dot"></span>Home</a>
+    <a class="nav-item" onclick="scrollTo('roadmap')"><span class="nav-dot"></span>Learning Roadmap</a>
+    <a class="nav-item" onclick="scrollTo('daily')"><span class="nav-dot"></span>Daily Plan</a>
+
+    <div class="nav-section">SQL & PySpark</div>
+    <a class="nav-item" onclick="scrollTo('sql-patterns')"><span class="nav-dot"></span>SQL Patterns <span class="nav-badge nb-green">5 patterns</span></a>
+    <a class="nav-item" onclick="scrollTo('window-fns')"><span class="nav-dot"></span>Window Functions <span class="nav-badge nb-blue">6 types</span></a>
+    <a class="nav-item" onclick="scrollTo('date-patterns')"><span class="nav-dot"></span>Date Patterns <span class="nav-badge nb-amber">3 patterns</span></a>
+
+    <div class="nav-section">AWS Buckets</div>
+    <a class="nav-item" onclick="scrollTo('buckets-overview')"><span class="nav-dot"></span>8 Buckets Overview</a>
+    <a class="nav-item" onclick="scrollTo('bucket-detail')"><span class="nav-dot"></span>Bucket Deep Dives</a>
+    <a class="nav-item" onclick="scrollTo('key-phrases')"><span class="nav-dot"></span>Key Phrases</a>
+
+    <div class="nav-section">Portfolio</div>
+    <a class="nav-item" onclick="scrollTo('projects')"><span class="nav-dot"></span>3 Projects</a>
+    <a class="nav-item" onclick="scrollTo('github')"><span class="nav-dot"></span>GitHub & LinkedIn</a>
+
+    <div class="nav-section">Interview</div>
+    <a class="nav-item" onclick="scrollTo('behavioral')"><span class="nav-dot"></span>Behavioral Answers</a>
+    <a class="nav-item" onclick="scrollTo('answer-framework')"><span class="nav-dot"></span>Answer Framework</a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+<!-- HERO -->
+<div class="hero" id="home">
+  <div class="hero-eyebrow">Data Engineering Interview Preparation</div>
+  <div class="hero-title">Your Complete<br>DE Prep Guide</div>
+  <div class="hero-sub">Everything from our conversation — SQL patterns, PySpark, all 8 AWS buckets, 3 portfolio projects, and behavioral answers. Structured for a 5 YOE Data Engineer role.</div>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num">8</span><span class="stat-label">Interview Buckets</span></div>
+    <div class="stat"><span class="stat-num">40+</span><span class="stat-label">Questions Covered</span></div>
+    <div class="stat"><span class="stat-num">3</span><span class="stat-label">Portfolio Projects</span></div>
+    <div class="stat"><span class="stat-num">6wk</span><span class="stat-label">To Interview Ready</span></div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-section">
+  <div class="progress-header">
+    <div class="progress-title">Your preparation progress</div>
+    <div class="progress-pct">~65% complete</div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" style="--target:65%"></div></div>
+  <div class="checklist" style="margin-top:14px">
+    <div class="check-item"><span class="check-icon ci-done">✓</span>SQL patterns learned</div>
+    <div class="check-item"><span class="check-icon ci-done">✓</span>Window functions covered</div>
+    <div class="check-item"><span class="check-icon ci-done">✓</span>All 8 buckets studied</div>
+    <div class="check-item"><span class="check-icon ci-done">✓</span>Project 1 complete</div>
+    <div class="check-item"><span class="check-icon ci-prog">~</span>Project 2 in progress</div>
+    <div class="check-item"><span class="check-icon ci-todo">○</span>Project 3 pending</div>
+    <div class="check-item"><span class="check-icon ci-todo">○</span>Mock interviews</div>
+    <div class="check-item"><span class="check-icon ci-todo">○</span>LeetCode SQL practice</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ROADMAP -->
+<div class="section" id="roadmap">
+  <div class="section-header">
+    <div class="section-icon si-purple">🗺</div>
+    <div><div class="section-title">Learning Roadmap</div><div class="section-desc">6 weeks from today to interview-ready</div></div>
+  </div>
+  <div class="two-col">
+    <div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-dot tl-d-done"></div><div class="tl-week">Week 1–2 — Done ✓</div><div class="tl-title">SQL patterns + PySpark fundamentals</div><div class="tl-desc">All 8 patterns, window functions, date queries, 40+ questions mapped to buckets</div></div>
+        <div class="tl-item"><div class="tl-dot tl-d-done"></div><div class="tl-week">Week 2–3 — Done ✓</div><div class="tl-title">All 8 AWS interview buckets</div><div class="tl-desc">Files, Performance, Incremental, Quality, Glue, Lambda, Delta Lake, Reliability</div></div>
+        <div class="tl-item"><div class="tl-dot tl-d-done"></div><div class="tl-week">Week 3 — Done ✓</div><div class="tl-title">Project 1 — Healthcare batch pipeline</div><div class="tl-desc">PySpark local, ingest + transform + quality, GitHub with README</div></div>
+        <div class="tl-item"><div class="tl-dot tl-d-prog"></div><div class="tl-week">Week 4 — In Progress</div><div class="tl-title">Project 2 — AWS end-to-end pipeline</div><div class="tl-desc">S3 + Glue Crawler + Glue ETL + Athena on real AWS</div></div>
+        <div class="tl-item"><div class="tl-dot tl-d-todo"></div><div class="tl-week">Week 5</div><div class="tl-title">Project 3 — Streaming anomaly detection</div><div class="tl-desc">Kafka + Docker + Spark Structured Streaming</div></div>
+        <div class="tl-item"><div class="tl-dot tl-d-todo"></div><div class="tl-week">Week 6</div><div class="tl-title">Mock interviews + LeetCode SQL + Apply</div><div class="tl-desc">5+ mock interviews, 20+ fresh SQL problems, start applying</div></div>
+      </div>
+    </div>
+    <div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px">
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px">Your unique advantages</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--green);font-size:14px">✦</span><div><div style="font-size:12.5px;font-weight:500;color:var(--text)">CX background = business context</div><div style="font-size:11.5px;color:var(--text2);margin-top:2px">Most DE candidates can write code but can't explain downstream impact. You can.</div></div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--green);font-size:14px">✦</span><div><div style="font-size:12.5px;font-weight:500;color:var(--text)">3 real built projects</div><div style="font-size:11.5px;color:var(--text2);margin-top:2px">Not tutorials. Not copied repos. Your own code with your decisions.</div></div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--green);font-size:14px">✦</span><div><div style="font-size:12.5px;font-weight:500;color:var(--text)">Structured answer framework</div><div style="font-size:11.5px;color:var(--text2);margin-top:2px">Problem → Solution → Trade-off. Every answer follows this pattern.</div></div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--green);font-size:14px">✦</span><div><div style="font-size:12.5px;font-weight:500;color:var(--text)">40+ questions demystified</div><div style="font-size:11.5px;color:var(--text2);margin-top:2px">Every question maps to one of 8 buckets. Nothing is unknown anymore.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DAILY PLAN -->
+<div class="section" id="daily">
+  <div class="section-header">
+    <div class="section-icon si-green">📅</div>
+    <div><div class="section-title">Daily Study Plan</div><div class="section-desc">90 minutes a day — 10 hours a week</div></div>
+  </div>
+  <div class="day-grid">
+    <div class="day-card"><div class="day-name">Mon</div><div class="day-task">45min coding project work</div><div class="day-time">+ 45min bucket review</div></div>
+    <div class="day-card"><div class="day-name">Tue</div><div class="day-task">45min coding project work</div><div class="day-time">+ 45min SQL practice</div></div>
+    <div class="day-card"><div class="day-name">Wed</div><div class="day-task">45min coding project work</div><div class="day-time">+ 45min bucket review</div></div>
+    <div class="day-card"><div class="day-name">Thu</div><div class="day-task">45min coding project work</div><div class="day-time">+ 45min SQL practice</div></div>
+    <div class="day-card"><div class="day-name">Fri</div><div class="day-task">45min coding project work</div><div class="day-time">+ 45min say answers aloud</div></div>
+    <div class="day-card"><div class="day-name">Sat</div><div class="day-task">2–3hr longer project session</div><div class="day-time">Deep build day</div></div>
+    <div class="day-card day-rest"><div class="day-name">Sun</div><div class="day-task">Complete rest</div><div class="day-time">No prep</div></div>
+  </div>
+  <div class="info-box" style="margin-top:12px">Three non-negotiable daily habits: (1) Open VS Code every day even for 20 minutes. (2) Say one answer out loud every evening — not read it, say it. (3) Commit to GitHub every day you write code.</div>
+</div>
+
+<!-- SQL PATTERNS -->
+<div class="section" id="sql-patterns">
+  <div class="section-header">
+    <div class="section-icon si-blue">🔷</div>
+    <div><div class="section-title">SQL Patterns</div><div class="section-desc">Every interview question maps to one of these 5 patterns</div></div>
+  </div>
+  <div class="card-grid">
+    <div class="card fade-in">
+      <div class="card-tag ct-blue">Pattern A</div>
+      <div class="card-title">Activity in a time window</div>
+      <div class="card-body">Keywords: "in last X days", "at least once in", "more than N times". Tool: WHERE date >= TODAY - X + GROUP BY + HAVING</div>
+      <div class="card-footer"><span class="pill pl-blue">Q5 visited &gt;3 times</span><span class="pill pl-blue">Q6 purchased once</span></div>
+    </div>
+    <div class="card fade-in">
+      <div class="card-tag ct-amber">Pattern B</div>
+      <div class="card-title">Absence / inactivity</div>
+      <div class="card-body">Keywords: "not logged in", "not contacted", "no order in". Tool: LEFT JOIN + IS NULL or left_anti join in PySpark</div>
+      <div class="card-footer"><span class="pill pl-amber">Q3 not logged 3 days</span><span class="pill pl-amber">Q7 not contacted</span></div>
+    </div>
+    <div class="card fade-in">
+      <div class="card-tag ct-purple">Pattern C</div>
+      <div class="card-title">Consecutive days</div>
+      <div class="card-body">Keywords: "consecutive", "streak", "N days in a row". Tool: ROW_NUMBER trick — date minus row_number = same value for consecutive rows</div>
+      <div class="card-footer"><span class="pill pl-purple">Q1 consecutive logins</span><span class="pill pl-purple">Q2 orders 3 days</span></div>
+    </div>
+    <div class="card fade-in">
+      <div class="card-tag ct-green">Pattern D</div>
+      <div class="card-title">Top N per group</div>
+      <div class="card-body">Keywords: "top 3 per", "highest in each", "best per category". Tool: DENSE_RANK with PARTITION BY then filter WHERE rnk &lt;= N</div>
+      <div class="card-footer"><span class="pill pl-green">2nd highest salary</span><span class="pill pl-green">Top 3 per dept</span></div>
+    </div>
+    <div class="card fade-in">
+      <div class="card-tag ct-red">Pattern E</div>
+      <div class="card-title">Running calculations</div>
+      <div class="card-body">Keywords: "running total", "cumulative", "moving average". Tool: SUM/AVG with ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</div>
+      <div class="card-footer"><span class="pill pl-red">Running total</span><span class="pill pl-red">7-day moving avg</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- WINDOW FUNCTIONS -->
+<div class="section" id="window-fns">
+  <div class="section-header">
+    <div class="section-icon si-cyan">🪟</div>
+    <div><div class="section-title">Window Functions</div><div class="section-desc">The most tested advanced PySpark topic</div></div>
+  </div>
+  <div class="tip-box" style="margin-bottom:16px">Core idea: GROUP BY collapses rows. Window functions keep all rows and ADD a new column. PARTITION BY = reset per group. ORDER BY = define sequence.</div>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Function</th><th>What it does</th><th>When to use</th><th>PySpark</th></tr>
+      <tr><td><code style="color:var(--accent2)">ROW_NUMBER()</code></td><td>Unique number, no ties</td><td>Deduplication — keep one row per group</td><td>row_number().over(w)</td></tr>
+      <tr><td><code style="color:var(--accent2)">RANK()</code></td><td>Ties get same rank, gaps after</td><td>Rarely used in practice</td><td>rank().over(w)</td></tr>
+      <tr><td><code style="color:var(--accent2)">DENSE_RANK()</code></td><td>Ties same rank, no gaps</td><td>Nth highest, Top N per group</td><td>dense_rank().over(w)</td></tr>
+      <tr><td><code style="color:var(--accent2)">LAG(col, n)</code></td><td>Value from n rows before</td><td>Day-over-day change, self-comparison</td><td>lag("col").over(w)</td></tr>
+      <tr><td><code style="color:var(--accent2)">LEAD(col, n)</code></td><td>Value from n rows after</td><td>Gap detection, next value</td><td>lead("col").over(w)</td></tr>
+      <tr><td><code style="color:var(--accent2)">AVG() OVER</code></td><td>Group average per row</td><td>Compare to dept average</td><td>avg("col").over(w)</td></tr>
+      <tr><td><code style="color:var(--accent2)">SUM() OVER</code></td><td>Running total</td><td>Cumulative calculations</td><td>sum_("col").over(w)</td></tr>
+      <tr><td><code style="color:var(--accent2)">NTILE(n)</code></td><td>Divide into N buckets</td><td>Quartiles, percentiles</td><td>ntile(4).over(w)</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- DATE PATTERNS -->
+<div class="section" id="date-patterns">
+  <div class="section-header">
+    <div class="section-icon si-amber">📅</div>
+    <div><div class="section-title">Date-Based Query Patterns</div><div class="section-desc">All 8 date questions from your interview list solved</div></div>
+  </div>
+  <div class="exp-card">
+    <div class="exp-head" onclick="toggle(this)">
+      <span class="exp-num en-blue">Pattern A</span>
+      <span class="exp-title">Activity in time window — visited &gt;3 times, purchased once in 30 days</span>
+      <span class="exp-arrow">▼</span>
+    </div>
+    <div class="exp-body">
+      <div class="exp-lbl">SQL</div>
+      <div class="code-block">SELECT user_id, COUNT(*) AS visits
+FROM visits
+WHERE visit_date >= CURRENT_DATE - 7
+GROUP BY user_id
+HAVING COUNT(*) > 3;</div>
+      <div class="exp-lbl">PySpark</div>
+      <div class="code-block">df.filter(datediff(current_date(), col("visit_date")) &lt;= 7) \
+  .groupBy("user_id").count().filter(col("count") > 3)</div>
+    </div>
+  </div>
+  <div class="exp-card">
+    <div class="exp-head" onclick="toggle(this)">
+      <span class="exp-num en-amber">Pattern B</span>
+      <span class="exp-title">Absence — not logged in 3 days, not contacted in 14 days</span>
+      <span class="exp-arrow">▼</span>
+    </div>
+    <div class="exp-body">
+      <div class="exp-lbl">SQL — LEFT JOIN + IS NULL</div>
+      <div class="code-block">SELECT u.user_id FROM users u
+LEFT JOIN logins l
+  ON u.user_id = l.user_id
+  AND l.login_date >= CURRENT_DATE - 3
+WHERE l.user_id IS NULL;</div>
+      <div class="exp-lbl">PySpark — left_anti join</div>
+      <div class="code-block">recent = logins.filter(datediff(current_date(),"login_date") &lt;= 3) \
+              .select("user_id").distinct()
+users.join(recent, "user_id", "left_anti")</div>
+    </div>
+  </div>
+  <div class="exp-card">
+    <div class="exp-head" onclick="toggle(this)">
+      <span class="exp-num en-purple">Pattern C</span>
+      <span class="exp-title">Consecutive days — logged in 3 consecutive days, orders on consecutive days</span>
+      <span class="exp-arrow">▼</span>
+    </div>
+    <div class="exp-body">
+      <div class="tip-box">Key trick: date - ROW_NUMBER = same value for consecutive dates. Group by that value and count.</div>
+      <div class="code-block">WITH daily AS (
+  SELECT user_id, CAST(login_date AS DATE) AS day
+  FROM logins GROUP BY 1, 2        -- dedup first
+),
+with_rn AS (
+  SELECT user_id, day,
+    DATE_SUB(day, ROW_NUMBER() OVER (
+      PARTITION BY user_id ORDER BY day
+    )) AS streak_group
+  FROM daily
+)
+SELECT DISTINCT user_id
+FROM with_rn
+GROUP BY user_id, streak_group
+HAVING COUNT(*) >= 3;              -- 3+ consecutive days</div>
+    </div>
+  </div>
+</div>
+
+<!-- BUCKETS OVERVIEW -->
+<div class="section" id="buckets-overview">
+  <div class="section-header">
+    <div class="section-icon si-purple">🪣</div>
+    <div><div class="section-title">The 8 Interview Buckets</div><div class="section-desc">Every AWS/DE question maps to one of these. Label it first, then answer.</div></div>
+  </div>
+  <div class="info-box" style="margin-bottom:16px">When a question arrives in an interview — stop and label the bucket first. "That's a Bucket 2 — performance question." That one habit stops the blank-out.</div>
+  <div class="bucket-grid">
+    <div class="bucket fade-in"><div class="bucket-num">1</div><div class="bucket-title">Reading Files</div><div class="bucket-phrase">"Define schema, never infer"</div><div class="bucket-qs">Parquet vs CSV vs JSON, read modes, corrupt files, large CSV, schema changes, small files</div><span class="bucket-count">6 questions</span></div>
+    <div class="bucket fade-in"><div class="bucket-num">2</div><div class="bucket-title">Performance</div><div class="bucket-phrase">"Broadcast first, salt if both large"</div><div class="bucket-qs">Skewed data, salting, broadcast join, cache vs persist, partitioning, bucketing</div><span class="bucket-count">5 questions</span></div>
+    <div class="bucket fade-in"><div class="bucket-num">3</div><div class="bucket-title">Incremental</div><div class="bucket-phrase">"Idempotent — run twice, same result"</div><div class="bucket-qs">Incremental files, late data, Glue bookmarks, latest partition, regex from path</div><span class="bucket-count">5 questions</span></div>
+    <div class="bucket fade-in"><div class="bucket-num">4</div><div class="bucket-title">Data Quality</div><div class="bucket-phrase">"fail_reason column — always tag bad rows"</div><div class="bucket-qs">4 quality layers, valid/corrupt split, duplicates, S3 logs analysis, alerting</div><span class="bucket-count">5 questions</span></div>
+    <div class="bucket fade-in"><div class="bucket-num">5</div><div class="bucket-title">AWS Glue</div><div class="bucket-phrase">"Doors = DynamicFrame, inside = DataFrame"</div><div class="bucket-qs">DynamicFrame vs DataFrame, Glue Catalog, schema evolution, bookmarks, job.commit()</div><span class="bucket-count">6 questions</span></div>
+    <div class="bucket fade-in"><div class="bucket-num">6</div><div class="bucket-title">Lambda</div><div class="bucket-phrase">"Lambda detects and delegates"</div><div class="bucket-qs">Cold start, timeout, memory=CPU, S3 trigger, scheduler, 15-min limit</div><span class="bucket-count">5 questions</span></div>
+    <div class="bucket fade-in"><div class="bucket-num">7</div><div class="bucket-title">Delta Lake</div><div class="bucket-phrase">"Parquet plus _delta_log folder"</div><div class="bucket-qs">Delta vs Parquet, MERGE upsert, time travel, schema evolution, OPTIMIZE + ZORDER</div><span class="bucket-count">6 questions</span></div>
+    <div class="bucket fade-in"><div class="bucket-num">8</div><div class="bucket-title">Reliability</div><div class="bucket-phrase">"Idempotent, quarantine, restore, prevent"</div><div class="bucket-qs">Job failures, alerting, Kinesis, CI/CD, end-to-end design, recovery playbook</div><span class="bucket-count">6 questions</span></div>
+  </div>
+</div>
+
+<!-- BUCKET DETAIL -->
+<div class="section" id="bucket-detail">
+  <div class="section-header">
+    <div class="section-icon si-amber">🔍</div>
+    <div><div class="section-title">Key Answers Per Bucket</div><div class="section-desc">The most important question from each bucket — with the answer to say</div></div>
+  </div>
+
+  <div class="exp-card">
+    <div class="exp-head" onclick="toggle(this)">
+      <span class="exp-num en-blue">B1</span><span class="exp-title">How do you handle a corrupt file in S3?</span><span class="exp-arrow">▼</span>
+    </div>
+    <div class="exp-body">
+      <div class="code-block">df = spark.read.option("mode","PERMISSIVE") \
+    .option("columnNameOfCorruptRecord","_corrupt") \
+    .json("s3://bucket/raw/")
+
+valid_df = df.filter(col("_corrupt").isNull()).drop("_corrupt")
+bad_df   = df.filter(col("_corrupt").isNotNull()) \
+             .withColumn("source_file", input_file_name()) \
+             .withColumn("flagged_at",  current_timestamp())
+
+valid_df.write.mode("append").parquet("s3://processed/")
+bad_df.write.mode("append").json("s3://quarantine/")</div>
+      <div class="say-box"><div class="say-label">Say this</div><div class="say-text">"PERMISSIVE mode captures bad rows in _corrupt_record. I split into valid and quarantine DataFrames — valid goes to processed, bad goes to quarantine with source filename and timestamp. I alert if bad rate exceeds 5%."</div></div>
+    </div>
+  </div>
+
+  <div class="exp-card">
+    <div class="exp-head" onclick="toggle(this)">
+      <span class="exp-num en-red">B2</span><span class="exp-title">How do you handle skewed data?</span><span class="exp-arrow">▼</span>
+    </div>
+    <div class="exp-body">
+      <div class="code-block"># Fix 1: broadcast join (small table)
+result = df_large.join(broadcast(df_small), "country")
+
+# Fix 2: salting (both tables large)
+df_large = df_large.withColumn("salt",
+    (rand()*10).cast("int").cast("string")) \
+    .withColumn("key", concat(col("country"),lit("_"),col("salt")))</div>
+      <div class="say-box"><div class="say-label">Say this</div><div class="say-text">"Skew means one partition has far more data. I detect it by checking partition sizes. Fix: broadcast join if one table is small. If both large, use salting — add a random number to the join key so the hot key spreads across partitions."</div></div>
+    </div>
+  </div>
+
+  <div class="exp-card">
+    <div class="exp-head" onclick="toggle(this)">
+      <span class="exp-num en-amber">B3</span><span class="exp-title">How do you implement incremental processing?</span><span class="exp-arrow">▼</span>
+    </div>
+    <div class="exp-body">
+      <div class="code-block"># Approach: watermark in DynamoDB
+last_ts = get_watermark("orders_pipeline")  # from DynamoDB
+df = spark.read.parquet("s3://bucket/orders/") \
+    .filter(col("updated_at") > last_ts)
+
+# Process and write
+df.write.mode("overwrite").partitionBy("dt").parquet("s3://processed/")
+
+# Save new watermark AFTER successful write
+new_ts = df.agg(max_("updated_at")).collect()[0][0]
+save_watermark("orders_pipeline", new_ts)</div>
+      <div class="say-box"><div class="say-label">Say this</div><div class="say-text">"Three approaches: partition filter for date-partitioned S3, watermark stored in DynamoDB for tables with updated_at, or Glue Job Bookmarks where AWS manages state automatically. Always save the watermark AFTER a successful write — not before."</div></div>
+    </div>
+  </div>
+
+  <div class="exp-card">
+    <div class="exp-head" onclick="toggle(this)">
+      <span class="exp-num en-purple">B5</span><span class="exp-title">What is the difference between Glue DynamicFrame and DataFrame?</span><span class="exp-arrow">▼</span>
+    </div>
+    <div class="exp-body">
+      <div class="code-block"># DynamicFrame for the doors (I/O)
+dyf = glueContext.create_dynamic_frame.from_catalog(
+    database="db", table_name="orders",
+    transformation_ctx="orders"        # required for bookmarks
+)
+df = dyf.toDF()                        # convert IMMEDIATELY
+
+# DataFrame for everything inside (all transforms)
+df = df.filter(col("status")=="active") \
+       .withColumn("year", year("order_date"))
+
+# Convert back only for output
+dyf_out = DynamicFrame.fromDF(df, glueContext, "output")
+# ... write ...
+job.commit()                           # CRITICAL — advances bookmarks</div>
+      <div class="say-box"><div class="say-label">Say this</div><div class="say-text">"DynamicFrame for the doors, DataFrame for everything inside. DynamicFrame handles messy schemas at I/O. DataFrame has the full Spark API for transforms. Always add transformation_ctx and always end with job.commit() — without it bookmarks never advance."</div></div>
+    </div>
+  </div>
+
+  <div class="exp-card">
+    <div class="exp-head" onclick="toggle(this)">
+      <span class="exp-num en-blue">B7</span><span class="exp-title">Delta Lake vs Parquet — when to use each?</span><span class="exp-arrow">▼</span>
+    </div>
+    <div class="exp-body">
+      <div class="code-block"># Delta Lake = Parquet files + _delta_log/ folder
+# That log gives you: ACID, MERGE, time travel, schema evolution
+
+# MERGE — upsert pattern
+target.alias("t").merge(
+    updates.alias("s"), "t.order_id = s.order_id"
+).whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
+
+# Time travel — query past version
+df = spark.read.format("delta") \
+    .option("timestampAsOf","2024-01-14") \
+    .load("s3://bucket/delta/orders/")</div>
+      <div class="say-box"><div class="say-label">Say this</div><div class="say-text">"Parquet is a file format — fast reads, append-only. Delta Lake is Parquet files plus a _delta_log folder. That log gives ACID transactions, MERGE for upserts, and time travel. Plain Parquet for simple append-only pipelines. Delta when I need corrections, history, or schema evolution."</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- KEY PHRASES -->
+<div class="section" id="key-phrases">
+  <div class="section-header">
+    <div class="section-icon si-green">💬</div>
+    <div><div class="section-title">Key Phrases Per Bucket</div><div class="section-desc">One phrase per bucket — say these in every answer for that bucket</div></div>
+  </div>
+  <div class="phrase-grid">
+    <div class="phrase-card"><div class="phrase-bucket">Bucket 1 — Files</div><div class="phrase-text">"Define schema, never infer"</div></div>
+    <div class="phrase-card"><div class="phrase-bucket">Bucket 2 — Performance</div><div class="phrase-text">"Broadcast first, salt if both large"</div></div>
+    <div class="phrase-card"><div class="phrase-bucket">Bucket 3 — Incremental</div><div class="phrase-text">"Idempotent — run twice, same result"</div></div>
+    <div class="phrase-card"><div class="phrase-bucket">Bucket 4 — Data Quality</div><div class="phrase-text">"fail_reason column — always tag bad rows"</div></div>
+    <div class="phrase-card"><div class="phrase-bucket">Bucket 5 — Glue</div><div class="phrase-text">"Doors = DynamicFrame, inside = DataFrame"</div></div>
+    <div class="phrase-card"><div class="phrase-bucket">Bucket 6 — Lambda</div><div class="phrase-text">"Lambda detects and delegates"</div></div>
+    <div class="phrase-card"><div class="phrase-bucket">Bucket 7 — Delta Lake</div><div class="phrase-text">"Parquet plus _delta_log folder"</div></div>
+    <div class="phrase-card"><div class="phrase-bucket">Bucket 8 — Reliability</div><div class="phrase-text">"Idempotent, quarantine, restore, prevent"</div></div>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<div class="section" id="projects">
+  <div class="section-header">
+    <div class="section-icon si-cyan">🗂</div>
+    <div><div class="section-title">3 Portfolio Projects</div><div class="section-desc">Real built projects — not tutorials. Your proof of DE skills.</div></div>
+  </div>
+
+  <div class="proj-card pc-1">
+    <div class="proj-header">
+      <div><div class="proj-num">Project 1</div><div class="proj-title">Healthcare Readmission Batch Pipeline</div></div>
+      <span class="proj-status ps-done">✓ Complete</span>
+    </div>
+    <div class="proj-desc">Processes 101,766 patient records to identify 30-day readmission patterns, categorise patients by risk tier, and run data quality checks. Full local PySpark pipeline.</div>
+    <div class="proj-stack">
+      <span class="pill pl-purple">PySpark 3.4</span><span class="pill pl-blue">Parquet</span><span class="pill pl-green">Data Quality</span><span class="pill pl-amber">Window Functions</span><span class="pill pl-cyan">GitHub</span>
+    </div>
+    <div class="proj-flow">
+      <span class="pf-step">CSV (101k rows)</span><span class="pf-arr">→</span>
+      <span class="pf-step">ingest.py</span><span class="pf-arr">→</span>
+      <span class="pf-step">quality.py</span><span class="pf-arr">→</span>
+      <span class="pf-step">transform.py</span><span class="pf-arr">→</span>
+      <span class="pf-step">Parquet (partitioned)</span>
+    </div>
+    <div class="say-box" style="margin-top:14px"><div class="say-label">Say in interview</div><div class="say-text">"I built a batch pipeline that processes 100k patient records daily to identify readmission patterns. In my CX role I used this data manually — this pipeline automates the preparation into a reproducible daily job."</div></div>
+  </div>
+
+  <div class="proj-card pc-2">
+    <div class="proj-header">
+      <div><div class="proj-num">Project 2</div><div class="proj-title">Automobile Sales AWS Pipeline</div></div>
+      <span class="proj-status ps-prog">In Progress</span>
+    </div>
+    <div class="proj-desc">End-to-end AWS pipeline processing 426,880 vehicle listings. Identifies underpriced cars using window functions comparing each listing to segment average.</div>
+    <div class="proj-stack">
+      <span class="pill pl-amber">AWS S3</span><span class="pill pl-amber">Glue Crawler</span><span class="pill pl-amber">Glue ETL</span><span class="pill pl-amber">Athena</span><span class="pill pl-amber">IAM</span><span class="pill pl-blue">PySpark</span>
+    </div>
+    <div class="proj-flow">
+      <span class="pf-step">CSV → S3 raw</span><span class="pf-arr">→</span>
+      <span class="pf-step">Glue Crawler</span><span class="pf-arr">→</span>
+      <span class="pf-step">Glue ETL Job</span><span class="pf-arr">→</span>
+      <span class="pf-step">S3 Parquet</span><span class="pf-arr">→</span>
+      <span class="pf-step">Athena SQL</span>
+    </div>
+    <div class="say-box" style="margin-top:14px"><div class="say-label">Say in interview</div><div class="say-text">"End-to-end AWS pipeline — raw CSV to Athena-queryable Parquet. I used window functions to compare each listing to its segment average, identifying underpriced vehicles. Glue job runs with Job Bookmarks so reruns only process new files."</div></div>
+  </div>
+
+  <div class="proj-card pc-3">
+    <div class="proj-header">
+      <div><div class="proj-num">Project 3</div><div class="proj-title">Vehicle Anomaly Detection — Streaming</div></div>
+      <span class="proj-status ps-ready">Guide Ready</span>
+    </div>
+    <div class="proj-desc">Real-time IoT streaming pipeline. Python producer simulates 100 vehicles sending sensor data. Spark Structured Streaming detects anomalies in 2-minute tumbling windows.</div>
+    <div class="proj-stack">
+      <span class="pill pl-cyan">Kafka</span><span class="pill pl-cyan">Docker</span><span class="pill pl-cyan">Spark Streaming</span><span class="pill pl-green">Watermarking</span><span class="pill pl-green">Windowing</span>
+    </div>
+    <div class="proj-flow">
+      <span class="pf-step">Python producer</span><span class="pf-arr">→</span>
+      <span class="pf-step">Kafka (Docker)</span><span class="pf-arr">→</span>
+      <span class="pf-step">Spark Streaming</span><span class="pf-arr">→</span>
+      <span class="pf-step">2-min windows</span><span class="pf-arr">→</span>
+      <span class="pf-step">Anomaly alerts</span>
+    </div>
+    <div class="say-box" style="margin-top:14px"><div class="say-label">Say in interview</div><div class="say-text">"Real-time pipeline detecting vehicle engine anomalies. Locally I used Kafka in Docker — in production on AWS this would be Kinesis. I used a 1-minute watermark because sensor data arrives late due to network delays. Checkpoint location ensures the job recovers from crashes without data loss."</div></div>
+  </div>
+</div>
+
+<!-- GITHUB & LINKEDIN -->
+<div class="section" id="github">
+  <div class="section-header">
+    <div class="section-icon si-green">🐙</div>
+    <div><div class="section-title">GitHub & LinkedIn Setup</div><div class="section-desc">What recruiters actually look at — in order</div></div>
+  </div>
+  <div class="two-col">
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px">GitHub — recruiter view order</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="mrow" style="margin-bottom:0"><span class="mk" style="color:var(--accent2);min-width:80px">1st</span><span class="mv">README — problem statement, architecture diagram, technical decisions, how to run</span></div>
+        <div class="mrow" style="margin-bottom:0"><span class="mk" style="color:var(--accent2);min-width:80px">2nd</span><span class="mv">Folder structure — organised like a real project, not a Jupyter notebook dump</span></div>
+        <div class="mrow" style="margin-bottom:0"><span class="mk" style="color:var(--accent2);min-width:80px">3rd</span><span class="mv">Code quality — functions, comments, no hardcoded credentials</span></div>
+        <div class="mrow" style="margin-bottom:0"><span class="mk" style="color:var(--accent2);min-width:80px">4th</span><span class="mv">Commit history — daily commits over weeks, not one giant dump</span></div>
+        <div class="mrow" style="margin-bottom:0"><span class="mk" style="color:var(--accent2);min-width:80px">5th</span><span class="mv">Tech stack — matches job description keywords</span></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px">LinkedIn post template</div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;font-size:12px;color:var(--text2);line-height:1.8">
+        Just finished building [Project Name] — a pipeline that [one sentence].<br><br>
+        → [Tech 1]: [why you used it]<br>
+        → [Tech 2]: [why you used it]<br><br>
+        The most interesting challenge: [specific technical decision]<br><br>
+        Coming from CX, I know firsthand why this data matters — [business impact].<br><br>
+        GitHub link in comments.<br><br>
+        #DataEngineering #PySpark #AWS #OpenToWork
+      </div>
+      <div class="tip-box" style="margin-top:8px">Posts that explain one specific technical decision get 5–10x more recruiter engagement than "I finished a project!" posts.</div>
+    </div>
+  </div>
+</div>
+
+<!-- BEHAVIORAL -->
+<div class="section" id="behavioral">
+  <div class="section-header">
+    <div class="section-icon si-red">🎤</div>
+    <div><div class="section-title">Behavioral Answers</div><div class="section-desc">Your CX background is your superpower — use it in every answer</div></div>
+  </div>
+
+  <div class="exp-card">
+    <div class="exp-head" onclick="toggle(this)">
+      <span class="exp-num en-red">Must</span><span class="exp-title">Why are you moving from CX to Data Engineering?</span><span class="exp-arrow">▼</span>
+    </div>
+    <div class="exp-body">
+      <div class="say-box"><div class="say-label">Your answer</div><div class="say-text">"In my CX role I kept running into the same problem — I could see customers were having issues but didn't have the right data to understand why at scale. I started pulling reports, writing SQL queries to find patterns, and realised the data infrastructure was limiting the insights we could get. I wanted to be on the side that builds those systems. I've spent the last [X months] upskilling in PySpark, AWS, and pipeline design, and I'm ready to bring both the technical skills and the business context."</div></div>
+    </div>
+  </div>
+
+  <div class="exp-card">
+    <div class="exp-head" onclick="toggle(this)">
+      <span class="exp-num en-amber">STAR</span><span class="exp-title">Tell me about a time you solved a complex problem with data</span><span class="exp-arrow">▼</span>
+    </div>
+    <div class="exp-body">
+      <div class="exp-lbl">STAR structure — adapt from CX experience</div>
+      <div class="say-box"><div class="say-label">Your answer</div><div class="say-text">S: We had high customer complaints about delayed deliveries but couldn't identify root cause from the dashboard we had.<br>T: Find patterns across regions, carriers, and time periods.<br>A: Pulled raw data from 3 systems, wrote SQL to join orders, shipping, and complaint tables. Found 68% of complaints came from one carrier in northeast on Mondays.<br>R: Complaints dropped 40% in 2 months. This drove me deeper into DE — I wanted to build pipelines that surface these insights automatically.</div></div>
+    </div>
+  </div>
+
+  <div class="exp-card">
+    <div class="exp-head" onclick="toggle(this)">
+      <span class="exp-num en-blue">STAR</span><span class="exp-title">Tell me about a time you caught a data quality error</span><span class="exp-arrow">▼</span>
+    </div>
+    <div class="exp-body">
+      <div class="say-box"><div class="say-label">Your answer</div><div class="say-text">S: Weekly CX metrics showed 30% drop in satisfaction — seemed impossible.<br>T: Validate data before leadership made decisions.<br>A: Traced back to source — new survey tool changed scale from 1-5 to 1-10 but normalization wasn't updated. Cross-checked row counts which didn't match — that was the signal.<br>R: Fixed normalization, reprocessed data, set up automated row count reconciliation. Now standard in our quality process.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ANSWER FRAMEWORK -->
+<div class="section" id="answer-framework">
+  <div class="section-header">
+    <div class="section-icon si-purple">⚙️</div>
+    <div><div class="section-title">The Answer Framework</div><div class="section-desc">Use this for every technical question — even ones you haven't seen before</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center">
+      <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--accent2);opacity:.4">1</div>
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin:6px 0">Problem</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">Show you understand what they're asking. Define the problem clearly before solving it.</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center">
+      <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--green);opacity:.4">2</div>
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin:6px 0">Solution</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">Name the technique and explain why you chose it over alternatives.</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center">
+      <div style="font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--amber);opacity:.4">3</div>
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin:6px 0">Trade-off</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">What are the downsides? When would you choose something different? This signals seniority.</div>
+    </div>
+  </div>
+  <div class="info-box">When you go blank: "I haven't hit this exact scenario in production, but my approach would be to [reasoning]. I'd validate by [checking logs / testing]. Is that the direction you're thinking?" — Never go silent. A reasoned partial answer beats silence every time.</div>
+
+  <div class="divider"></div>
+  <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px">Final checklist before applying</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">
+    <div class="check-item"><span class="check-icon ci-done">✓</span>3 repos pinned on GitHub</div>
+    <div class="check-item"><span class="check-icon ci-done">✓</span>Each README has technical decisions section</div>
+    <div class="check-item"><span class="check-icon ci-todo">○</span>All 3 pipeline steps ran successfully</div>
+    <div class="check-item"><span class="check-icon ci-todo">○</span>LinkedIn has at least one project post</div>
+    <div class="check-item"><span class="check-icon ci-todo">○</span>LinkedIn headline says "Data Engineer"</div>
+    <div class="check-item"><span class="check-icon ci-todo">○</span>5+ mock interviews completed</div>
+    <div class="check-item"><span class="check-icon ci-todo">○</span>20+ LeetCode SQL medium solved</div>
+    <div class="check-item"><span class="check-icon ci-todo">○</span>Can explain every line of code in your projects</div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</main>
+</div><!-- /layout -->
+
+<script>
+function toggle(h){
+  const b=h.nextElementSibling;
+  const a=h.querySelector('.exp-arrow');
+  b.classList.toggle('open');
+  a.classList.toggle('open');
+}
+function scrollTo(id){
+  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+}
+function toggleMenu(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+// Active nav on scroll
+const sections=['home','roadmap','daily','sql-patterns','window-fns','date-patterns','buckets-overview','bucket-detail','key-phrases','projects','github','behavioral','answer-framework'];
+window.addEventListener('scroll',()=>{
+  const y=window.scrollY+80;
+  for(let i=sections.length-1;i>=0;i--){
+    const el=document.getElementById(sections[i]);
+    if(el&&el.offsetTop<=y){
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+      const navItems=document.querySelectorAll('.nav-item');
+      navItems.forEach(n=>{
+        if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes(sections[i]))
+          n.classList.add('active');
+      });
+      break;
+    }
+  }
+});
+</script>
+</body>
+</html>
