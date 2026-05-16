@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data & AI Engineering — Complete Study Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,900;1,300&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f12;
+    --bg2: #13161b;
+    --bg3: #1a1e24;
+    --bg4: #21262f;
+    --border: #2a2f38;
+    --border2: #363d48;
+    --text: #e8eaed;
+    --text2: #9aa3b0;
+    --text3: #5c6472;
+    --accent: #4ade80;
+    --accent2: #22c55e;
+    --gold: #fbbf24;
+    --blue: #60a5fa;
+    --purple: #a78bfa;
+    --red: #f87171;
+    --orange: #fb923c;
+    --teal: #2dd4bf;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.7;min-height:100vh}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(13,15,18,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 20px}
+  .nav-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:0;height:52px;overflow-x:auto;scrollbar-width:none}
+  .nav-inner::-webkit-scrollbar{display:none}
+  .nav-logo{font-family:'Fraunces',serif;font-weight:900;font-size:16px;color:var(--accent);white-space:nowrap;margin-right:24px;flex-shrink:0}
+  .nav-link{color:var(--text3);font-size:12px;font-weight:500;text-decoration:none;white-space:nowrap;padding:6px 10px;border-radius:6px;transition:all .15s;flex-shrink:0;letter-spacing:.02em;text-transform:uppercase}
+  .nav-link:hover,.nav-link.active{color:var(--accent);background:rgba(74,222,128,.08)}
+
+  /* LAYOUT */
+  .container{max-width:900px;margin:0 auto;padding:80px 20px 80px}
+
+  /* HERO */
+  .hero{text-align:center;padding:60px 0 80px;border-bottom:1px solid var(--border);margin-bottom:80px}
+  .hero-tag{display:inline-block;background:rgba(74,222,128,.1);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 14px;border-radius:20px;border:1px solid rgba(74,222,128,.2);margin-bottom:20px}
+  .hero h1{font-family:'Fraunces',serif;font-size:clamp(36px,6vw,64px);font-weight:900;line-height:1.05;margin-bottom:16px;background:linear-gradient(135deg,#e8eaed 0%,#9aa3b0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hero-sub{font-size:16px;color:var(--text2);max-width:560px;margin:0 auto 32px;line-height:1.6}
+  .hero-pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .pill{background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:12px;padding:4px 12px;border-radius:20px;font-family:'DM Mono',monospace}
+
+  /* SECTION */
+  .section{margin-bottom:80px;scroll-margin-top:65px}
+  .section-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:.1em;margin-bottom:8px;text-transform:uppercase}
+  .section-title{font-family:'Fraunces',serif;font-size:clamp(24px,4vw,38px);font-weight:900;line-height:1.1;margin-bottom:8px}
+  .section-lead{font-size:16px;color:var(--text2);margin-bottom:32px;line-height:1.65;max-width:720px}
+  .divider{height:1px;background:linear-gradient(90deg,var(--border) 0%,transparent 100%);margin-bottom:32px}
+
+  /* CARDS */
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:16px;transition:border-color .2s}
+  .card:hover{border-color:var(--border2)}
+  .card-title{font-weight:600;font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .card-body{font-size:13px;color:var(--text2);line-height:1.7}
+  .card-body strong{color:var(--text);font-weight:600}
+
+  /* 2-col grid */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  @media(max-width:640px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+  /* COMPARE TABLE */
+  .compare{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;border-radius:10px;overflow:hidden}
+  .compare th{background:var(--bg3);padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+  .compare td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top;line-height:1.5}
+  .compare tr:last-child td{border-bottom:none}
+  .compare tr:hover td{background:rgba(255,255,255,.02)}
+
+  /* CODE */
+  .code{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px 18px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.8;color:#a8b3c4;margin-bottom:16px;overflow-x:auto;white-space:pre}
+  .cm{color:#4b5563}
+  .ck{color:#60a5fa}
+  .cv{color:#4ade80}
+  .cs{color:#fbbf24}
+
+  /* ACCENT BOXES */
+  .insight{border-left:3px solid var(--accent);background:rgba(74,222,128,.05);border-radius:0 10px 10px 0;padding:14px 18px;font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px}
+  .insight strong{color:var(--accent)}
+  .insight-blue{border-color:var(--blue);background:rgba(96,165,250,.05)}
+  .insight-blue strong{color:var(--blue)}
+  .insight-gold{border-color:var(--gold);background:rgba(251,191,36,.05)}
+  .insight-gold strong{color:var(--gold)}
+  .insight-purple{border-color:var(--purple);background:rgba(167,139,250,.05)}
+  .insight-purple strong{color:var(--purple)}
+  .insight-red{border-color:var(--red);background:rgba(248,113,113,.05)}
+  .insight-red strong{color:var(--red)}
+
+  /* FLOW DIAGRAM */
+  .flow{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin-bottom:20px}
+  .flow-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:500;white-space:nowrap}
+  .flow-arr{color:var(--text3);padding:0 8px;font-size:14px;flex-shrink:0}
+
+  /* BADGE */
+  .badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle;margin-left:6px}
+  .badge-green{background:rgba(74,222,128,.15);color:var(--accent)}
+  .badge-blue{background:rgba(96,165,250,.15);color:var(--blue)}
+  .badge-gold{background:rgba(251,191,36,.15);color:var(--gold)}
+  .badge-purple{background:rgba(167,139,250,.15);color:var(--purple)}
+  .badge-red{background:rgba(248,113,113,.15);color:var(--red)}
+  .badge-teal{background:rgba(45,212,191,.15);color:var(--teal)}
+
+  /* STEP LIST */
+  .steps{display:flex;flex-direction:column;gap:0}
+  .step{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--border)}
+  .step:last-child{border-bottom:none}
+  .step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px;font-family:'DM Mono',monospace}
+  .step-body{flex:1}
+  .step-title{font-weight:600;font-size:14px;margin-bottom:4px}
+  .step-desc{font-size:13px;color:var(--text2);line-height:1.65}
+
+  /* CHIP */
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .chip{background:var(--bg4);border:1px solid var(--border);color:var(--text3);font-size:11px;padding:3px 9px;border-radius:8px;font-family:'DM Mono',monospace}
+
+  /* TOC */
+  .toc{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:60px}
+  .toc-title{font-family:'Fraunces',serif;font-weight:600;font-size:16px;margin-bottom:16px;color:var(--text)}
+  .toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+  @media(max-width:560px){.toc-grid{grid-template-columns:1fr}}
+  .toc-link{color:var(--text2);text-decoration:none;font-size:13px;padding:6px 10px;border-radius:6px;display:flex;align-items:center;gap:8px;transition:all .15s}
+  .toc-link:hover{background:var(--bg3);color:var(--accent)}
+  .toc-n{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);width:22px;flex-shrink:0}
+
+  /* SECTION COLOR ACCENTS */
+  .s1 .section-title{color:var(--accent)}
+  .s2 .section-title{color:var(--blue)}
+  .s3 .section-title{color:var(--gold)}
+  .s4 .section-title{color:var(--purple)}
+  .s5 .section-title{color:var(--teal)}
+  .s6 .section-title{color:var(--orange)}
+  .s7 .section-title{color:var(--red)}
+  .s8 .section-title{color:var(--accent)}
+  .s9 .section-title{color:var(--blue)}
+  .s10 .section-title{color:var(--gold)}
+  .s11 .section-title{color:var(--purple)}
+  .s12 .section-title{color:var(--teal)}
+
+  /* TAG LINE */
+  .tagline{font-size:12px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:4px}
+
+  /* PROGRESS BAR */
+  .latbar{height:6px;border-radius:3px;margin:4px 0 2px;min-width:20px;transition:width .3s}
+
+  /* QUOTE */
+  blockquote{border-left:3px solid var(--purple);background:rgba(167,139,250,.05);padding:14px 18px;border-radius:0 10px 10px 0;font-size:13px;color:var(--text2);font-style:italic;line-height:1.7;margin-bottom:16px}
+  blockquote strong{color:var(--purple);font-style:normal}
+
+  /* FOOTER */
+  footer{border-top:1px solid var(--border);padding:40px 20px;text-align:center;color:var(--text3);font-size:12px;margin-top:40px}
+  footer strong{color:var(--text2)}
+
+  /* PRINT */
+  @media print{nav{display:none}.container{padding:20px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">DE Study</div>
+    <a class="nav-link" href="#batch-streaming">Batch/Stream</a>
+    <a class="nav-link" href="#storage">Storage</a>
+    <a class="nav-link" href="#architectures">Architectures</a>
+    <a class="nav-link" href="#data-quality">DQ</a>
+    <a class="nav-link" href="#spark">Spark</a>
+    <a class="nav-link" href="#event-driven">Events</a>
+    <a class="nav-link" href="#ml-pipeline">ML Pipeline</a>
+    <a class="nav-link" href="#fraud">Fraud</a>
+    <a class="nav-link" href="#recommendations">Recs</a>
+    <a class="nav-link" href="#semantic-search">Search</a>
+    <a class="nav-link" href="#aws-platform">AWS</a>
+    <a class="nav-link" href="#interview">Interview</a>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Complete Study Guide</div>
+  <h1>Data & AI Engineering</h1>
+  <p class="hero-sub">Everything you need for data engineering and AI engineering interviews — from batch vs streaming to ML pipelines, semantic search, and real-world system design.</p>
+  <div class="hero-pills">
+    <span class="pill">PySpark</span>
+    <span class="pill">AWS</span>
+    <span class="pill">Kafka</span>
+    <span class="pill">Medallion</span>
+    <span class="pill">SageMaker</span>
+    <span class="pill">FAISS</span>
+    <span class="pill">Embeddings</span>
+    <span class="pill">MLflow</span>
+  </div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <div class="toc-grid">
+    <a class="toc-link" href="#batch-streaming"><span class="toc-n">01</span>Batch vs Streaming</a>
+    <a class="toc-link" href="#storage"><span class="toc-n">02</span>Data Lake vs Warehouse vs Lakehouse</a>
+    <a class="toc-link" href="#architectures"><span class="toc-n">03</span>Lambda, Kappa & Medallion</a>
+    <a class="toc-link" href="#data-quality"><span class="toc-n">04</span>Data Quality & Validation</a>
+    <a class="toc-link" href="#spark"><span class="toc-n">05</span>Spark Performance Tuning</a>
+    <a class="toc-link" href="#event-driven"><span class="toc-n">06</span>Event-Driven Pipelines (Kafka/Kinesis)</a>
+    <a class="toc-link" href="#ml-pipeline"><span class="toc-n">07</span>ML Pipeline: Training to Production</a>
+    <a class="toc-link" href="#fraud"><span class="toc-n">08</span>Case Study: Fraud Detection</a>
+    <a class="toc-link" href="#recommendations"><span class="toc-n">09</span>Case Study: Recommendation System</a>
+    <a class="toc-link" href="#semantic-search"><span class="toc-n">10</span>Case Study: Semantic Search</a>
+    <a class="toc-link" href="#aws-platform"><span class="toc-n">11</span>Full AWS Platform Blueprint</a>
+    <a class="toc-link" href="#interview"><span class="toc-n">12</span>Interview Framework</a>
+  </div>
+</div>
+
+<!-- ───────────────────────── 01 BATCH VS STREAMING ───────────────────────── -->
+<div class="section s1" id="batch-streaming">
+  <div class="section-num">01</div>
+  <div class="section-title">Batch vs Streaming</div>
+  <p class="section-lead">The most fundamental choice in data engineering. Every system design question starts here. The key question is: how stale is too stale?</p>
+  <div class="divider"></div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><span style="color:var(--blue)">■</span> Batch Processing</div>
+      <div class="card-body">Process large chunks of data on a schedule — hourly, nightly, weekly. The data is collected, stored, then processed all at once.<br><br>
+      <strong>When to use:</strong> results can be hours or days old. Large volumes processed efficiently. Easy to re-run on failure. Lower cost — spins up, works, shuts down.<br><br>
+      <strong>Real example:</strong> Swiggy's nightly restaurant payout report. All orders from the day processed at 2am. PySpark on EMR reads S3, aggregates by restaurant, writes report.
+      </div>
+      <div class="chips"><span class="chip">PySpark on EMR</span><span class="chip">Airflow schedule</span><span class="chip">S3 + Redshift</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span style="color:var(--accent)">■</span> Stream Processing</div>
+      <div class="card-body">Process each event the moment it arrives. No waiting, no schedules. Results in seconds.<br><br>
+      <strong>When to use:</strong> sub-minute freshness needed. Events arrive continuously. User is waiting on screen right now. Fraud detection, live dashboards, ride tracking.<br><br>
+      <strong>Real example:</strong> Swiggy's fraud check on every order placement. Event → Kinesis → Spark Streaming → fraud score → approve/block. All in under 2 seconds.
+      </div>
+      <div class="chips"><span class="chip">Kinesis / Kafka</span><span class="chip">Spark Streaming</span><span class="chip">DynamoDB</span></div>
+    </div>
+  </div>
+
+  <div class="insight insight-gold">
+    <strong>Middle ground: micro-batching.</strong> Running batch every 5 minutes instead of nightly gives most of the freshness of streaming without the full complexity. Always ask: do we truly need sub-second latency, or would 5-minute micro-batches solve the problem? This is the answer that wins interviews.
+  </div>
+
+  <table class="compare">
+    <tr><th>Question to ask</th><th>→ Batch</th><th>→ Streaming</th></tr>
+    <tr><td>How fresh must data be?</td><td>Hours/days is fine</td><td>Seconds or less</td></tr>
+    <tr><td>How does data arrive?</td><td>Files/dumps on schedule</td><td>Continuous event flow</td></tr>
+    <tr><td>What if it fails?</td><td>Easy re-run is acceptable</td><td>Must handle missed events</td></tr>
+    <tr><td>Budget?</td><td>Cost-sensitive → batch</td><td>Can afford always-on infra</td></tr>
+    <tr><td>AWS tool</td><td>EMR + PySpark + Airflow</td><td>Kinesis + Spark Streaming</td></tr>
+  </table>
+
+  <div class="insight insight-blue">
+    <strong>In PySpark:</strong> <code>spark.read</code> = batch. <code>spark.readStream</code> = streaming. The transformation logic is nearly identical — the framework handles the difference. This is worth mentioning in interviews.
+  </div>
+</div>
+
+<!-- ───────────────────────── 02 STORAGE ───────────────────────── -->
+<div class="section s2" id="storage">
+  <div class="section-num">02</div>
+  <div class="section-title">Data Lake vs Warehouse vs Lakehouse</div>
+  <p class="section-lead">You don't choose one — you use all three, and data flows from lake through to warehouse. Each has a specific role.</p>
+  <div class="divider"></div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title" style="color:var(--blue)">🏞️ Data Lake</div>
+      <div class="card-body"><strong>What:</strong> raw storage, any format, cheap.<br><br>
+      <strong>Format:</strong> JSON, CSV, Parquet, images, logs — anything.<br><strong>Schema:</strong> schema-on-read (applied at query time).<br><strong>Cost:</strong> ~$23/TB/month on S3.<br><strong>Query speed:</strong> slow without tuning.<br><br>
+      <strong>Use for:</strong> raw archival, ML training data, compliance (never delete raw).
+      </div>
+      <div class="chips"><span class="chip">AWS S3</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--purple)">🏛️ Data Warehouse</div>
+      <div class="card-body"><strong>What:</strong> structured, optimised for SQL queries.<br><br>
+      <strong>Format:</strong> tables only, columnar storage.<br><strong>Schema:</strong> schema-on-write (enforced at insert).<br><strong>Cost:</strong> ~$250/TB/month.<br><strong>Query speed:</strong> very fast.<br><br>
+      <strong>Use for:</strong> executive dashboards, BI reports, analyst SQL queries.
+      </div>
+      <div class="chips"><span class="chip">Redshift</span><span class="chip">Snowflake</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--teal)">🏠 Lakehouse</div>
+      <div class="card-body"><strong>What:</strong> lake's cost + warehouse's query performance.<br><br>
+      <strong>Format:</strong> Parquet + Delta Lake on S3.<br><strong>Schema:</strong> enforced + evolvable.<br><strong>Cost:</strong> S3 rates + compute on query.<br><strong>Query speed:</strong> good with Athena/Spectrum.<br><br>
+      <strong>Use for:</strong> mixed teams, cost-sensitive, ACID transactions needed.
+      </div>
+      <div class="chips"><span class="chip">Delta Lake</span><span class="chip">Athena</span><span class="chip">Redshift Spectrum</span></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Key interview insight — Redshift Spectrum:</strong> lets analysts run SQL on S3 Parquet files directly without copying data into Redshift first. You get warehouse-speed SQL at lake-level storage cost. This is the practical "lakehouse" pattern most AWS teams use, even without Delta Lake.
+  </div>
+
+  <div class="insight insight-gold">
+    <strong>Schema-on-read vs schema-on-write:</strong> Warehouse enforces schema at write time — bad data is rejected immediately. Lake applies schema at query time — flexible but risky if upstream data changes silently. Delta Lake on S3 gives you write-time enforcement with the flexibility to add columns without breaking existing queries.
+  </div>
+
+  <blockquote><strong>One-sentence interview answer:</strong> "I'd use S3 as the lake for raw ingestion and ML data, PySpark to transform into structured Parquet, and Redshift Spectrum for analyst SQL access — loading into Redshift proper only for the highest-frequency queries where Spectrum latency isn't fast enough."</blockquote>
+</div>
+
+<!-- ───────────────────────── 03 ARCHITECTURES ───────────────────────── -->
+<div class="section s3" id="architectures">
+  <div class="section-num">03</div>
+  <div class="section-title">Lambda, Kappa & Medallion</div>
+  <p class="section-lead">Three architecture patterns. Each solves a different problem. Know all three and when to use each — interviewers always ask you to compare them.</p>
+  <div class="divider"></div>
+
+  <div class="tagline">LAMBDA ARCHITECTURE</div>
+  <div class="card" style="border-color:rgba(167,139,250,.3)">
+    <div class="card-title" style="color:var(--purple)">Lambda — batch accuracy + streaming speed, two pipelines</div>
+    <div class="card-body">
+    The same data feeds two parallel pipelines. Batch layer processes full history accurately (but slowly). Speed layer processes recent data in real-time (fast but approximate). Serving layer merges both results.<br><br>
+    <strong>Batch layer:</strong> PySpark on EMR, runs nightly, reads all S3 data, writes pre-computed views to Redshift.<br>
+    <strong>Speed layer:</strong> Spark Streaming on Kinesis, always on, processes last few minutes, writes to DynamoDB with TTL.<br>
+    <strong>Serving layer:</strong> queries merge Redshift (history) + DynamoDB (live) into one answer.<br><br>
+    <strong>The problem:</strong> two codebases with the same logic. Batch and streaming implementations can drift and give different numbers for the same metric.<br><br>
+    <strong>Use when:</strong> need both real-time freshness AND accurate historical data. Financial reporting + live dashboard on the same platform.
+    </div>
+    <div class="chips"><span class="chip">EMR + PySpark</span><span class="chip">Spark Streaming</span><span class="chip">Kinesis</span><span class="chip">Redshift</span><span class="chip">DynamoDB</span></div>
+  </div>
+
+  <div class="tagline">KAPPA ARCHITECTURE</div>
+  <div class="card" style="border-color:rgba(74,222,128,.3)">
+    <div class="card-title" style="color:var(--accent)">Kappa — one streaming pipeline, replay history through it</div>
+    <div class="card-body">
+    Removes the batch layer entirely. ONE streaming pipeline handles everything — live events AND historical reprocessing. Kinesis/Kafka retains events in an immutable log. When you need to reprocess history, deploy a v2 consumer starting from an earlier offset. Same code, different starting position.<br><br>
+    <strong>Replay process:</strong> (1) deploy v2 consumer from past timestamp, (2) it races through history writing to new output table, (3) once caught up to "now", swap serving layer to v2, (4) decommission v1.<br><br>
+    <strong>The problem:</strong> replay is expensive. Kinesis retention max 365 days. Large history requires long retention periods or S3 backup.<br><br>
+    <strong>Use when:</strong> primarily real-time needs, small team, frequent logic changes, don't need years of replay.
+    </div>
+    <div class="chips"><span class="chip">Kinesis / Kafka</span><span class="chip">Spark Streaming</span><span class="chip">One codebase</span></div>
+  </div>
+
+  <div class="tagline">MEDALLION ARCHITECTURE</div>
+  <div class="card" style="border-color:rgba(251,191,36,.3)">
+    <div class="card-title" style="color:var(--gold)">Medallion — Bronze → Silver → Gold, progressive refinement</div>
+    <div class="card-body">
+    Three progressive layers. Each layer is more refined than the last. One codebase, batch-first. The most commonly used pattern on AWS + Databricks today.<br><br>
+    <strong>🥉 Bronze:</strong> raw data lands exactly as received. No transformations. Any format. Append-only. Never modify. This is your safety net — always reprocessable.<br><br>
+    <strong>🥈 Silver:</strong> cleaned, validated, deduplicated, enriched. PySpark reads Bronze, applies quality rules, joins reference data, writes clean Parquet. Bad rows go to quarantine with a reason code.<br><br>
+    <strong>🥇 Gold:</strong> business-ready aggregates. GroupBy, sum, rollup. What dashboards and ML models consume. Rebuilt from Silver on each run.<br><br>
+    <strong>Use when:</strong> batch analytics, data quality is critical, AWS + PySpark team, want simplicity over Lambda's complexity.
+    </div>
+    <div class="chips"><span class="chip">S3 (3 buckets)</span><span class="chip">PySpark on EMR</span><span class="chip">Airflow</span><span class="chip">Redshift Spectrum</span></div>
+  </div>
+
+  <table class="compare">
+    <tr><th></th><th>Lambda</th><th>Kappa</th><th>Medallion</th></tr>
+    <tr><td>Pipelines</td><td>Two (batch + stream)</td><td>One (stream)</td><td>One (batch)</td></tr>
+    <tr><td>Complexity</td><td>High</td><td>Medium</td><td>Low</td></tr>
+    <tr><td>Real-time?</td><td>Built-in</td><td>Always</td><td>Optional add-on</td></tr>
+    <tr><td>Best for</td><td>Finance/compliance</td><td>Real-time apps</td><td>Most analytics</td></tr>
+    <tr><td>2025 usage</td><td>Legacy / enterprise</td><td>Streaming-first</td><td>Default modern</td></tr>
+  </table>
+
+  <div class="insight insight-purple">
+    <strong>Modern pattern (2025):</strong> Medallion as the core batch pipeline. Kinesis/Kafka streaming writes directly into Bronze in real-time. Silver and Gold still run as scheduled PySpark jobs. Real-time ingestion + single-codebase simplicity. Best of both worlds.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Silver layer PySpark — the core of Medallion</div>
+    <div class="code"><span class="cm"># Bronze → Silver: clean, validate, enrich</span>
+bronze_df = spark.read.parquet(<span class="cs">"s3://shop/bronze/orders/date=2024-01-15/"</span>)
+
+<span class="cm"># 1. Cast types</span>
+typed = bronze_df.withColumn(<span class="cs">"amount"</span>, col(<span class="cs">"amount"</span>).cast(<span class="cs">"decimal(10,2)"</span>))
+
+<span class="cm"># 2. Separate good from bad rows</span>
+good = typed.filter(col(<span class="cs">"order_id"</span>).isNotNull() & (col(<span class="cs">"amount"</span>) > <span class="cv">0</span>))
+bad  = typed.subtract(good)
+
+<span class="cm"># 3. Deduplicate — keep latest per order_id</span>
+w = Window.partitionBy(<span class="cs">"order_id"</span>).orderBy(desc(<span class="cs">"updated_at"</span>))
+deduped = good.withColumn(<span class="cs">"rn"</span>, row_number().over(w)).filter(col(<span class="cs">"rn"</span>) == <span class="cv">1</span>)
+
+<span class="cm"># 4. Enrich — join with products reference</span>
+products = spark.read.parquet(<span class="cs">"s3://shop/reference/products/"</span>)
+enriched = deduped.join(products, on=<span class="cs">"product_id"</span>, how=<span class="cs">"left"</span>)
+
+<span class="cm"># 5. Route good → Silver, bad → quarantine</span>
+enriched.write.mode(<span class="cs">"append"</span>).partitionBy(<span class="cs">"date"</span>).parquet(<span class="cs">"s3://shop/silver/orders/"</span>)
+bad.write.mode(<span class="cs">"append"</span>).parquet(<span class="cs">"s3://shop/silver/quarantine/orders/"</span>)</div>
+  </div>
+</div>
+
+<!-- ───────────────────────── 04 DATA QUALITY ───────────────────────── -->
+<div class="section s4" id="data-quality">
+  <div class="section-num">04</div>
+  <div class="section-title">Data Quality & Validation</div>
+  <p class="section-lead">Bad data is the most common reason pipelines fail silently. The key insight: never drop bad data — quarantine it with a reason code so you can investigate and reprocess.</p>
+  <div class="divider"></div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title" style="color:var(--red)">1. Completeness</div>
+      <div class="card-body">Are required fields present? Check null rates on critical columns. Alert if null rate exceeds threshold (e.g. >5% on order_id).<br><code style="font-size:11px">isNotNull(), dropna()</code></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--orange)">2. Validity</div>
+      <div class="card-body">Do values match expected format/range? Check: amount > 0, email regex, status in allowed list.<br><code style="font-size:11px">filter(), rlike(), between(), isin()</code></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--purple)">3. Uniqueness</div>
+      <div class="card-body">Are primary keys actually unique? Detect duplicates, keep latest by updated_at using Window function.<br><code style="font-size:11px">row_number().over(Window)</code></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--teal)">4. Consistency</div>
+      <div class="card-body">Do related fields agree? If status="delivered" then delivery_date must exist. Refund ≤ original amount.<br><code style="font-size:11px">when().otherwise()</code></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:rgba(96,165,250,.3)">
+    <div class="card-title" style="color:var(--blue)">5. Freshness — the most commonly forgotten dimension</div>
+    <div class="card-body">Did the data arrive when expected? A pipeline can pass all null checks and still silently process yesterday's data if an upstream system failed. Always check <code>max(event_timestamp)</code> before processing. If more than N hours old, block the pipeline — don't process stale data into your Gold layer.</div>
+    <div class="chips"><span class="chip">max(timestamp)</span><span class="chip">datediff()</span><span class="chip">CloudWatch alarm</span></div>
+  </div>
+
+  <div class="insight insight-red">
+    <strong>Never reject at Bronze. Never drop silently.</strong> Always land raw data first, validate second. If your validation rule was wrong, you can reprocess from Bronze. If you rejected at ingest, the data is gone forever. Bad rows go to <code>s3://bucket/silver/quarantine/</code> with a <code>dq_reason</code> column.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Full validation pipeline — PySpark</div>
+    <div class="code"><span class="cm"># Tag each row with dq_status and dq_reason</span>
+validated = bronze_df.withColumn(<span class="cs">"dq_reason"</span>,
+  when(col(<span class="cs">"order_id"</span>).isNull(), <span class="cs">"null_order_id"</span>)
+  .when(col(<span class="cs">"amount"</span>) <= <span class="cv">0</span>, <span class="cs">"invalid_amount"</span>)
+  .when(~col(<span class="cs">"status"</span>).isin([<span class="cs">"placed"</span>,<span class="cs">"confirmed"</span>,<span class="cs">"delivered"</span>]), <span class="cs">"bad_status"</span>)
+  .when((col(<span class="cs">"status"</span>)==<span class="cs">"delivered"</span>) & col(<span class="cs">"delivery_date"</span>).isNull(), <span class="cs">"delivered_no_date"</span>)
+  .otherwise(<span class="cv">None</span>)
+).withColumn(<span class="cs">"dq_status"</span>,
+  when(col(<span class="cs">"dq_reason"</span>).isNotNull(), <span class="cs">"fail"</span>).otherwise(<span class="cs">"pass"</span>))
+
+silver     = validated.filter(col(<span class="cs">"dq_status"</span>) == <span class="cs">"pass"</span>)
+quarantine = validated.filter(col(<span class="cs">"dq_status"</span>) == <span class="cs">"fail"</span>)
+
+<span class="cm"># Publish quality metrics — block Gold if pass rate too low</span>
+pass_rate = silver.count() / bronze_df.count() * <span class="cv">100</span>
+<span class="ck">if</span> pass_rate < <span class="cv">95</span>:
+    <span class="ck">raise</span> Exception(<span class="cs">f"Quality check failed: {pass_rate:.1f}% — halting Gold job"</span>)</div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Blocking checks</div>
+      <div class="card-body">Halt the pipeline on failure. Use for: freshness too old, completeness null rate >10%, zero rows received. Bad data must not reach Gold.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Non-blocking checks</div>
+      <div class="card-body">Log + alert but continue. Use for: soft business rules where partial data is better than no data. Flag the issue, let the pipeline proceed.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ───────────────────────── 05 SPARK ───────────────────────── -->
+<div class="section s5" id="spark">
+  <div class="section-num">05</div>
+  <div class="section-title">Spark Performance Tuning</div>
+  <p class="section-lead">The golden rule: diagnose before you tune. 90% of Spark problems are code problems, not resource problems. More machines won't fix data skew.</p>
+  <div class="divider"></div>
+
+  <div class="insight insight-blue">
+    <strong>Diagnose first:</strong> open Spark UI (port 4040 on driver, or EMR Application History). Find the slow stage. Check: (1) task duration distribution — is one task taking 100× longer? That's skew. (2) shuffle bytes — are they huge? That's expensive joins. (3) spill to disk? Need more executor memory.
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num" style="background:rgba(248,113,113,.15);color:var(--red)">1</div>
+      <div class="step-body">
+        <div class="step-title" style="color:var(--red)">Data Skew — one task takes 100× longer than others</div>
+        <div class="step-desc">One key has far more rows than others (e.g. 70% of rows have country_code="IN"). All assigned to one task. That task runs for 45 minutes while 199 others finish in 10 seconds.<br><br>
+        <strong>Fix 1 (try first):</strong> Enable AQE — <code>spark.sql.adaptive.skewJoin.enabled=true</code> — splits skewed partitions automatically.<br>
+        <strong>Fix 2:</strong> Broadcast join — if the smaller table is under 100MB, <code>broadcast(small_df)</code> — no shuffle at all.<br>
+        <strong>Fix 3 (nuclear):</strong> Salting — append random suffix (0-9) to skewed key, explode other table with same range, join on salted key. Splits one hot partition into 10.
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:rgba(251,191,36,.15);color:var(--gold)">2</div>
+      <div class="step-body">
+        <div class="step-title" style="color:var(--gold)">Excessive Shuffle — massive data movement across network</div>
+        <div class="step-desc">groupBy, join, repartition all trigger shuffles. A shuffle on 500GB moves 500GB across the network between stages.<br><br>
+        <strong>Fix 1:</strong> Broadcast joins for any table under 100MB — eliminates entire shuffle stage.<br>
+        <strong>Fix 2:</strong> Pre-aggregate before joining — reduce data volume before the shuffle.<br>
+        <strong>Fix 3:</strong> Increase <code>spark.sql.autoBroadcastJoinThreshold</code> to 100MB.
+        </div>
+        <div class="code" style="margin-top:10px"><span class="cm"># Bad: SortMergeJoin shuffles both tables</span>
+orders.join(products, on=<span class="cs">"product_id"</span>)
+
+<span class="cm"># Good: BroadcastHashJoin — products sent to all executors, no shuffle</span>
+orders.join(broadcast(products), on=<span class="cs">"product_id"</span>)</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:rgba(167,139,250,.15);color:var(--purple)">3</div>
+      <div class="step-body">
+        <div class="step-title" style="color:var(--purple)">Wrong Partition Count — idle cores or scheduling overhead</div>
+        <div class="step-desc">Too few partitions: 4 partitions on a 16-core cluster leaves 12 cores idle. Too many partitions: 50,000 tiny partitions means more scheduling overhead than actual work.<br><br>
+        <strong>Target:</strong> 128–256MB per partition. Formula: total data size (MB) ÷ 128 = good partition count.<br>
+        <strong>repartition(n):</strong> full shuffle, balanced. Use to increase partitions or rebalance skewed data.<br>
+        <strong>coalesce(n):</strong> no shuffle, cheap. Use only to reduce partitions (e.g. before writing to S3 to avoid small files).
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:rgba(45,212,191,.15);color:var(--teal)">4</div>
+      <div class="step-body">
+        <div class="step-title" style="color:var(--teal)">Reading Too Much Data — full table scan when you need 1 day</div>
+        <div class="step-desc">Job reads 10TB from S3 but only processes 50GB. Caused by: no partition filter (Spark scans every folder), selecting all columns when you need 3.<br><br>
+        <strong>Fix 1:</strong> Always filter on partition column early — <code>filter(col("date") == "2024-01-15")</code> before any joins.<br>
+        <strong>Fix 2:</strong> Select only needed columns immediately — Parquet only reads selected columns, zero I/O for others.<br>
+        <strong>Fix 3:</strong> Verify with <code>df.explain(True)</code> — look for "PushedFilters" in FileScan output.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Key Spark config settings for EMR</div>
+    <div class="code"><span class="ck">spark</span> = SparkSession.builder
+  .config(<span class="cs">"spark.sql.adaptive.enabled"</span>, <span class="cs">"true"</span>)               <span class="cm"># AQE — enable always</span>
+  .config(<span class="cs">"spark.sql.adaptive.coalescePartitions.enabled"</span>, <span class="cs">"true"</span>) <span class="cm"># auto-tune partitions</span>
+  .config(<span class="cs">"spark.sql.adaptive.skewJoin.enabled"</span>, <span class="cs">"true"</span>)          <span class="cm"># auto-fix skew</span>
+  .config(<span class="cs">"spark.sql.shuffle.partitions"</span>, <span class="cs">"400"</span>)                  <span class="cm"># tune to data size</span>
+  .config(<span class="cs">"spark.sql.autoBroadcastJoinThreshold"</span>, <span class="cs">"52428800"</span>)      <span class="cm"># 50MB broadcast</span>
+  .config(<span class="cs">"spark.executor.memory"</span>, <span class="cs">"16g"</span>)
+  .config(<span class="cs">"spark.executor.cores"</span>, <span class="cs">"4"</span>)                              <span class="cm"># 4-5 max for S3</span>
+  .config(<span class="cs">"spark.dynamicAllocation.enabled"</span>, <span class="cs">"true"</span>)               <span class="cm"># scale up/down</span>
+  .getOrCreate()</div>
+  </div>
+
+  <div class="insight">
+    <strong>AQE is the single most impactful config change.</strong> Adaptive Query Execution (Spark 3.0+, EMR 6.x) automatically coalesces small shuffle partitions, handles skew joins, and switches join strategies at runtime. Enabling it alone can halve job duration on skewed workloads.
+  </div>
+</div>
+
+<!-- ───────────────────────── 06 EVENT-DRIVEN ───────────────────────── -->
+<div class="section s6" id="event-driven">
+  <div class="section-num">06</div>
+  <div class="section-title">Event-Driven Pipelines — Kafka & Kinesis</div>
+  <p class="section-lead">In traditional pipelines, you pull data on a schedule. In event-driven design, data pushes itself to you the moment something happens. The producer doesn't know or care who's listening.</p>
+  <div class="divider"></div>
+
+  <div class="flow" style="margin-bottom:20px">
+    <div class="flow-box" style="color:var(--blue)">Order placed</div>
+    <div class="flow-arr">→</div>
+    <div class="flow-box" style="color:var(--accent)">Kafka topic</div>
+    <div class="flow-arr">→</div>
+    <div class="flow-box" style="color:var(--purple)">Fraud detector</div>
+    <div class="flow-arr">+</div>
+    <div class="flow-box" style="color:var(--gold)">Analytics pipeline</div>
+    <div class="flow-arr">+</div>
+    <div class="flow-box" style="color:var(--teal)">Notification service</div>
+  </div>
+
+  <div class="insight insight-blue">
+    <strong>Core principle:</strong> the order service doesn't call fraud, analytics, or notifications directly. It publishes ONE event to Kafka. All consumers subscribe independently. Adding a loyalty points service requires zero changes to the order service. This is loose coupling.
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title" style="color:var(--purple)">Kafka (MSK on AWS)</div>
+      <div class="card-body">
+      <strong>Topics:</strong> named streams (orders, payments, inventory).<br>
+      <strong>Partitions:</strong> unit of parallelism — 12 partitions = 12 parallel consumers.<br>
+      <strong>Partition key:</strong> use order_id as key → all events for same order go to same partition → ordering guaranteed per order.<br>
+      <strong>Consumer groups:</strong> each group has independent offset. Fraud service and analytics service both read the same topic without interfering.<br>
+      <strong>Retention:</strong> configurable, days to forever.
+      </div>
+      <div class="chips"><span class="chip">&lt;5ms latency</span><span class="chip">multi-consumer groups</span><span class="chip">self-managed</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--blue)">Kinesis (AWS native)</div>
+      <div class="card-body">
+      <strong>Shards:</strong> equivalent to partitions — 1MB/s per shard.<br>
+      <strong>Fan-out:</strong> up to 5 consumers per shard, 2MB/s each with enhanced fan-out.<br>
+      <strong>Retention:</strong> default 24hrs, max 365 days (extra cost).<br>
+      <strong>Integration:</strong> native Lambda triggers, Firehose to S3, Glue connectors — no config needed.<br>
+      <strong>Management:</strong> fully managed, zero broker ops.
+      </div>
+      <div class="chips"><span class="chip">~70ms latency</span><span class="chip">AWS-native</span><span class="chip">zero ops</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Manual offset commit — why it matters</div>
+    <div class="code"><span class="ck">consumer</span> = KafkaConsumer(
+  <span class="cs">'payments'</span>,
+  group_id=<span class="cs">'fraud-detector-group'</span>,
+  enable_auto_commit=<span class="cv">False</span>,  <span class="cm"># CRITICAL: commit manually after processing</span>
+)
+
+<span class="ck">for</span> message <span class="ck">in</span> consumer:
+    <span class="ck">try</span>:
+        score = get_fraud_score(message.value)
+        write_to_dynamodb(message.value[<span class="cs">'txn_id'</span>], score)
+        consumer.commit()  <span class="cm"># commit ONLY after successful write</span>
+                           <span class="cm"># if we crash here, Kafka replays this message</span>
+    <span class="ck">except</span> Exception <span class="ck">as</span> e:
+        send_to_dlq(message.value, str(e))  <span class="cm"># dead letter queue</span>
+        consumer.commit()                    <span class="cm"># avoid infinite retry loop</span></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title" style="color:var(--accent)">At-least-once delivery</div>
+      <div class="card-body">Commit offset after processing. If crash before commit → Kafka replays. Event processed at least once, possibly twice. <strong>Your consumer must be idempotent</strong> — use event_id as DynamoDB dedup key. This is the standard choice.</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--purple)">Exactly-once delivery</div>
+      <div class="card-body">Kafka transactions — complex, performance overhead. Use only for financial transactions where duplicates are unacceptable and idempotency is hard. <code>enable.idempotence=true</code> + <code>transactional.id</code>.</div>
+    </div>
+  </div>
+
+  <table class="compare">
+    <tr><th></th><th>Kafka (MSK)</th><th>Kinesis</th></tr>
+    <tr><td>Latency</td><td>&lt;5ms</td><td>~70ms avg</td></tr>
+    <tr><td>Management</td><td>Self-managed topics/groups</td><td>Fully managed</td></tr>
+    <tr><td>Retention</td><td>Days to forever</td><td>Max 365 days</td></tr>
+    <tr><td>Best for</td><td>High throughput, multi-consumer, existing Kafka</td><td>AWS-native, quick start, serverless</td></tr>
+    <tr><td>Choose when</td><td>Need sub-10ms, advanced consumer groups</td><td>Small team, all-in AWS, moderate scale</td></tr>
+  </table>
+</div>
+
+<!-- ───────────────────────── 07 ML PIPELINE ───────────────────────── -->
+<div class="section s7" id="ml-pipeline">
+  <div class="section-num">07</div>
+  <div class="section-title">ML Pipeline: Training to Production</div>
+  <p class="section-lead">Training a model is 20% of the work. The other 80% is getting it to production safely, keeping it accurate, and letting the team iterate quickly.</p>
+  <div class="divider"></div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num" style="background:rgba(74,222,128,.15);color:var(--accent)">1</div>
+      <div class="step-body">
+        <div class="step-title">Feature Store — offline + online</div>
+        <div class="step-desc"><strong>Offline store (S3):</strong> historical features for training. Point-in-time correct joins — features as they were at event time, not today's values.<br>
+        <strong>Online store (DynamoDB):</strong> latest features for serving. Single GetItem call in &lt;5ms. Updated by Spark Streaming after each event.<br>
+        <strong>Why it matters:</strong> the same transformation code populates both stores. This prevents training-serving skew — the silent killer of ML models.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:rgba(96,165,250,.15);color:var(--blue)">2</div>
+      <div class="step-body">
+        <div class="step-title">Model Training — SageMaker + MLflow</div>
+        <div class="step-desc"><strong>Critical:</strong> use time-based train/test split, never random. Random splitting on time-series data lets the model "see" future events during training (data leakage). Train on everything before date X, test on everything after.<br>
+        <strong>MLflow logs:</strong> every training run — parameters, metrics, model artifacts, training dataset reference, Git commit. Enables full reproducibility and rollback.</div>
+        <div class="code" style="margin-top:10px"><span class="ck">with</span> mlflow.start_run():
+    mlflow.log_param(<span class="cs">"training_rows"</span>, len(df))
+    mlflow.log_param(<span class="cs">"training_date"</span>, <span class="cs">"2024-01-15"</span>)
+
+    <span class="cm"># Time-based split — NEVER random for time-series</span>
+    cutoff = <span class="ck">int</span>(len(df) * <span class="cv">0.8</span>)
+    X_train, X_test = X.iloc[:cutoff], X.iloc[cutoff:]
+
+    model.fit(X_train, y_train)
+    auc = roc_auc_score(y_test, model.predict_proba(X_test)[:,<span class="cv">1</span>])
+    mlflow.log_metric(<span class="cs">"auc_roc"</span>, auc)
+
+    <span class="cm"># Only register if better than current production model</span>
+    <span class="ck">if</span> auc > get_production_model_auc() + <span class="cv">0.003</span>:
+        mlflow.sklearn.log_model(model, <span class="cs">"model"</span>)
+        client.transition_model_version_stage(name, version, <span class="cs">"Staging"</span>)</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:rgba(251,191,36,.15);color:var(--gold)">3</div>
+      <div class="step-body">
+        <div class="step-title">Deployment — never auto-deploy to production</div>
+        <div class="step-desc"><strong>Shadow mode:</strong> new model runs on 100% of traffic alongside old model, but results not shown to users. Compare outputs — if 99%+ agreement, safe to promote.<br>
+        <strong>Canary:</strong> 5% of traffic to new model. Monitor CTR, error rate. If metrics equal or better after 24hrs, gradually increase: 5%→25%→50%→100%.<br>
+        <strong>A/B test:</strong> split users (not just traffic) into stable cohorts. Measure business KPIs over 2–4 weeks. Use statistical significance testing before full deploy.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:rgba(248,113,113,.15);color:var(--red)">4</div>
+      <div class="step-body">
+        <div class="step-title">Monitoring + Drift Detection</div>
+        <div class="step-desc"><strong>Data drift:</strong> input feature distributions change. Average order value shifts, null rates spike. Detect with PSI (Population Stability Index) on each feature weekly. Alert if PSI > 0.2.<br>
+        <strong>Concept drift:</strong> relationship between features and labels changes. Users who bought X no longer buy Y. Monitor prediction score distribution weekly.<br>
+        <strong>Business metrics:</strong> the most important signal. Track CTR, conversion, revenue. A model with great AUC but falling CTR means offline metrics don't reflect real behaviour.<br>
+        <strong>Retraining loop:</strong> drift alert → Airflow triggers SageMaker Pipeline → train → evaluate → Staging → human approval → Production.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight insight-red">
+    <strong>Training-serving skew is the silent killer.</strong> If feature engineering code in training differs even slightly from serving — different null handling, different window aggregation — the model underperforms in production with no obvious error. A feature store with a single shared transformation definition prevents this entirely.
+  </div>
+</div>
+
+<!-- ───────────────────────── 08 FRAUD ───────────────────────── -->
+<div class="section s8" id="fraud">
+  <div class="section-num">08</div>
+  <div class="section-title">Case Study: Real-Time Fraud Detection</div>
+  <p class="section-lead">The hardest ML system design — sub-100ms latency, 99.9% uptime, model updates without downtime, and the cost of being wrong in either direction is high.</p>
+  <div class="divider"></div>
+
+  <div class="insight insight-gold">
+    <strong>Core constraint:</strong> 100ms end-to-end. The payment must be approved or blocked before the user sees a response. This budget forces every design decision.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Latency budget — how 100ms is spent</div>
+    <div class="card-body">
+      <div style="margin-bottom:6px"><span style="display:inline-block;width:160px;font-size:12px;color:var(--text2)">Network + API Gateway</span><div class="latbar" style="background:rgba(96,165,250,.3);width:80px;display:inline-block"></div> <span style="font-size:12px;color:var(--blue)">8ms</span></div>
+      <div style="margin-bottom:6px"><span style="display:inline-block;width:160px;font-size:12px;color:var(--text2)">Rule engine (Lambda)</span><div class="latbar" style="background:rgba(74,222,128,.3);width:50px;display:inline-block"></div> <span style="font-size:12px;color:var(--accent)">5ms</span></div>
+      <div style="margin-bottom:6px"><span style="display:inline-block;width:160px;font-size:12px;color:var(--text2)">DynamoDB feature lookup</span><div class="latbar" style="background:rgba(74,222,128,.3);width:100px;display:inline-block"></div> <span style="font-size:12px;color:var(--accent)">10ms</span></div>
+      <div style="margin-bottom:6px"><span style="display:inline-block;width:160px;font-size:12px;color:var(--text2)">SageMaker ML scoring</span><div class="latbar" style="background:rgba(251,191,36,.4);width:400px;max-width:40%;display:inline-block"></div> <span style="font-size:12px;color:var(--gold)">40ms</span></div>
+      <div style="margin-bottom:6px"><span style="display:inline-block;width:160px;font-size:12px;color:var(--text2)">Decision engine</span><div class="latbar" style="background:rgba(74,222,128,.3);width:50px;display:inline-block"></div> <span style="font-size:12px;color:var(--accent)">5ms</span></div>
+      <div><span style="display:inline-block;width:160px;font-size:12px;color:var(--text2)">Buffer remaining</span><div class="latbar" style="background:rgba(167,139,250,.3);width:320px;max-width:30%;display:inline-block"></div> <span style="font-size:12px;color:var(--purple)">32ms</span></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title" style="color:var(--red)">Rule Engine (always first)</div>
+      <div class="card-body">Hardcoded rules. Zero ML compute. &lt;5ms.<br><br>
+      • Velocity: &gt;5 transactions in 1 hour<br>
+      • Impossible travel: &gt;500km in &lt;60min<br>
+      • Blocklisted card or merchant<br>
+      • Amount &gt;10× user's 30-day average<br>
+      • New device + new merchant + high amount<br><br>
+      Hard block on: impossible travel, blocklisted card. ML not consulted.</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--blue)">ML Model (XGBoost)</div>
+      <div class="card-body">Catches subtle patterns rules miss. Features pre-computed in DynamoDB.<br><br>
+      Score ≥ 0.85 → Block<br>
+      Score 0.5–0.85 → Approve + flag for review<br>
+      Score 0.3–0.5 + rules → Low priority review<br>
+      Score &lt; 0.3 → Approve silently (~95% of all txns)<br><br>
+      Storage writes are async — non-blocking after response sent.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Key features fed to the model</div>
+    <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div><strong style="color:var(--red)">Real-time (computed now):</strong><br>
+      Amount, merchant category, time of day, distance from last transaction, time since last transaction, is new merchant for this user</div>
+      <div><strong style="color:var(--blue)">Historical (DynamoDB lookup):</strong><br>
+      Avg spend 7d/30d, transaction count last 1hr, distinct merchants 24hr, account age, previous fraud flags, KYC level, chargeback history</div>
+    </div>
+  </div>
+
+  <div class="insight insight-red">
+    <strong>Fail open, not closed.</strong> If the ML endpoint goes down, fall back to rules-only and approve anything the rules don't catch. A blocked legitimate payment destroys customer trust instantly. A missed fraud transaction is a recoverable financial loss. Exception: impossible travel and blocklisted cards always block regardless of system state.
+  </div>
+
+  <div class="insight insight-gold">
+    <strong>The class imbalance problem:</strong> only 0.1–0.5% of transactions are fraud. A model predicting "legitimate" for everything would be 99.9% accurate but useless. Never use accuracy. Use AUC-ROC, precision-recall, and F1. Oversample fraud cases or undersample legitimate ones during training to balance the dataset.
+  </div>
+</div>
+
+<!-- ───────────────────────── 09 RECS ───────────────────────── -->
+<div class="section s9" id="recommendations">
+  <div class="section-num">09</div>
+  <div class="section-title">Case Study: Netflix-Style Recommendations</div>
+  <p class="section-lead">200M users, 15,000 titles, 200ms to load the homepage. The core insight: pre-compute candidates in batch, re-rank in real-time using the last 5 minutes of session context.</p>
+  <div class="divider"></div>
+
+  <div class="insight insight-blue">
+    <strong>Why not score all 15,000 titles in real-time?</strong> Deep ranking model on 15,000 titles × 200M users × 50 requests/day = 150 trillion model calls/day. Impossible. Solution: two-stage funnel — fast retrieval narrows 15,000 → 500 offline, precise ranker scores 500 in real-time.
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num" style="background:rgba(248,113,113,.15);color:var(--red)">1</div>
+      <div class="step-body">
+        <div class="step-title">Candidate Generation — ANN on embeddings <span class="badge badge-blue">15,000 → 500</span></div>
+        <div class="step-desc">Two-tower neural network produces a 128-dim embedding for every user and title. FAISS HNSW index stores all 15,000 title embeddings. ANN search finds the 500 most similar titles to the user's embedding in &lt;10ms. Runs offline nightly, results stored per user in DynamoDB.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:rgba(251,191,36,.15);color:var(--gold)">2</div>
+      <div class="step-body">
+        <div class="step-title">Ranking — precise scoring at request time <span class="badge badge-gold">500 → 100</span></div>
+        <div class="step-desc">For each of the 500 candidates, XGBoost predicts P(user watches this title | user features + title features + context). Features: watch history, time of day, device, title genre/popularity, user-title affinity score. Includes session context — what the user watched 5 minutes ago.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:rgba(74,222,128,.15);color:var(--accent)">3</div>
+      <div class="step-body">
+        <div class="step-title">Business Rules + Diversity <span class="badge badge-green">100 → 40</span></div>
+        <div class="step-desc">Remove watched titles (last 30 days). Max 3 titles per genre in top 10. Boost new releases and expiring licensed content. Apply parental controls and regional restrictions. In-memory, &lt;5ms, no ML needed.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title" style="color:var(--purple)">Embeddings — user and item</div>
+      <div class="card-body"><strong>User embedding (128-dim):</strong> watch history, genres, ratings, time-of-day patterns. Updated daily via PySpark batch.<br><br>
+      <strong>Item embedding (128-dim):</strong> genre, cast, director, NLP synopsis, viewing patterns across all users. Updated weekly.<br><br>
+      Users and titles that are "similar" have vectors that are close in the 128-dim space. Finding candidates = nearest neighbour search.</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--red)">Cold Start Problem</div>
+      <div class="card-body"><strong>New user:</strong> show onboarding (pick 3 genres). Map to content-based embedding. Blend content (60%) + collaborative (40%). Improves over first 2 weeks.<br><br>
+      <strong>New title:</strong> content-based embedding from metadata. Inherit collaborative embedding from 5 most similar existing titles. Show to 1% of matched users to collect signal (exploration budget).</div>
+    </div>
+  </div>
+
+  <div class="insight insight-purple">
+    <strong>Filter bubble prevention:</strong> diversity rules enforce genre breadth. "Something different" row has an explicit diversity budget. Novelty bonus in ranker gives small score boost to content unlike the user's recent 10 watches. Short-term CTR goes up with filter bubbles — but 30-day retention goes down. Always measure retention, not just CTR.
+  </div>
+
+  <blockquote><strong>Interview answer on metrics:</strong> "I'd never use accuracy — the dataset is 99.9% legitimate. Use AUC-ROC for offline eval. For production, A/B test CTR, watch start rate, and 30-day retention on stable user cohorts over 2 weeks. The correlation between offline AUC improvement and online CTR improvement tells you whether your evaluation setup is trustworthy."</blockquote>
+</div>
+
+<!-- ───────────────────────── 10 SEMANTIC SEARCH ───────────────────────── -->
+<div class="section s10" id="semantic-search">
+  <div class="section-num">10</div>
+  <div class="section-title">Case Study: Semantic Product Search</div>
+  <p class="section-lead">Traditional search matches keywords. Semantic search matches meaning. A user searching "comfortable shoes for standing all day" should find "orthopedic sneakers with memory foam" — zero word overlap.</p>
+  <div class="divider"></div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Keyword search fails on</div>
+      <div class="card-body">• "sofa" ≠ "couch" (synonyms)<br>• "gift for 5-year-old" → 0 results (intent)<br>• "runing shoes" (typos)<br>• "comfortable work shoes" (descriptive)<br><br>
+      <strong>Good for:</strong> "Samsung Galaxy S24 128GB Black", "SKU-48291-XL-RED" (exact codes)</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Semantic search handles all of these</div>
+      <div class="card-body">• "sofa" → couch, settee, loveseat ✓<br>• "gift for 5-year-old" → toys, books, LEGO ✓<br>• "runing shoes" → running shoes ✓<br>• "comfortable work shoes" → anti-fatigue clogs ✓<br><br>
+      <strong>Fails on:</strong> product codes and SKUs (no semantics in a code)</div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Critical rule — same model for queries and products.</strong> If you embed products with model A and queries with model B, the vectors live in different spaces — cosine similarity is meaningless. Always use the same model for both. When you upgrade the model, re-embed all 10M products before going live.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Query pipeline — 100ms end-to-end</div>
+    <div class="steps" style="padding:0">
+      <div class="step" style="padding:10px 0">
+        <div class="step-num" style="background:rgba(167,139,250,.15);color:var(--purple);font-size:10px">1</div>
+        <div class="step-body"><div class="step-title" style="font-size:12px">Query understanding — detect intent <span class="badge badge-purple">&lt;5ms</span></div><div class="step-desc" style="font-size:12px">Product code? → weight keyword. Natural language? → weight semantic. Extract embedded filters ("red dress under 2000").</div></div>
+      </div>
+      <div class="step" style="padding:10px 0">
+        <div class="step-num" style="background:rgba(74,222,128,.15);color:var(--accent);font-size:10px">2</div>
+        <div class="step-body"><div class="step-title" style="font-size:12px">Embed query <span class="badge badge-green">&lt;20ms</span></div><div class="step-desc" style="font-size:12px">sentence-transformers/all-MiniLM → 768-dim vector. Same model, same preprocessing as products.</div></div>
+      </div>
+      <div class="step" style="padding:10px 0">
+        <div class="step-num" style="background:rgba(96,165,250,.15);color:var(--blue);font-size:10px">3</div>
+        <div class="step-body"><div class="step-title" style="font-size:12px">ANN search in FAISS <span class="badge badge-blue">&lt;10ms</span></div><div class="step-desc" style="font-size:12px">HNSW index, 10M product vectors in memory. Returns 200 nearest products by cosine similarity.</div></div>
+      </div>
+      <div class="step" style="padding:10px 0">
+        <div class="step-num" style="background:rgba(251,191,36,.15);color:var(--gold);font-size:10px">4</div>
+        <div class="step-body"><div class="step-title" style="font-size:12px">Cross-encoder re-rank <span class="badge badge-gold">&lt;30ms</span></div><div class="step-desc" style="font-size:12px">Sees query + product together. Much more accurate than bi-encoder dot product. Scores all 200 candidates.</div></div>
+      </div>
+      <div class="step" style="padding:10px 0;border-bottom:none">
+        <div class="step-num" style="background:rgba(45,212,191,.15);color:var(--teal);font-size:10px">5</div>
+        <div class="step-body"><div class="step-title" style="font-size:12px">Personalisation + rules → top 20 <span class="badge badge-teal">&lt;5ms</span></div><div class="step-desc" style="font-size:12px">Boost user's past categories, in-stock, high-rated. Diversity rules: max 4 per brand. Return with facets.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Hybrid search — Reciprocal Rank Fusion</div>
+    <div class="code"><span class="cm"># Merge keyword (BM25) + semantic (ANN) results</span>
+<span class="cm"># alpha controls weighting: 0.8 = mostly semantic, 0.2 = mostly keyword</span>
+
+<span class="ck">def</span> rrf(keyword_results, semantic_results, k=<span class="cv">60</span>, alpha=<span class="cv">0.5</span>):
+    scores = {}
+    <span class="ck">for</span> rank, p <span class="ck">in</span> enumerate(keyword_results, start=<span class="cv">1</span>):
+        scores[p[<span class="cs">'id'</span>]] = scores.get(p[<span class="cs">'id'</span>], <span class="cv">0</span>) + (<span class="cv">1</span>-alpha) * (<span class="cv">1</span>/(k+rank))
+    <span class="ck">for</span> rank, p <span class="ck">in</span> enumerate(semantic_results, start=<span class="cv">1</span>):
+        scores[p[<span class="cs">'id'</span>]] = scores.get(p[<span class="cs">'id'</span>], <span class="cv">0</span>) + alpha * (<span class="cv">1</span>/(k+rank))
+    <span class="ck">return</span> sorted(scores, key=scores.get, reverse=<span class="cv">True</span>)
+
+<span class="cm"># Detect query type for dynamic alpha</span>
+<span class="ck">def</span> detect_alpha(query):
+    <span class="ck">if</span> re.match(<span class="cs">r'^[A-Z0-9\-]{5,}$'</span>, query.upper()): <span class="ck">return</span> <span class="cv">0.1</span>  <span class="cm"># product code</span>
+    <span class="ck">elif</span> len(query.split()) > <span class="cv">4</span>: <span class="ck">return</span> <span class="cv">0.8</span>                     <span class="cm"># natural language</span>
+    <span class="ck">else</span>: <span class="ck">return</span> <span class="cv">0.5</span>                                               <span class="cm"># balanced</span></div>
+  </div>
+
+  <div class="insight insight-blue">
+    <strong>Bi-encoder vs Cross-encoder:</strong> bi-encoder embeds query and document independently — fast because product embeddings are pre-computed. Cross-encoder sees query + document together — much more accurate but too slow for 10M products. Solution: bi-encoder for retrieval (10M → 200), cross-encoder for re-ranking (200 → 20). This is the same two-stage funnel as Netflix recommendations.
+  </div>
+
+  <div class="insight insight-teal">
+    <strong>This IS the RAG architecture.</strong> Semantic search's vector index + ANN retrieval is identical to the retrieval component of every RAG (Retrieval-Augmented Generation) system. The only difference: search returns results directly to the user; RAG passes them to an LLM as context. Understanding semantic search means you understand how every modern LLM-based system retrieves information.
+  </div>
+</div>
+
+<!-- ───────────────────────── 11 AWS PLATFORM ───────────────────────── -->
+<div class="section s11" id="aws-platform">
+  <div class="section-num">11</div>
+  <div class="section-title">Full AWS Platform Blueprint</div>
+  <p class="section-lead">Every service mapped to its role. One platform, four use cases — fraud detection, analytics, recommendations, semantic search. Built once, used by all.</p>
+  <div class="divider"></div>
+
+  <table class="compare">
+    <tr><th>Layer</th><th>Service</th><th>Role</th><th>Why not X?</th></tr>
+    <tr><td><strong style="color:var(--accent)">Ingestion</strong></td><td>Kinesis Data Streams</td><td>Real-time event streaming</td><td>vs Kafka MSK: fully managed, AWS-native, zero broker ops</td></tr>
+    <tr><td><strong style="color:var(--accent)">Ingestion</strong></td><td>Kinesis Firehose</td><td>Auto-deliver stream → S3</td><td>Zero code — buffers, converts to Parquet, delivers. Built-in.</td></tr>
+    <tr><td><strong style="color:var(--blue)">Storage</strong></td><td>S3 (3 buckets)</td><td>Bronze / Silver / Gold lake</td><td>$23/TB/month. Infinite scale. Native EMR/Athena/Redshift integration.</td></tr>
+    <tr><td><strong style="color:var(--blue)">Storage</strong></td><td>Glue Catalog</td><td>Schema registry for S3</td><td>Makes S3 Parquet queryable as SQL tables from any service.</td></tr>
+    <tr><td><strong style="color:var(--blue)">Storage</strong></td><td>DynamoDB</td><td>Low-latency serving store</td><td>Single-digit ms reads. TTL for auto-expiry. Feature store + rec cache.</td></tr>
+    <tr><td><strong style="color:var(--purple)">Processing</strong></td><td>EMR (PySpark)</td><td>Batch + streaming jobs</td><td>Managed Spark. Auto-scaling. vs Glue: more control for complex jobs.</td></tr>
+    <tr><td><strong style="color:var(--purple)">Processing</strong></td><td>Redshift + Spectrum</td><td>Analytics warehouse</td><td>Spectrum queries S3 directly — no COPY needed for historical data.</td></tr>
+    <tr><td><strong style="color:var(--gold)">ML</strong></td><td>SageMaker Training</td><td>Managed model training</td><td>Spin up any instance, train, shut down. Integrated S3 + MLflow.</td></tr>
+    <tr><td><strong style="color:var(--gold)">ML</strong></td><td>SageMaker Endpoints</td><td>Real-time inference</td><td>Auto-scaling, blue/green deployment, p99 SLA monitoring built-in.</td></tr>
+    <tr><td><strong style="color:var(--red)">Serving</strong></td><td>OpenSearch</td><td>Hybrid BM25 + kNN search</td><td>Only AWS-managed service doing keyword + vector search in one query.</td></tr>
+    <tr><td><strong style="color:var(--red)">Serving</strong></td><td>ElastiCache (Redis)</td><td>Result + feature cache</td><td>Sub-ms reads. Popular queries cached. Absorbs spike traffic.</td></tr>
+    <tr><td><strong style="color:var(--red)">Serving</strong></td><td>QuickSight</td><td>BI dashboards</td><td>Connects to Redshift Gold layer. No extra ETL for analysts.</td></tr>
+    <tr><td><strong style="color:var(--teal)">Orchestration</strong></td><td>MWAA (Airflow)</td><td>Pipeline scheduling</td><td>DAGs, retries, alerts. Managed — no scheduler to self-host.</td></tr>
+    <tr><td><strong style="color:var(--teal)">Orchestration</strong></td><td>CloudWatch + SNS</td><td>Metrics + alerting</td><td>Native AWS metrics from every service. Custom pipeline quality metrics.</td></tr>
+  </table>
+
+  <div class="card">
+    <div class="card-title">Four use cases on one platform</div>
+    <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <strong style="color:var(--red)">Fraud Detection (&lt;100ms)</strong><br>
+        Order event → Kinesis → Lambda rules (&lt;5ms) → DynamoDB feature lookup (&lt;10ms) → SageMaker XGBoost (&lt;40ms) → decision → async write to S3 Bronze
+      </div>
+      <div>
+        <strong style="color:var(--purple)">Analytics (nightly)</strong><br>
+        Airflow 2am → EMR Bronze→Silver (&lt;45min) → EMR Silver→Gold (&lt;30min) → Redshift COPY → QuickSight refresh by 6am
+      </div>
+      <div>
+        <strong style="color:var(--accent)">Recommendations</strong><br>
+        Weekly: SageMaker trains two-tower model. Nightly: Batch Transform pre-computes 500 candidates/user → DynamoDB. At request: 5ms lookup + 40ms ranker = &lt;50ms
+      </div>
+      <div>
+        <strong style="color:var(--blue)">Semantic Search (&lt;100ms)</strong><br>
+        Nightly: SageMaker embeds 10M products → OpenSearch index. At query: embed query (&lt;20ms) → OpenSearch hybrid search (&lt;20ms) → cross-encoder re-rank (&lt;30ms)
+      </div>
+    </div>
+  </div>
+
+  <div class="insight insight-gold">
+    <strong>Cost optimisation order:</strong> (1) S3 Intelligent-Tiering — old Bronze to Glacier at $0.004/GB vs $0.023/GB. (2) EMR Spot instances for batch jobs — 60–70% cheaper. (3) SageMaker endpoint auto-scaling to zero for non-critical models. (4) DynamoDB: switch to provisioned capacity once patterns are stable — saves 40–60% vs on-demand.
+  </div>
+</div>
+
+<!-- ───────────────────────── 12 INTERVIEW FRAMEWORK ───────────────────────── -->
+<div class="section s12" id="interview">
+  <div class="section-num">12</div>
+  <div class="section-title">Interview Framework</div>
+  <p class="section-lead">A systematic method for any pipeline design question. Interviewers aren't testing whether your design is perfect — they're testing whether you think like an engineer.</p>
+  <div class="divider"></div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num" style="background:rgba(74,222,128,.15);color:var(--accent)">1</div>
+      <div class="step-body">
+        <div class="step-title">Clarify requirements <span class="badge badge-green">2–3 min</span></div>
+        <div class="step-desc">Never skip this. Ask: batch or real-time? Data volume (GB/day or TB/day)? How fresh does output need to be? Who consumes it — analysts, ML, dashboards? What if the pipeline fails — is data loss acceptable? Expected growth in 6 months?<br><br>
+        <strong>Say:</strong> "Before I start designing, can I ask a few questions? Is the primary use case real-time or batch? What's the approximate data volume? And how stale is too stale for the output?"</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:rgba(96,165,250,.15);color:var(--blue)">2</div>
+      <div class="step-body">
+        <div class="step-title">Estimate scale <span class="badge badge-blue">2 min</span></div>
+        <div class="step-desc">Numbers anchor every decision. Calculate: events/second at peak (drives streaming vs batch), daily data in GB/TB (drives storage and compute), number of concurrent readers (drives serving layer).<br><br>
+        <strong>Say:</strong> "1M users × 10 events/day = 10M events/day = ~115 events/second. At 5KB each, that's ~50GB/day. That tells me we can use batch — 50GB/day doesn't justify streaming unless the latency requirement demands it."</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:rgba(251,191,36,.15);color:var(--gold)">3</div>
+      <div class="step-body">
+        <div class="step-title">High-level design — source → process → serve <span class="badge badge-gold">5–8 min</span></div>
+        <div class="step-desc">Use the three-layer framing out loud: ingestion (Kinesis + Firehose), processing (EMR PySpark), serving (Redshift Spectrum + Athena). This maps naturally to Medallion architecture which most interviewers will recognise.<br><br>
+        <strong>Say:</strong> "I'd structure this as three layers. Ingestion — events via Kinesis land raw in S3. Processing — PySpark on EMR validates, cleans, aggregates. Serving — Redshift Spectrum queries Parquet directly so analysts get SQL without data duplication."</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:rgba(167,139,250,.15);color:var(--purple)">4</div>
+      <div class="step-body">
+        <div class="step-title">Deep dive — pick 2 components <span class="badge badge-purple">5–8 min</span></div>
+        <div class="step-desc">Don't wait to be asked. Pick two components yourself and go deep — schema and partitioning strategy, data quality rules, fault tolerance, scaling story.<br><br>
+        <strong>Say:</strong> "Let me go deeper on two areas. First, S3 partitioning — I'd partition by date then region, so 'sales in Mumbai last week' opens 7 folders not 3 years of data. Second, data quality — validation between Bronze and Silver with quarantine for bad rows and a CloudWatch alarm that blocks the Gold job if pass rate drops below 95%."</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num" style="background:rgba(248,113,113,.15);color:var(--red)">5</div>
+      <div class="step-body">
+        <div class="step-title">Trade-offs — name what you gave up <span class="badge badge-red">2–3 min</span></div>
+        <div class="step-desc">Naming trade-offs unprompted is the single biggest signal of seniority. Every choice has a cost — say what it is.<br><br>
+        <strong>Say:</strong> "I chose Medallion over Lambda because it's one codebase for a small team with no hard real-time requirement. The downside is our Gold layer is up to 1 hour old. If the business later needs real-time metrics, I'd add Kinesis writing into Bronze — Silver and Gold jobs stay unchanged. I'd also highlight that Redshift Spectrum is slower than native Redshift for the most frequent queries — if dashboards start timing out, we'd load those specific tables into Redshift proper."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="tagline">COMMON MISTAKES TO AVOID</div>
+
+  <div class="grid-2">
+    <div class="card" style="border-color:rgba(248,113,113,.3)">
+      <div class="card-title" style="color:var(--red)">❌ Don't do this</div>
+      <div class="card-body">
+      • Jump into architecture without clarifying<br>
+      • Say "use streaming" without justifying why<br>
+      • Design only the happy path<br>
+      • Say "add more machines" when asked to scale<br>
+      • Drop bad data with filter() silently<br>
+      • Design in silence with no commentary<br>
+      • Pick one architecture without acknowledging alternatives<br>
+      • Forget orchestration and monitoring
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(74,222,128,.3)">
+      <div class="card-title" style="color:var(--accent)">✓ Do this instead</div>
+      <div class="card-body">
+      • Spend 2 min on requirements — it's free marks<br>
+      • Justify every choice: "I chose X because Y"<br>
+      • Proactively cover failure modes<br>
+      • Check Spark UI first, diagnose, then fix<br>
+      • Quarantine bad rows with dq_reason column<br>
+      • Think out loud — reasoning is what's scored<br>
+      • Name the alternatives you rejected and why<br>
+      • Always mention Airflow scheduling + CloudWatch alerts
+      </div>
+    </div>
+  </div>
+
+  <div class="tagline" style="margin-top:24px">DECISION MAPS</div>
+
+  <table class="compare">
+    <tr><th>Situation</th><th>Choose</th><th>Reasoning</th></tr>
+    <tr><td>Real-time + historical accuracy, large team</td><td><span class="badge badge-purple">Lambda</span></td><td>Need both paths, team can maintain two codebases</td></tr>
+    <tr><td>Primarily real-time, small team</td><td><span class="badge badge-green">Kappa</span></td><td>One codebase, replay from Kinesis log</td></tr>
+    <tr><td>Batch analytics, data quality critical</td><td><span class="badge badge-gold">Medallion</span></td><td>Simplest, one codebase, most widely used in 2025</td></tr>
+    <tr><td>Real-time ingest + batch analytics</td><td><span class="badge badge-gold">Medallion + streaming → Bronze</span></td><td>Stream to Bronze, keep Silver/Gold as batch jobs</td></tr>
+    <tr><td>Need SQL on large S3 data, cost-sensitive</td><td><span class="badge badge-blue">Lakehouse (Spectrum/Athena)</span></td><td>No data duplication, pay per query</td></tr>
+    <tr><td>Sub-second ML inference</td><td><span class="badge badge-red">SageMaker endpoint</span></td><td>Managed, auto-scaling, blue/green built-in</td></tr>
+    <tr><td>10M+ users, recommendations</td><td><span class="badge badge-teal">Batch pre-compute + DynamoDB</span></td><td>5ms lookup beats real-time scoring at scale</td></tr>
+    <tr><td>Product search with natural language</td><td><span class="badge badge-purple">Hybrid: OpenSearch BM25 + kNN</span></td><td>Keyword for codes, semantic for intent</td></tr>
+  </table>
+
+  <div class="tagline" style="margin-top:24px">KEY NUMBERS TO REMEMBER</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-body" style="font-family:'DM Mono',monospace;font-size:12px;line-height:2">
+      S3 storage: <span style="color:var(--accent)">~$23/TB/month</span><br>
+      Redshift: <span style="color:var(--blue)">~$250/TB/month</span><br>
+      DynamoDB GetItem: <span style="color:var(--accent)">&lt;5ms</span><br>
+      Spark partition target: <span style="color:var(--gold)">128–256MB</span><br>
+      Broadcast join threshold: <span style="color:var(--purple)">up to 100MB</span><br>
+      Kinesis retention: <span style="color:var(--blue)">default 24hr, max 365d</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body" style="font-family:'DM Mono',monospace;font-size:12px;line-height:2">
+      Fraud detection budget: <span style="color:var(--red)">&lt;100ms total</span><br>
+      SageMaker ML scoring: <span style="color:var(--gold)">~40ms</span><br>
+      Homepage load (Netflix): <span style="color:var(--blue)">&lt;200ms</span><br>
+      ANN search (FAISS 10M): <span style="color:var(--accent)">&lt;10ms</span><br>
+      Quality gate threshold: <span style="color:var(--gold)">&gt;95% pass rate</span><br>
+      Fraud rate in dataset: <span style="color:var(--red)">0.1–0.5% (imbalanced)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight" style="margin-top:20px">
+    <strong>The one-sentence framework for every trade-off question:</strong> "It depends on [factor]. If [condition A], I'd choose [option 1] because [reason]. If [condition B], I'd choose [option 2] because [reason]." This structure shows you understand architecture is contextual, not dogmatic. That reasoning is what separates senior-level answers from junior ones.
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  <strong>Data & AI Engineering Study Guide</strong><br>
+  <span>Batch · Streaming · Medallion · Lambda · Kappa · Kafka · Kinesis · PySpark · SageMaker · MLflow · FAISS · Embeddings · Semantic Search · Fraud Detection · Recommendations</span>
+</footer>
+
+<script>
+// Active nav on scroll
+const sections = document.querySelectorAll('.section');
+const navLinks = document.querySelectorAll('.nav-link');
+
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      const id = e.target.id;
+      navLinks.forEach(l => {
+        l.classList.toggle('active', l.getAttribute('href') === '#'+id);
+      });
+    }
+  });
+}, {rootMargin:'-20% 0px -70% 0px'});
+
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
