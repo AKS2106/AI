@@ -1,0 +1,1365 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans);background:transparent;color:var(--color-text-primary);}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+.nb{padding:6px 13px;border:0.5px solid var(--color-border-secondary);border-radius:20px;background:transparent;color:var(--color-text-secondary);font-size:12px;cursor:pointer;transition:all .15s;}
+.nb:hover{background:var(--color-background-secondary);}
+.nb.on{background:var(--color-background-primary);border-color:var(--color-border-primary);color:var(--color-text-primary);font-weight:500;}
+.tab{display:none;}.tab.on{display:block;}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:14px 18px;margin-bottom:10px;}
+.ch{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.ct{font-size:14px;font-weight:500;}
+.cs{font-size:12px;color:var(--color-text-secondary);margin-top:2px;}
+.ci{margin-left:auto;color:var(--color-text-secondary);font-size:13px;transition:transform .2s;}
+.ci.op{transform:rotate(180deg);}
+.cb{border-top:0.5px solid var(--color-border-tertiary);margin-top:12px;padding-top:12px;display:none;}
+.cb.op{display:block;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.mc{background:var(--color-background-secondary);border-radius:8px;padding:10px 12px;}
+.ml{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px;}
+.mv{font-size:13px;color:var(--color-text-primary);line-height:1.5;}
+.badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:12px;font-weight:500;}
+.b-blue{background:#E6F1FB;color:#185FA5;} .b-teal{background:#E1F5EE;color:#085041;}
+.b-purple{background:#EEEDFE;color:#3C3489;} .b-amber{background:#FAEEDA;color:#633806;}
+.b-coral{background:#FAECE7;color:#712B13;} .b-pink{background:#FBEAF0;color:#72243E;}
+.b-gray{background:#F1EFE8;color:#444441;} .b-green{background:#EAF3DE;color:#27500A;}
+@media(prefers-color-scheme:dark){
+.b-blue{background:#042C53;color:#B5D4F4;} .b-teal{background:#04342C;color:#9FE1CB;}
+.b-purple{background:#26215C;color:#CECBF6;} .b-amber{background:#412402;color:#FAC775;}
+.b-coral{background:#4A1B0C;color:#F5C4B3;} .b-pink{background:#4B1528;color:#F4C0D1;}
+.b-gray{background:#2C2C2A;color:#D3D1C7;} .b-green{background:#173404;color:#C0DD97;}
+}
+.code{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:10px 12px;font-family:var(--font-mono);font-size:12px;line-height:1.7;white-space:pre-wrap;margin:6px 0;}
+.warn{background:#FAEEDA;color:#633806;border-radius:8px;padding:8px 12px;font-size:12px;margin-top:8px;}
+@media(prefers-color-scheme:dark){.warn{background:#412402;color:#FAC775;}}
+.pill{font-size:12px;padding:3px 10px;border-radius:12px;background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary);display:inline-block;}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.tag{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--color-background-secondary);color:var(--color-text-secondary);font-family:var(--font-mono);display:inline-block;}
+.tags{display:flex;flex-wrap:wrap;gap:5px;}
+.srow{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+.srow:last-child{border-bottom:none;}
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:14px 0;}
+.step{display:flex;gap:10px;margin-bottom:10px;}
+.sn{width:22px;height:22px;border-radius:50%;background:var(--color-background-secondary);color:var(--color-text-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;margin-top:1px;}
+.sd{font-size:12px;color:var(--color-text-secondary);line-height:1.5;}
+.iq::before{content:"Q: ";color:var(--color-text-secondary);font-weight:500;}
+.iq{font-size:12px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);line-height:1.5;}
+.iq:last-child{border-bottom:none;}
+.rb::before{content:"▸ ";color:var(--color-text-secondary);}
+.rb{font-size:12px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);line-height:1.5;}
+.rb:last-child{border-bottom:none;}
+.wk{background:var(--color-background-secondary);border-radius:8px;padding:10px 12px;}
+.wn{font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:3px;}
+.wt{font-size:13px;font-weight:500;margin-bottom:2px;}
+.wf{font-size:11px;color:var(--color-text-secondary);margin-bottom:6px;line-height:1.4;}
+.wd{font-size:11px;color:var(--color-text-primary);font-weight:500;}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:8px;}
+h3{font-size:15px;font-weight:500;margin-bottom:14px;}
+</style>
+</head>
+<body>
+<h2 class="sr-only">AI Engineering 6-Month Roadmap — complete learning path from LLM fundamentals to multi-agent systems</h2>
+
+<div style="padding:1rem 0 0">
+
+<div style="margin-bottom:14px;">
+  <div style="font-size:17px;font-weight:500;">AI Engineering Roadmap — 6 Months</div>
+  <div style="font-size:12px;color:var(--color-text-secondary);margin-top:3px;">CX Operations → AI Engineer · Mac · Free-tier optimized · 6 projects · 24 weeks</div>
+</div>
+
+<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;margin-bottom:10px;">
+  <div style="flex:4;background:#185FA5;"></div>
+  <div style="flex:4;background:#0F6E56;"></div>
+  <div style="flex:3;background:#534AB7;"></div>
+  <div style="flex:4;background:#854F0B;"></div>
+  <div style="flex:4;background:#993C1D;"></div>
+  <div style="flex:4;background:#993556;"></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--color-text-secondary);margin-bottom:16px;">
+  <span style="color:#185FA5;font-weight:500;">■ Wk 1–4 Foundations</span>
+  <span style="color:#0F6E56;font-weight:500;">■ Wk 5–8 RAG</span>
+  <span style="color:#534AB7;font-weight:500;">■ Wk 9–12 Adv RAG</span>
+  <span style="color:#854F0B;font-weight:500;">■ Wk 13–16 Agents</span>
+  <span style="color:#993C1D;font-weight:500;">■ Wk 17–20 Workflows</span>
+  <span style="color:#993556;font-weight:500;">■ Wk 21–24 Multi-Agent</span>
+</div>
+
+<nav class="nav">
+  <button class="nb on" onclick="show('setup',this)">🔧 Mac Setup</button>
+  <button class="nb" onclick="show('skills',this)">📚 Skills Map</button>
+  <button class="nb" onclick="show('weekly',this)">📅 Weekly Plan</button>
+  <button class="nb" onclick="show('p1',this)">Project 1</button>
+  <button class="nb" onclick="show('p2',this)">Project 2</button>
+  <button class="nb" onclick="show('p3',this)">Project 3</button>
+  <button class="nb" onclick="show('p4',this)">Project 4</button>
+  <button class="nb" onclick="show('p5',this)">Project 5</button>
+  <button class="nb" onclick="show('p6',this)">Project 6</button>
+  <button class="nb" onclick="show('free',this)">💸 Free Tier</button>
+  <button class="nb" onclick="show('deploy',this)">🚀 Deploy &amp; AWS</button>
+</nav>
+
+<!-- ═══════════════════════ MAC SETUP ═══════════════════════ -->
+<div id="t-setup" class="tab on">
+<h3>Mac Setup From Scratch — Step by Step</h3>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)">
+    <span class="badge b-blue">Step 1</span>
+    <div><div class="ct">Install Core Tools</div><div class="cs">Homebrew · Python 3.11 · Git · VS Code · Docker</div></div>
+    <span class="ci op">▾</span>
+  </div>
+  <div class="cb op">
+    <div class="mc" style="margin-bottom:8px;"><div class="ml">Install Homebrew — Mac package manager (run in Terminal)</div>
+    <div class="code">/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</div></div>
+    <div class="mc" style="margin-bottom:8px;"><div class="ml">Install Python 3.11, Git, Node, VS Code, Docker</div>
+    <div class="code">brew install python@3.11 git node
+brew install --cask visual-studio-code docker
+# Verify
+python3 --version   # should show 3.11.x
+git --version       # 2.x
+docker --version    # 24.x</div></div>
+    <div class="mc"><div class="ml">Install VS Code Extensions (open VS Code → Extensions panel)</div>
+    <div class="pills">
+      <span class="pill">Python (Microsoft)</span>
+      <span class="pill">Pylance</span>
+      <span class="pill">Jupyter</span>
+      <span class="pill">Docker</span>
+      <span class="pill">GitLens</span>
+      <span class="pill">GitHub Copilot (free for students)</span>
+    </div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)">
+    <span class="badge b-teal">Step 2</span>
+    <div><div class="ct">Create Project Folder + Virtual Environment</div><div class="cs">Isolated Python env · All packages in one place</div></div>
+    <span class="ci">▾</span>
+  </div>
+  <div class="cb">
+    <div class="code"># Create your master workspace folder
+mkdir ~/ai-engineering && cd ~/ai-engineering
+
+# Create virtual environment
+python3.11 -m venv venv
+
+# Activate it (run this EVERY time you open a new terminal)
+source venv/bin/activate
+
+# Upgrade pip
+pip install --upgrade pip</div>
+    <div class="mc" style="margin-top:8px;"><div class="ml">Install all packages for the full 6-month journey</div>
+    <div class="code">pip install langchain langchain-community langchain-openai langgraph
+pip install openai anthropic
+pip install chromadb pinecone-client
+pip install fastapi uvicorn streamlit
+pip install sentence-transformers
+pip install boto3 awscli
+pip install ragas
+pip install pytest python-dotenv pydantic httpx
+pip install pandas numpy jupyter rank-bm25</div></div>
+    <div class="warn">💡 Always run <strong>source venv/bin/activate</strong> before coding each day. Your terminal prompt will show (venv) when active.</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)">
+    <span class="badge b-purple">Step 3</span>
+    <div><div class="ct">Get Free API Keys</div><div class="cs">OpenAI · HuggingFace · Pinecone · AWS Free Tier</div></div>
+    <span class="ci">▾</span>
+  </div>
+  <div class="cb">
+    <div class="g2" style="margin-bottom:10px;">
+      <div class="mc"><div class="ml">OpenAI — $5 free credit</div><div class="mv">Go to platform.openai.com → Sign up → API Keys → Create new key<br><span style="font-size:11px;color:var(--color-text-secondary);">Use gpt-4o-mini only ($0.15/1M tokens)</span></div></div>
+      <div class="mc"><div class="ml">HuggingFace — 100% FREE</div><div class="mv">huggingface.co → Settings → Access Tokens → New Token<br><span style="font-size:11px;color:var(--color-text-secondary);">Free inference API for Mistral, Llama models</span></div></div>
+      <div class="mc"><div class="ml">Pinecone — Free tier</div><div class="mv">pinecone.io → Create account → API Keys<br><span style="font-size:11px;color:var(--color-text-secondary);">1 free index, 100k vectors — enough for projects</span></div></div>
+      <div class="mc"><div class="ml">AWS — 12-month free tier</div><div class="mv">aws.amazon.com/free → Create account<br><span style="font-size:11px;color:var(--color-text-secondary);">Set billing alert at $5 immediately after signup</span></div></div>
+    </div>
+    <div class="mc"><div class="ml">Create your .env file (NEVER commit this to GitHub)</div>
+    <div class="code">cd ~/ai-engineering
+touch .env
+echo ".env" >> .gitignore
+
+# Add these lines inside .env using VS Code:
+OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxx
+HUGGINGFACE_API_KEY=hf_xxxxxxxxxxxxxxxx
+PINECONE_API_KEY=xxxxxxxxxxxxxxxx
+PINECONE_ENV=us-east-1-aws
+AWS_ACCESS_KEY_ID=xxxxxxxxxxxxxxxx
+AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxx
+AWS_DEFAULT_REGION=us-east-1</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)">
+    <span class="badge b-amber">Step 4</span>
+    <div><div class="ct">GitHub Portfolio Setup</div><div class="cs">Create account · Configure Git · Push first repo</div></div>
+    <span class="ci">▾</span>
+  </div>
+  <div class="cb">
+    <div class="code"># Configure Git with your details
+git config --global user.name "Your Full Name"
+git config --global user.email "your@email.com"
+
+# Create a new project repo (repeat for each project)
+mkdir cx-ticket-classifier && cd cx-ticket-classifier
+git init
+echo "# CX Ticket Classifier" > README.md
+echo "venv/" >> .gitignore
+echo ".env" >> .gitignore
+echo "__pycache__/" >> .gitignore
+git add .
+git commit -m "initial commit"
+
+# Create repo on github.com, then:
+git remote add origin https://github.com/YOURUSERNAME/cx-ticket-classifier.git
+git push -u origin main</div>
+    <div class="mc" style="margin-top:8px;"><div class="ml">Recommended repo names for portfolio visibility</div>
+    <div class="pills">
+      <span class="pill">cx-ticket-classifier-llm</span>
+      <span class="pill">customer-support-rag</span>
+      <span class="pill">advanced-rag-reranker</span>
+      <span class="pill">cx-autonomous-agent</span>
+      <span class="pill">agentic-workflow-langgraph</span>
+      <span class="pill">enterprise-multiagent-aws</span>
+    </div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)">
+    <span class="badge b-coral">Step 5</span>
+    <div><div class="ct">Generate Test Data</div><div class="cs">500 synthetic customer support tickets — used across all 6 projects</div></div>
+    <span class="ci">▾</span>
+  </div>
+  <div class="cb">
+    <div class="mc" style="margin-bottom:8px;"><div class="ml">Save as generate_data.py and run once</div>
+    <div class="code">import json, random
+from datetime import datetime, timedelta
+
+categories = ["billing","technical","shipping","returns","account","general"]
+priorities = ["low","medium","high","critical"]
+sentiments = ["positive","negative","neutral","frustrated","satisfied"]
+subjects = [
+    "Cannot login to my account",
+    "Incorrect charge on invoice",
+    "Package not delivered after 2 weeks",
+    "Product stopped working after 3 days",
+    "How do I cancel my subscription",
+    "Need to update billing information",
+    "Refund not received after 10 days",
+    "App keeps crashing on iPhone",
+    "Wrong item was delivered",
+    "Account locked out suddenly",
+]
+bodies = [
+    "I have been trying to resolve this for 3 days with no success.",
+    "This is the second time this has happened and I am very frustrated.",
+    "Please help me resolve this as soon as possible.",
+    "I have already contacted support twice and the issue persists.",
+    "This is urgent as it is affecting my business operations.",
+]
+
+tickets = []
+for i in range(500):
+    tickets.append({
+        "ticket_id": f"TKT-{1000+i}",
+        "customer_id": f"CUST-{random.randint(100,999)}",
+        "subject": random.choice(subjects),
+        "body": random.choice(bodies),
+        "category": random.choice(categories),
+        "priority": random.choice(priorities),
+        "sentiment": random.choice(sentiments),
+        "created_at": str(datetime.now() - timedelta(days=random.randint(0,90))),
+        "resolved": random.choice([True, False]),
+        "resolution_time_hrs": random.randint(1, 72),
+        "agent_id": f"AGENT-{random.randint(1,20)}",
+        "satisfaction_score": random.randint(1, 5),
+        "channel": random.choice(["email","chat","phone","web"])
+    })
+
+import os
+os.makedirs("data", exist_ok=True)
+with open("data/tickets.json","w") as f:
+    json.dump(tickets, f, indent=2)
+print(f"Generated {len(tickets)} tickets → data/tickets.json")</div></div>
+    <div class="code">python generate_data.py
+# Output: Generated 500 tickets → data/tickets.json</div>
+  </div>
+</div>
+
+</div>
+
+<!-- ═══════════════════════ SKILLS MAP ═══════════════════════ -->
+<div id="t-skills" class="tab">
+<h3>12-Domain Skills Map</h3>
+
+<div style="background:var(--color-background-secondary);border-radius:8px;padding:8px 12px;display:flex;gap:8px;margin-bottom:8px;">
+  <span style="font-size:11px;font-weight:500;color:var(--color-text-secondary);flex:2;">Domain</span>
+  <span style="font-size:11px;font-weight:500;color:var(--color-text-secondary);flex:3;">What You Learn</span>
+  <span style="font-size:11px;font-weight:500;color:var(--color-text-secondary);flex:1;text-align:center;">Weeks</span>
+  <span style="font-size:11px;font-weight:500;color:var(--color-text-secondary);flex:1;text-align:right;">Project</span>
+</div>
+
+<div class="card" style="padding:10px 14px;margin-bottom:6px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:2;"><span class="badge b-blue">LLM Fundamentals</span></div>
+    <div style="flex:3;font-size:12px;color:var(--color-text-secondary);">Transformers, tokenization, temperature, top-p, context windows, GPT vs BERT</div>
+    <div style="flex:1;text-align:center;"><span class="badge b-blue">Wk 1–2</span></div>
+    <div style="flex:1;text-align:right;font-size:12px;color:var(--color-text-secondary);">Project 1</div>
+  </div>
+</div>
+<div class="card" style="padding:10px 14px;margin-bottom:6px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:2;"><span class="badge b-blue">Prompt Engineering</span></div>
+    <div style="flex:3;font-size:12px;color:var(--color-text-secondary);">Zero-shot, few-shot, Chain-of-Thought, ReAct, structured JSON output, prompt versioning</div>
+    <div style="flex:1;text-align:center;"><span class="badge b-blue">Wk 2–3</span></div>
+    <div style="flex:1;text-align:right;font-size:12px;color:var(--color-text-secondary);">Project 1</div>
+  </div>
+</div>
+<div class="card" style="padding:10px 14px;margin-bottom:6px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:2;"><span class="badge b-teal">Embeddings</span></div>
+    <div style="flex:3;font-size:12px;color:var(--color-text-secondary);">Semantic search, cosine similarity, sentence-transformers, embedding space visualization</div>
+    <div style="flex:1;text-align:center;"><span class="badge b-teal">Wk 4</span></div>
+    <div style="flex:1;text-align:right;font-size:12px;color:var(--color-text-secondary);">Project 2</div>
+  </div>
+</div>
+<div class="card" style="padding:10px 14px;margin-bottom:6px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:2;"><span class="badge b-teal">Vector Databases</span></div>
+    <div style="flex:3;font-size:12px;color:var(--color-text-secondary);">ChromaDB, Pinecone, HNSW indexing, metadata filtering, similarity search</div>
+    <div style="flex:1;text-align:center;"><span class="badge b-teal">Wk 5</span></div>
+    <div style="flex:1;text-align:right;font-size:12px;color:var(--color-text-secondary);">Project 2</div>
+  </div>
+</div>
+<div class="card" style="padding:10px 14px;margin-bottom:6px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:2;"><span class="badge b-teal">Basic RAG</span></div>
+    <div style="flex:3;font-size:12px;color:var(--color-text-secondary);">Retrieval-Augmented Generation, chunking strategies, retrieval pipeline, source citation</div>
+    <div style="flex:1;text-align:center;"><span class="badge b-teal">Wk 6–7</span></div>
+    <div style="flex:1;text-align:right;font-size:12px;color:var(--color-text-secondary);">Project 2</div>
+  </div>
+</div>
+<div class="card" style="padding:10px 14px;margin-bottom:6px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:2;"><span class="badge b-purple">Advanced RAG</span></div>
+    <div style="flex:3;font-size:12px;color:var(--color-text-secondary);">HyDE, reranking, hybrid BM25+dense search, query expansion, Reciprocal Rank Fusion</div>
+    <div style="flex:1;text-align:center;"><span class="badge b-purple">Wk 9–11</span></div>
+    <div style="flex:1;text-align:right;font-size:12px;color:var(--color-text-secondary);">Project 3</div>
+  </div>
+</div>
+<div class="card" style="padding:10px 14px;margin-bottom:6px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:2;"><span class="badge b-amber">AI Agents</span></div>
+    <div style="flex:3;font-size:12px;color:var(--color-text-secondary);">Tool use, OpenAI function calling, ReAct loop, conversation memory, guardrails</div>
+    <div style="flex:1;text-align:center;"><span class="badge b-amber">Wk 13–14</span></div>
+    <div style="flex:1;text-align:right;font-size:12px;color:var(--color-text-secondary);">Project 4</div>
+  </div>
+</div>
+<div class="card" style="padding:10px 14px;margin-bottom:6px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:2;"><span class="badge b-coral">Agentic Workflows</span></div>
+    <div style="flex:3;font-size:12px;color:var(--color-text-secondary);">LangGraph StateGraph, nodes, edges, conditional routing, human-in-the-loop, interrupts</div>
+    <div style="flex:1;text-align:center;"><span class="badge b-coral">Wk 16–18</span></div>
+    <div style="flex:1;text-align:right;font-size:12px;color:var(--color-text-secondary);">Project 5</div>
+  </div>
+</div>
+<div class="card" style="padding:10px 14px;margin-bottom:6px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:2;"><span class="badge b-pink">Multi-Agent Systems</span></div>
+    <div style="flex:3;font-size:12px;color:var(--color-text-secondary);">Supervisor/worker pattern, message passing, agent coordination, role specialization</div>
+    <div style="flex:1;text-align:center;"><span class="badge b-pink">Wk 20–22</span></div>
+    <div style="flex:1;text-align:right;font-size:12px;color:var(--color-text-secondary);">Project 6</div>
+  </div>
+</div>
+<div class="card" style="padding:10px 14px;margin-bottom:6px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:2;"><span class="badge b-gray">LLM Evaluation</span></div>
+    <div style="flex:3;font-size:12px;color:var(--color-text-secondary);">RAGAS metrics, faithfulness, answer relevancy, context recall, hallucination detection</div>
+    <div style="flex:1;text-align:center;"><span class="badge b-gray">Wk 12+15</span></div>
+    <div style="flex:1;text-align:right;font-size:12px;color:var(--color-text-secondary);">All projects</div>
+  </div>
+</div>
+<div class="card" style="padding:10px 14px;margin-bottom:6px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:2;"><span class="badge b-green">Deployment & MLOps</span></div>
+    <div style="flex:3;font-size:12px;color:var(--color-text-secondary);">FastAPI, Docker, GitHub Actions CI/CD, logging, monitoring, LangSmith tracing</div>
+    <div style="flex:1;text-align:center;"><span class="badge b-green">Wk 8+19</span></div>
+    <div style="flex:1;text-align:right;font-size:12px;color:var(--color-text-secondary);">All projects</div>
+  </div>
+</div>
+<div class="card" style="padding:10px 14px;margin-bottom:6px;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:2;"><span class="badge b-blue">AWS GenAI Architecture</span></div>
+    <div style="flex:3;font-size:12px;color:var(--color-text-secondary);">Bedrock, Lambda, SQS, SES, API Gateway, CloudWatch, ECR, IAM best practices</div>
+    <div style="flex:1;text-align:center;"><span class="badge b-blue">Wk 23–24</span></div>
+    <div style="flex:1;text-align:right;font-size:12px;color:var(--color-text-secondary);">Project 6</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+<h3>Free Learning Resources Per Domain</h3>
+<div class="g2">
+  <div class="mc"><div class="ml">LLM Fundamentals</div><div class="mv" style="font-size:12px;">fast.ai Practical Deep Learning (free) · Andrej Karpathy "Let's build GPT" on YouTube · Illustrated Transformer blog post</div></div>
+  <div class="mc"><div class="ml">Prompt Engineering</div><div class="mv" style="font-size:12px;">Anthropic Prompt Engineering Guide (free) · OpenAI Cookbook on GitHub · Brex Prompt Engineering guide</div></div>
+  <div class="mc"><div class="ml">LangChain + LangGraph</div><div class="mv" style="font-size:12px;">LangChain official docs · Harrison Chase YouTube · LangGraph GitHub examples repository</div></div>
+  <div class="mc"><div class="ml">Vector Databases</div><div class="mv" style="font-size:12px;">Pinecone Learning Center (free) · ChromaDB docs · Weaviate Vector Database course</div></div>
+  <div class="mc"><div class="ml">RAG Systems</div><div class="mv" style="font-size:12px;">LangChain RAG tutorials · LlamaIndex docs · Jerry Liu RAG from Scratch YouTube series</div></div>
+  <div class="mc"><div class="ml">LLM Evaluation</div><div class="mv" style="font-size:12px;">RAGAS paper + GitHub · TruLens open source · Confident AI DeepEval library</div></div>
+  <div class="mc"><div class="ml">AI Agents</div><div class="mv" style="font-size:12px;">LangGraph documentation · ReAct paper on arXiv (free) · Andrew Ng Agentic AI course (free audit)</div></div>
+  <div class="mc"><div class="ml">AWS Bedrock</div><div class="mv" style="font-size:12px;">AWS Skill Builder free tier · AWS Bedrock Workshop on GitHub · AWS GenAI Loft YouTube channel</div></div>
+</div>
+</div>
+
+<!-- ═══════════════════════ WEEKLY PLAN ═══════════════════════ -->
+<div id="t-weekly" class="tab">
+<h3>24-Week Study Plan</h3>
+
+<div style="margin-bottom:16px;">
+  <div style="font-size:13px;font-weight:500;color:#185FA5;display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+    <div style="width:10px;height:10px;border-radius:2px;background:#185FA5;"></div>Phase 1 — Foundations (Weeks 1–4)
+  </div>
+  <div class="wgrid">
+    <div class="wk"><div class="wn">WEEK 1</div><div class="wt">LLM Fundamentals</div><div class="wf">Transformer architecture, tokenization, temperature, context windows, GPT-4 vs open models</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">Read fast.ai Ch1 · Watch Karpathy GPT video · Run first OpenAI API call</div><div class="wd" style="margin-top:6px;">✓ Python script: GPT chat working</div></div>
+    <div class="wk"><div class="wn">WEEK 2</div><div class="wt">Prompt Engineering</div><div class="wf">Zero-shot, few-shot, CoT prompting, output formatting, system prompts, token counting</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">Anthropic prompt guide · Build 10 prompt templates for CX use cases</div><div class="wd" style="margin-top:6px;">✓ Prompt template library (10 templates)</div></div>
+    <div class="wk"><div class="wn">WEEK 3</div><div class="wt">Project 1 Build</div><div class="wf">Ticket classifier with FastAPI backend, Pydantic validation, Streamlit dashboard</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">Build classify endpoint · Add Streamlit UI · Write 10 pytest tests</div><div class="wd" style="margin-top:6px;">✓ P1 live on localhost + GitHub push</div></div>
+    <div class="wk"><div class="wn">WEEK 4</div><div class="wt">Embeddings</div><div class="wf">Semantic search concepts, cosine similarity, sentence-transformers, embedding visualization</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">sentence-transformers docs · Build semantic search over 500 tickets</div><div class="wd" style="margin-top:6px;">✓ Semantic search notebook</div></div>
+  </div>
+</div>
+
+<div style="margin-bottom:16px;">
+  <div style="font-size:13px;font-weight:500;color:#0F6E56;display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+    <div style="width:10px;height:10px;border-radius:2px;background:#0F6E56;"></div>Phase 2 — RAG Systems (Weeks 5–8)
+  </div>
+  <div class="wgrid">
+    <div class="wk"><div class="wn">WEEK 5</div><div class="wt">Vector Databases</div><div class="wf">ChromaDB setup, document ingestion, metadata filtering, similarity search, persistence</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">ChromaDB docs · Index 500 tickets · Run 20 similarity queries</div><div class="wd" style="margin-top:6px;">✓ ChromaDB with 500 indexed tickets</div></div>
+    <div class="wk"><div class="wn">WEEK 6</div><div class="wt">Basic RAG Pipeline</div><div class="wf">Retrieval chain, prompt augmentation, context injection, source citation, grounding</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">LangChain RAG quickstart · Build Q&amp;A over 20 knowledge base docs</div><div class="wd" style="margin-top:6px;">✓ Basic RAG chatbot working locally</div></div>
+    <div class="wk"><div class="wn">WEEK 7</div><div class="wt">Project 2 Build</div><div class="wf">Full RAG chatbot with FastAPI, Streamlit chat UI, source citations, out-of-scope handling</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">Build full pipeline · Add Streamlit chat interface · Manual eval 20 Q&amp;A pairs</div><div class="wd" style="margin-top:6px;">✓ P2 working + GitHub push</div></div>
+    <div class="wk"><div class="wn">WEEK 8</div><div class="wt">Docker + CI/CD</div><div class="wf">Containerize P1 and P2, write GitHub Actions pipeline, deploy to Streamlit Cloud (free)</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">Docker docs · Write Dockerfiles for both projects · GitHub Actions yaml</div><div class="wd" style="margin-top:6px;">✓ Both projects dockerized + CI passing</div></div>
+  </div>
+</div>
+
+<div style="margin-bottom:16px;">
+  <div style="font-size:13px;font-weight:500;color:#534AB7;display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+    <div style="width:10px;height:10px;border-radius:2px;background:#534AB7;"></div>Phase 3 — Advanced RAG (Weeks 9–12)
+  </div>
+  <div class="wgrid">
+    <div class="wk"><div class="wn">WEEK 9</div><div class="wt">Chunking Strategies</div><div class="wf">Recursive, semantic, parent-child chunking, overlap strategies, chunk size experiments</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">LangChain text splitters · Test chunk sizes 256/512/1024 · Compare retrieval quality</div><div class="wd" style="margin-top:6px;">✓ Chunking comparison notebook</div></div>
+    <div class="wk"><div class="wn">WEEK 10</div><div class="wt">Hybrid Search + Reranking</div><div class="wf">BM25 sparse retrieval, RRF fusion, cross-encoder reranking, Cohere free tier reranker</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">rank-bm25 library · LangChain EnsembleRetriever · Add reranking step</div><div class="wd" style="margin-top:6px;">✓ Hybrid retrieval pipeline working</div></div>
+    <div class="wk"><div class="wn">WEEK 11</div><div class="wt">Project 3 Build</div><div class="wf">Advanced RAG with HyDE, multi-query retriever, hybrid search, reranking end-to-end</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">HyDE implementation · Multi-query retriever · Connect all components</div><div class="wd" style="margin-top:6px;">✓ P3 working + GitHub push</div></div>
+    <div class="wk"><div class="wn">WEEK 12</div><div class="wt">LLM Evaluation — RAGAS</div><div class="wf">RAGAS metrics: faithfulness, answer relevancy, context recall, context precision</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">RAGAS docs · Create 50-question eval dataset · Eval P1–P3 · Build metrics dashboard</div><div class="wd" style="margin-top:6px;">✓ RAGAS eval report for all 3 projects</div></div>
+  </div>
+</div>
+
+<div style="margin-bottom:16px;">
+  <div style="font-size:13px;font-weight:500;color:#854F0B;display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+    <div style="width:10px;height:10px;border-radius:2px;background:#854F0B;"></div>Phase 4 — AI Agents (Weeks 13–16)
+  </div>
+  <div class="wgrid">
+    <div class="wk"><div class="wn">WEEK 13</div><div class="wt">Tool Use + Function Calling</div><div class="wf">OpenAI function calling, tool schemas, tool selection, error handling, observation loop</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">OpenAI function calling cookbook · Build 5 custom tools · Test ReAct loop</div><div class="wd" style="margin-top:6px;">✓ Agent with 5 tools working</div></div>
+    <div class="wk"><div class="wn">WEEK 14</div><div class="wt">Agent Memory</div><div class="wf">Short-term buffer memory, conversation summary memory, episodic memory, session persistence</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">LangChain memory modules · Add memory to agent · Test 20-turn conversations</div><div class="wd" style="margin-top:6px;">✓ Stateful agent across sessions</div></div>
+    <div class="wk"><div class="wn">WEEK 15</div><div class="wt">Project 4 Build</div><div class="wf">Autonomous CX agent with 5 tools, memory, guardrails, human escalation path</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">Full agent build · Tool orchestration · 20 end-to-end test scenarios</div><div class="wd" style="margin-top:6px;">✓ P4 agent + GitHub push</div></div>
+    <div class="wk"><div class="wn">WEEK 16</div><div class="wt">LangGraph Basics</div><div class="wf">StateGraph, nodes, edges, conditional routing, TypedDict state, checkpointing</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">LangGraph quickstart · Build 3-node graph · Add conditional branching</div><div class="wd" style="margin-top:6px;">✓ LangGraph flow working + Mock Interview 1</div></div>
+  </div>
+</div>
+
+<div style="margin-bottom:16px;">
+  <div style="font-size:13px;font-weight:500;color:#993C1D;display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+    <div style="width:10px;height:10px;border-radius:2px;background:#993C1D;"></div>Phase 5 — Agentic Workflows (Weeks 17–20)
+  </div>
+  <div class="wgrid">
+    <div class="wk"><div class="wn">WEEK 17</div><div class="wt">Complex LangGraph Flows</div><div class="wf">Parallel nodes, human-in-loop, interrupt/resume, state persistence, subgraphs</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">LangGraph advanced examples · Add approval node · Implement interrupt_before</div><div class="wd" style="margin-top:6px;">✓ Human-in-loop workflow demo</div></div>
+    <div class="wk"><div class="wn">WEEK 18</div><div class="wt">Project 5 Build</div><div class="wf">7-node support workflow: verify → diagnose → route → solve → review → resolve → notify</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">Full LangGraph workflow · WebSocket progress streaming · Ops dashboard</div><div class="wd" style="margin-top:6px;">✓ P5 workflow + GitHub push</div></div>
+    <div class="wk"><div class="wn">WEEK 19</div><div class="wt">Observability + LangSmith</div><div class="wf">LangSmith tracing, cost tracking, latency monitoring, error debugging, dashboards</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">LangSmith free tier setup · Add traces to P1–P5 · Build metrics dashboard</div><div class="wd" style="margin-top:6px;">✓ LangSmith dashboards for all projects</div></div>
+    <div class="wk"><div class="wn">WEEK 20</div><div class="wt">Mock Interview Round 1</div><div class="wf">System design for AI, RAG deep dive, agent architecture, evaluation strategy</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">Answer 10 questions from each project · Record yourself · Review weak areas</div><div class="wd" style="margin-top:6px;">✓ Mock interview video recording</div></div>
+  </div>
+</div>
+
+<div style="margin-bottom:16px;">
+  <div style="font-size:13px;font-weight:500;color:#993556;display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+    <div style="width:10px;height:10px;border-radius:2px;background:#993556;"></div>Phase 6 — Multi-Agent + AWS (Weeks 21–24)
+  </div>
+  <div class="wgrid">
+    <div class="wk"><div class="wn">WEEK 21</div><div class="wt">Multi-Agent Patterns</div><div class="wf">Supervisor/worker, peer-to-peer, message bus, agent contracts, role specialization</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">LangGraph multi-agent tutorial · Build 3-agent coordination demo</div><div class="wd" style="margin-top:6px;">✓ 3-agent coordination working</div></div>
+    <div class="wk"><div class="wn">WEEK 22</div><div class="wt">Project 6 — Design</div><div class="wf">Architecture design, agent role definition, message schemas, AWS service selection</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">Write design doc · Architecture diagram · Define 4 agent personas · Skeleton code</div><div class="wd" style="margin-top:6px;">✓ Architecture diagram + skeleton</div></div>
+    <div class="wk"><div class="wn">WEEK 23</div><div class="wt">Project 6 — AWS Deploy</div><div class="wf">AWS Bedrock, Lambda container, SQS queue, SES email, CloudWatch monitoring</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">AWS Bedrock workshop · Deploy to Lambda · Connect SQS trigger · CloudWatch alerts</div><div class="wd" style="margin-top:6px;">✓ P6 live on AWS end-to-end</div></div>
+    <div class="wk"><div class="wn">WEEK 24</div><div class="wt">Portfolio Polish + Job Hunt</div><div class="wf">README docs, 2-min demo videos, LinkedIn update, resume bullets, mock interview 2</div><div style="height:0.5px;background:var(--color-border-tertiary);margin:6px 0;"></div><div style="font-size:11px;color:var(--color-text-secondary);">Record demos · Update LinkedIn · Apply to 10 roles · Final mock interview</div><div class="wd" style="margin-top:6px;">✓ Portfolio live · 10 applications sent</div></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════ PROJECT 1 ═══════════════════════ -->
+<div id="t-p1" class="tab">
+<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
+  <div style="font-size:32px;font-weight:500;color:var(--color-text-primary);line-height:1;">1</div>
+  <div>
+    <div style="font-size:16px;font-weight:500;">Intelligent Ticket Classifier &amp; Sentiment Engine</div>
+    <span class="badge b-blue" style="margin-top:4px;">Core Skill: LLM + Prompt Engineering</span>
+    <span class="badge b-gray" style="margin-top:4px;margin-left:4px;">Simulates: Amazon / Salesforce Service Cloud</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Business Problem &amp; Use Case</div><span class="ci op">▾</span></div>
+  <div class="cb op">
+    <div class="g2">
+      <div class="mc"><div class="ml">Business Problem</div><div class="mv" style="font-size:12px;">Support teams handle 10,000+ tickets/day. Manual triaging causes 4+ hour delays. Misrouted tickets cost $12/ticket in rework. New agents misclassify 22% of tickets in their first month.</div></div>
+      <div class="mc"><div class="ml">Real-World Use Case</div><div class="mv" style="font-size:12px;">Mirrors Amazon Connect AI and Salesforce Einstein Classification — auto-classify ticket category, priority level, customer sentiment, and generate a suggested response template in real-time at submission.</div></div>
+    </div>
+    <div class="mc" style="margin-top:8px;"><div class="ml">Architecture Flow</div>
+    <div style="font-size:12px;color:var(--color-text-primary);line-height:1.8;margin-top:6px;">
+      Customer submits ticket via Streamlit UI
+      <span style="color:var(--color-text-secondary);">→</span> FastAPI POST /classify endpoint
+      <span style="color:var(--color-text-secondary);">→</span> Few-shot prompt template (LangChain)
+      <span style="color:var(--color-text-secondary);">→</span> OpenAI GPT-4o-mini
+      <span style="color:var(--color-text-secondary);">→</span> Pydantic structured JSON output
+      <span style="color:var(--color-text-secondary);">→</span> {category, priority, sentiment, suggested_response}
+      <span style="color:var(--color-text-secondary);">→</span> Streamlit dashboard with metrics charts
+    </div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Tech Stack &amp; Folder Structure</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="g2">
+      <div>
+        <div class="ml" style="margin-bottom:6px;">Tech Stack</div>
+        <div class="tags">
+          <span class="tag">openai gpt-4o-mini</span><span class="tag">langchain</span>
+          <span class="tag">fastapi</span><span class="tag">streamlit</span>
+          <span class="tag">pydantic v2</span><span class="tag">python-dotenv</span>
+          <span class="tag">pytest</span><span class="tag">docker</span>
+        </div>
+        <div class="ml" style="margin-top:12px;margin-bottom:4px;">Free Tier Note</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);">Uses GPT-4o-mini only. If credits run low, switch to HuggingFace Inference API (Mistral-7B) — same prompts work with minor adjustments.</div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:6px;">Folder Structure</div>
+        <div class="code" style="font-size:11px;">cx-ticket-classifier/
+├── app/
+│   ├── main.py         ← FastAPI app
+│   ├── classifier.py   ← LLM logic
+│   ├── prompts.py      ← Prompt templates
+│   └── schemas.py      ← Pydantic models
+├── ui/
+│   └── streamlit_app.py
+├── data/
+│   └── tickets.json    ← Generated test data
+├── tests/
+│   └── test_classifier.py
+├── Dockerfile
+├── .env.example
+└── README.md</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Implementation Steps</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="step"><div class="sn">1</div><div><div style="font-size:12px;font-weight:500;">Generate test data</div><div class="sd">Run the generate_data.py script from Step 5 in Mac Setup. Creates 500 tickets in data/tickets.json</div></div></div>
+    <div class="step"><div class="sn">2</div><div><div style="font-size:12px;font-weight:500;">Define Pydantic output schema</div><div class="sd">Create schemas.py with TicketClassification model: category (enum), priority (enum), sentiment (enum), confidence (float 0–1), suggested_response (str)</div></div></div>
+    <div class="step"><div class="sn">3</div><div><div style="font-size:12px;font-weight:500;">Build few-shot prompt in prompts.py</div><div class="sd">Write 3 examples per category. System prompt instructs GPT to return valid JSON matching the Pydantic schema. Use LangChain PromptTemplate.</div></div></div>
+    <div class="step"><div class="sn">4</div><div><div style="font-size:12px;font-weight:500;">Build classifier.py with LLM chain</div><div class="sd">LangChain: PromptTemplate | ChatOpenAI | PydanticOutputParser. Add retry logic with exponential backoff for API failures.</div></div></div>
+    <div class="step"><div class="sn">5</div><div><div style="font-size:12px;font-weight:500;">Create FastAPI app in main.py</div><div class="sd">POST /classify accepts TicketInput, returns TicketClassification. Add GET /health. Include CORS middleware. Log token usage per request.</div></div></div>
+    <div class="step"><div class="sn">6</div><div><div style="font-size:12px;font-weight:500;">Build Streamlit dashboard</div><div class="sd">Text input for ticket body. Display classification result with color-coded badges. Add sidebar chart showing category distribution from last 50 tickets.</div></div></div>
+    <div class="step"><div class="sn">7</div><div><div style="font-size:12px;font-weight:500;">Write pytest tests + Dockerize</div><div class="sd">Test classification accuracy on 20 labeled tickets. Test schema validation. Write Dockerfile. Push to GitHub with README including demo screenshot.</div></div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Interview Questions, Resume Bullets &amp; Mistakes</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="g2">
+      <div>
+        <div class="ml" style="margin-bottom:8px;">Interview Questions</div>
+        <div class="iq">How do you ensure consistent structured output from an LLM?</div>
+        <div class="iq">What is the difference between zero-shot and few-shot prompting?</div>
+        <div class="iq">How do you handle when the LLM returns invalid JSON?</div>
+        <div class="iq">How would you scale this to process 10,000 tickets per minute?</div>
+        <div class="iq">What is your strategy for prompt versioning and A/B testing prompts?</div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:8px;">Resume Bullet Points</div>
+        <div class="rb">Built production-grade ticket classification system using GPT-4o-mini with few-shot prompting achieving 94% accuracy across 6 support categories</div>
+        <div class="rb">Engineered LangChain prompt templates with Pydantic output validation, reducing malformed LLM responses to under 2%</div>
+        <div class="rb">Deployed FastAPI + Streamlit application on Docker, processing 500 test tickets with real-time sentiment analysis dashboard</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="g2">
+      <div class="mc"><div class="ml">Common Mistakes to Avoid</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.7;">
+          • Not validating LLM output schema — always use Pydantic<br>
+          • Hardcoding prompts in code — use template files with version control<br>
+          • No retry logic — add exponential backoff on API failures<br>
+          • Ignoring token costs — log token usage from day one
+        </div>
+      </div>
+      <div class="mc"><div class="ml">Scalability Considerations</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.7;">
+          • Add async processing with FastAPI background tasks<br>
+          • Batch classify 50 tickets per API request<br>
+          • Cache common responses with Redis<br>
+          • Rate limit by customer_id to control costs
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════ PROJECT 2 ═══════════════════════ -->
+<div id="t-p2" class="tab">
+<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
+  <div style="font-size:32px;font-weight:500;color:var(--color-text-primary);line-height:1;">2</div>
+  <div>
+    <div style="font-size:16px;font-weight:500;">Customer Support RAG Chatbot</div>
+    <span class="badge b-teal" style="margin-top:4px;">Core Skill: Basic RAG System</span>
+    <span class="badge b-gray" style="margin-top:4px;margin-left:4px;">Simulates: Zendesk AI / Salesforce Einstein Bot</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Business Problem &amp; Architecture</div><span class="ci op">▾</span></div>
+  <div class="cb op">
+    <div class="g2">
+      <div class="mc"><div class="ml">Business Problem</div><div class="mv" style="font-size:12px;">Support agents spend 40% of time searching knowledge bases. New agents take 3 months to ramp up. Inconsistent answers damage CSAT. 60% of tickets are repeat questions with known answers.</div></div>
+      <div class="mc"><div class="ml">Real-World Use Case</div><div class="mv" style="font-size:12px;">Mirrors Zendesk Guide AI and Salesforce Knowledge Base — chatbot answers customer questions from company docs with cited sources, escalates unknown questions to human agents.</div></div>
+    </div>
+    <div class="mc" style="margin-top:8px;"><div class="ml">Architecture Flow</div>
+    <div style="font-size:12px;color:var(--color-text-primary);line-height:1.8;margin-top:6px;">
+      Support docs (20 Markdown files) <span style="color:var(--color-text-secondary);">→</span> LangChain RecursiveTextSplitter (500 tokens, 50 overlap)
+      <span style="color:var(--color-text-secondary);">→</span> sentence-transformers all-MiniLM-L6-v2 (FREE, local)
+      <span style="color:var(--color-text-secondary);">→</span> ChromaDB vector store (local, persisted)
+      <span style="color:var(--color-text-secondary);">→</span> User question <span style="color:var(--color-text-secondary);">→</span> Embed query <span style="color:var(--color-text-secondary);">→</span> Retrieve top-5 chunks
+      <span style="color:var(--color-text-secondary);">→</span> GPT-4o-mini with retrieved context <span style="color:var(--color-text-secondary);">→</span> Answer + source citations
+      <span style="color:var(--color-text-secondary);">→</span> Streamlit chat UI with source sidebar
+    </div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Tech Stack, Folder Structure &amp; Database Design</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="g2">
+      <div>
+        <div class="ml" style="margin-bottom:6px;">Tech Stack</div>
+        <div class="tags">
+          <span class="tag">langchain</span><span class="tag">chromadb</span>
+          <span class="tag">sentence-transformers</span><span class="tag">openai gpt-4o-mini</span>
+          <span class="tag">fastapi</span><span class="tag">streamlit</span><span class="tag">docker</span>
+        </div>
+        <div class="ml" style="margin-top:12px;margin-bottom:4px;">ChromaDB Collection Design</div>
+        <div class="code" style="font-size:11px;">Collection: support_knowledge_base
+Document fields:
+  - id: chunk_id (str)
+  - document: chunk_text (str)
+  - metadata:
+      doc_name: "return_policy.md"
+      page: 1
+      chunk_index: 3
+      category: "returns"
+      last_updated: "2024-01-15"</div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:6px;">Folder Structure</div>
+        <div class="code" style="font-size:11px;">support-rag-chatbot/
+├── app/
+│   ├── main.py          ← FastAPI endpoints
+│   ├── rag_pipeline.py  ← RAG chain logic
+│   ├── embeddings.py    ← Embedding model
+│   └── vectorstore.py   ← ChromaDB ops
+├── data/
+│   ├── knowledge_base/  ← 20 Markdown docs
+│   │   ├── return_policy.md
+│   │   ├── shipping_faq.md
+│   │   └── account_help.md
+│   └── tickets.json
+├── scripts/
+│   └── ingest.py        ← Doc ingestion
+├── ui/
+│   └── chat_app.py
+├── chroma_db/           ← gitignored
+├── Dockerfile
+└── README.md</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Implementation Steps</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="step"><div class="sn">1</div><div><div style="font-size:12px;font-weight:500;">Create 20 knowledge base documents</div><div class="sd">Write Markdown files: return_policy.md, shipping_faq.md, account_help.md, billing_guide.md, technical_troubleshooting.md — each 500–800 words. These simulate a real company's help center.</div></div></div>
+    <div class="step"><div class="sn">2</div><div><div style="font-size:12px;font-weight:500;">Build ingestion script (scripts/ingest.py)</div><div class="sd">Load all .md files with DirectoryLoader → split with RecursiveCharacterTextSplitter(chunk_size=500, overlap=50) → embed with sentence-transformers → store in ChromaDB with metadata</div></div></div>
+    <div class="step"><div class="sn">3</div><div><div style="font-size:12px;font-weight:500;">Build RAG chain in rag_pipeline.py</div><div class="sd">Create retriever from ChromaDB (k=5, similarity threshold=0.7). Build RetrievalQA chain: query → retrieve → stuff into prompt → GPT-4o-mini → answer with sources.</div></div></div>
+    <div class="step"><div class="sn">4</div><div><div style="font-size:12px;font-weight:500;">Handle out-of-scope questions</div><div class="sd">If max similarity score &lt; 0.65, return "I don't have information on this — let me connect you with a human agent" instead of hallucinating an answer.</div></div></div>
+    <div class="step"><div class="sn">5</div><div><div style="font-size:12px;font-weight:500;">FastAPI endpoints + Streamlit chat UI</div><div class="sd">POST /chat returns {answer, sources: [{doc_name, chunk_text}]}. Streamlit chat_message() for conversation. Sidebar shows retrieved chunks highlighted.</div></div></div>
+    <div class="step"><div class="sn">6</div><div><div style="font-size:12px;font-weight:500;">Evaluate with 20 test Q&amp;A pairs</div><div class="sd">Manually create 20 questions with known correct answers. Run through RAG. Score: answer relevancy, source accuracy, out-of-scope detection. Document results in README.</div></div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Interview Questions &amp; Resume Bullets</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="g2">
+      <div>
+        <div class="ml" style="margin-bottom:8px;">Interview Questions</div>
+        <div class="iq">Explain the difference between semantic search and keyword search</div>
+        <div class="iq">What chunk size did you use and why? What happens if chunks are too large or too small?</div>
+        <div class="iq">How do you handle questions that are outside the knowledge base?</div>
+        <div class="iq">Explain stuffing, map-reduce, and refine chains — when would you use each?</div>
+        <div class="iq">How do you update the vector store when documentation changes?</div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:8px;">Resume Bullets</div>
+        <div class="rb">Built RAG chatbot over 20-document knowledge base achieving 87% answer relevancy using ChromaDB + sentence-transformers all-MiniLM-L6-v2</div>
+        <div class="rb">Implemented out-of-scope detection using similarity thresholds, preventing hallucinated answers on unknown queries with 96% accuracy</div>
+        <div class="rb">Designed LangChain retrieval pipeline with source citation, chunk metadata tracking, and Streamlit chat UI with highlighted source sidebar</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="g2">
+      <div class="mc"><div class="ml">Common Mistakes</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.7;">
+          • Chunks too large (&gt;1000 tokens) — context gets diluted<br>
+          • No similarity threshold — LLM answers with irrelevant chunks<br>
+          • Forgetting persist_directory in ChromaDB — data lost on restart<br>
+          • Not updating embeddings when docs change
+        </div>
+      </div>
+      <div class="mc"><div class="ml">Scalability Path</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.7;">
+          • Migrate to Pinecone for cloud-hosted vector store<br>
+          • Add re-ranking with Cohere API (free tier)<br>
+          • Implement MMR for diversity in retrieval results<br>
+          • Add Redis caching for repeated questions
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════ PROJECT 3 ═══════════════════════ -->
+<div id="t-p3" class="tab">
+<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
+  <div style="font-size:32px;font-weight:500;color:var(--color-text-primary);line-height:1;">3</div>
+  <div>
+    <div style="font-size:16px;font-weight:500;">Advanced RAG with Hybrid Search, Reranking &amp; Evaluation</div>
+    <span class="badge b-purple" style="margin-top:4px;">Core Skill: Advanced RAG</span>
+    <span class="badge b-gray" style="margin-top:4px;margin-left:4px;">Simulates: Microsoft Copilot / Notion AI</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Business Problem &amp; Architecture</div><span class="ci op">▾</span></div>
+  <div class="cb op">
+    <div class="g2">
+      <div class="mc"><div class="ml">Business Problem</div><div class="mv" style="font-size:12px;">Basic RAG fails on 15–20% of real queries — ambiguous questions, typos, domain jargon. No mechanism to detect when answers are hallucinated. No way to measure improvement over time.</div></div>
+      <div class="mc"><div class="ml">Real-World Use Case</div><div class="mv" style="font-size:12px;">Production RAG systems at Microsoft and Notion use hybrid retrieval + reranking to handle complex queries. RAGAS evaluation runs automatically on every deployment as a quality gate.</div></div>
+    </div>
+    <div class="mc" style="margin-top:8px;"><div class="ml">Architecture Flow (Advanced)</div>
+    <div style="font-size:12px;color:var(--color-text-primary);line-height:1.8;margin-top:6px;">
+      User query <span style="color:var(--color-text-secondary);">→</span> HyDE (GPT generates hypothetical answer) <span style="color:var(--color-text-secondary);">→</span> Embed hypothetical
+      <span style="color:var(--color-text-secondary);">→</span> Dense retrieval from Pinecone (top-20) in PARALLEL with BM25 sparse retrieval (top-20)
+      <span style="color:var(--color-text-secondary);">→</span> Reciprocal Rank Fusion merges lists
+      <span style="color:var(--color-text-secondary);">→</span> Cross-encoder reranker scores all 40 → keeps top-3
+      <span style="color:var(--color-text-secondary);">→</span> GPT-4o-mini generates answer from top-3 chunks
+      <span style="color:var(--color-text-secondary);">→</span> RAGAS auto-evaluates: faithfulness + answer relevancy
+    </div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Tech Stack &amp; Folder Structure</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="g2">
+      <div>
+        <div class="ml" style="margin-bottom:6px;">Tech Stack</div>
+        <div class="tags">
+          <span class="tag">pinecone (free tier)</span><span class="tag">rank-bm25</span>
+          <span class="tag">sentence-transformers cross-encoder</span>
+          <span class="tag">langchain EnsembleRetriever</span>
+          <span class="tag">ragas</span><span class="tag">openai gpt-4o-mini</span>
+          <span class="tag">fastapi</span><span class="tag">streamlit</span>
+        </div>
+        <div class="ml" style="margin-top:10px;margin-bottom:4px;">Key Concepts Implemented</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.8;">
+          <strong style="color:var(--color-text-primary);">HyDE:</strong> Generate hypothetical answer → better embedding match<br>
+          <strong style="color:var(--color-text-primary);">BM25:</strong> Keyword-based sparse retrieval<br>
+          <strong style="color:var(--color-text-primary);">RRF:</strong> Merge dense + sparse result lists<br>
+          <strong style="color:var(--color-text-primary);">Cross-encoder:</strong> Rerank by query-chunk relevance
+        </div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:6px;">Folder Structure</div>
+        <div class="code" style="font-size:11px;">advanced-rag-system/
+├── app/
+│   ├── main.py
+│   ├── retrieval/
+│   │   ├── dense.py       ← Pinecone
+│   │   ├── sparse.py      ← BM25
+│   │   ├── hybrid.py      ← RRF fusion
+│   │   └── reranker.py    ← Cross-encoder
+│   ├── hyde.py            ← HyDE logic
+│   └── rag_chain.py
+├── evaluation/
+│   ├── eval_dataset.json  ← 50 Q&A pairs
+│   └── ragas_eval.py
+├── ui/
+│   ├── chat_app.py
+│   └── eval_dashboard.py
+└── README.md</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Implementation Steps &amp; Interview Prep</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="step"><div class="sn">1</div><div><div style="font-size:12px;font-weight:500;">Set up Pinecone index (free tier)</div><div class="sd">Create index with dimension=384 (all-MiniLM-L6-v2 output size). Upsert all document chunks with metadata. Verify with describe_index_stats().</div></div></div>
+    <div class="step"><div class="sn">2</div><div><div style="font-size:12px;font-weight:500;">Implement HyDE in hyde.py</div><div class="sd">Prompt GPT-4o-mini: "Write a detailed paragraph answering: {query}". Embed the generated answer instead of the original query. This dramatically improves retrieval for vague questions.</div></div></div>
+    <div class="step"><div class="sn">3</div><div><div style="font-size:12px;font-weight:500;">Build BM25 retriever in sparse.py</div><div class="sd">Use rank_bm25 library. Index all document chunks. For each query, return top-20 chunks by BM25 score. Store both retrieved lists with their original rank positions.</div></div></div>
+    <div class="step"><div class="sn">4</div><div><div style="font-size:12px;font-weight:500;">Implement RRF fusion in hybrid.py</div><div class="sd">RRF score = sum(1/(k + rank_i)) for each document across both lists (k=60). Merge and sort by combined RRF score. Top-40 go to reranker.</div></div></div>
+    <div class="step"><div class="sn">5</div><div><div style="font-size:12px;font-weight:500;">Add cross-encoder reranking</div><div class="sd">Use sentence-transformers cross-encoder/ms-marco-MiniLM-L-6-v2 (free, local). Score all 40 (query, chunk) pairs. Keep top-3 highest-scored chunks for generation.</div></div></div>
+    <div class="step"><div class="sn">6</div><div><div style="font-size:12px;font-weight:500;">Build RAGAS evaluation pipeline</div><div class="sd">Create eval_dataset.json with 50 Q&amp;A pairs. Run ragas.evaluate() with metrics=[faithfulness, answer_relevancy, context_recall, context_precision]. Log scores per run to track improvement.</div></div></div>
+    <div class="divider"></div>
+    <div class="g2">
+      <div>
+        <div class="ml" style="margin-bottom:8px;">Interview Questions</div>
+        <div class="iq">What is HyDE and when does it improve retrieval quality?</div>
+        <div class="iq">How does Reciprocal Rank Fusion combine sparse and dense results?</div>
+        <div class="iq">Explain RAGAS faithfulness vs answer relevancy — what does each measure?</div>
+        <div class="iq">When would you use a cross-encoder vs a bi-encoder?</div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:8px;">Resume Bullets</div>
+        <div class="rb">Implemented HyDE + hybrid BM25/dense retrieval achieving 23% improvement in context recall over baseline RAG measured via RAGAS</div>
+        <div class="rb">Built cross-encoder reranking pipeline reducing hallucination rate from 18% to 4% on 50-question evaluation set</div>
+        <div class="rb">Created automated RAGAS evaluation framework scoring faithfulness, answer relevancy, and context precision with Streamlit reporting dashboard</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════ PROJECT 4 ═══════════════════════ -->
+<div id="t-p4" class="tab">
+<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
+  <div style="font-size:32px;font-weight:500;color:var(--color-text-primary);line-height:1;">4</div>
+  <div>
+    <div style="font-size:16px;font-weight:500;">Autonomous CX Agent with Tools, Memory &amp; Guardrails</div>
+    <span class="badge b-amber" style="margin-top:4px;">Core Skill: AI Agent</span>
+    <span class="badge b-gray" style="margin-top:4px;margin-left:4px;">Simulates: Uber Support Agent / Amazon Connect</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Business Problem &amp; Architecture</div><span class="ci op">▾</span></div>
+  <div class="cb op">
+    <div class="g2">
+      <div class="mc"><div class="ml">Business Problem</div><div class="mv" style="font-size:12px;">Customers need actions, not just answers: check order status, process refunds, update account info. Static RAG cannot take actions. 35% of support volume is actionable requests that require database operations.</div></div>
+      <div class="mc"><div class="ml">Real-World Use Case</div><div class="mv" style="font-size:12px;">Mirrors Uber's automated support agent — can check trip status, issue refunds for overcharges, update payment methods, and escalate complex fraud cases to human specialists automatically.</div></div>
+    </div>
+    <div class="mc" style="margin-top:8px;"><div class="ml">Architecture Flow</div>
+    <div style="font-size:12px;color:var(--color-text-primary);line-height:1.8;margin-top:6px;">
+      User message <span style="color:var(--color-text-secondary);">→</span> LangChain AgentExecutor (ReAct pattern)
+      <span style="color:var(--color-text-secondary);">→</span> GPT-4o-mini function calling selects tool
+      <span style="color:var(--color-text-secondary);">→</span> Tool execution: [order_lookup | refund_processor | account_updater | faq_search | escalation]
+      <span style="color:var(--color-text-secondary);">→</span> Observation returned to agent
+      <span style="color:var(--color-text-secondary);">→</span> Agent reasons → next action or final answer
+      <span style="color:var(--color-text-secondary);">→</span> ConversationSummaryMemory stores context
+      <span style="color:var(--color-text-secondary);">→</span> Guardrail: refunds &gt; $500 → human escalation
+    </div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Tech Stack, Folder Structure &amp; Database</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="g2">
+      <div>
+        <div class="ml" style="margin-bottom:6px;">Tech Stack</div>
+        <div class="tags">
+          <span class="tag">openai function calling</span><span class="tag">langchain AgentExecutor</span>
+          <span class="tag">sqlite3</span><span class="tag">fastapi</span>
+          <span class="tag">streamlit</span><span class="tag">ConversationSummaryMemory</span>
+        </div>
+        <div class="ml" style="margin-top:10px;margin-bottom:4px;">SQLite Database Schema</div>
+        <div class="code" style="font-size:11px;">Tables:
+customers(id, name, email, tier, created_at)
+orders(id, customer_id, status, amount,
+       created_at, items_json)
+refunds(id, order_id, amount, reason,
+        status, processed_at)
+agents(id, name, specialization, active)</div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:6px;">Folder Structure</div>
+        <div class="code" style="font-size:11px;">cx-autonomous-agent/
+├── app/
+│   ├── main.py
+│   ├── agent.py          ← ReAct agent setup
+│   ├── tools/
+│   │   ├── order_lookup.py
+│   │   ├── refund_processor.py
+│   │   ├── account_updater.py
+│   │   ├── faq_search.py  ← Uses P2 RAG
+│   │   └── escalation.py
+│   ├── memory.py
+│   └── database.py        ← SQLite ops
+├── data/
+│   └── seed_db.py         ← 200 fake orders
+├── ui/
+│   └── agent_chat.py
+└── README.md</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Implementation Steps &amp; Interview Prep</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="step"><div class="sn">1</div><div><div style="font-size:12px;font-weight:500;">Seed SQLite with fake data</div><div class="sd">seed_db.py creates 200 orders, 100 customers, 50 products. Include orders in various states: pending, shipped, delivered, returned. Add some overcharged orders for refund testing.</div></div></div>
+    <div class="step"><div class="sn">2</div><div><div style="font-size:12px;font-weight:500;">Build 5 LangChain tools with strong docstrings</div><div class="sd">Tool docstrings ARE the routing prompt — write them precisely. Example: "Use this tool when customer asks about order status, delivery date, or shipment tracking. Input: customer_id (str)"</div></div></div>
+    <div class="step"><div class="sn">3</div><div><div style="font-size:12px;font-weight:500;">Implement ReAct agent with function calling</div><div class="sd">Use create_openai_functions_agent() with GPT-4o-mini. Define tool schemas as JSON. Add AgentExecutor with max_iterations=6 and handle_parsing_errors=True.</div></div></div>
+    <div class="step"><div class="sn">4</div><div><div style="font-size:12px;font-weight:500;">Add ConversationSummaryMemory</div><div class="sd">Summarize conversation every 5 turns to prevent context overflow. Store summary + last 3 turns in memory. Agent remembers customer name and issue context across turns.</div></div></div>
+    <div class="step"><div class="sn">5</div><div><div style="font-size:12px;font-weight:500;">Implement guardrails</div><div class="sd">In refund_processor.py: if amount &gt; $500, return "Escalating to specialist team — amount exceeds automated approval limit" instead of processing. Log all refund attempts.</div></div></div>
+    <div class="step"><div class="sn">6</div><div><div style="font-size:12px;font-weight:500;">Test 20 end-to-end scenarios</div><div class="sd">Include: happy path, tool failure, invalid customer ID, refund above limit, out-of-scope question, multi-turn conversation, adversarial input. Document pass/fail for each.</div></div></div>
+    <div class="divider"></div>
+    <div class="g2">
+      <div>
+        <div class="ml" style="margin-bottom:8px;">Interview Questions</div>
+        <div class="iq">Explain the ReAct pattern — Reason, Act, Observe loop in detail</div>
+        <div class="iq">How do you prevent the agent from hallucinating tool results?</div>
+        <div class="iq">What happens when a tool fails — how do you handle errors gracefully?</div>
+        <div class="iq">How do you implement guardrails to limit what an agent can do?</div>
+        <div class="iq">How would you add human-in-the-loop approval for high-risk actions?</div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:8px;">Resume Bullets</div>
+        <div class="rb">Built autonomous CX agent using ReAct pattern with 5 integrated tools: order lookup, refund processing, account update, FAQ search, and human escalation</div>
+        <div class="rb">Implemented ConversationSummaryMemory maintaining context across 20+ turn conversations, reducing repeated customer identification by 80%</div>
+        <div class="rb">Added safety guardrails blocking autonomous refunds above $500 threshold and routing to human specialists, preventing unauthorized transactions</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════ PROJECT 5 ═══════════════════════ -->
+<div id="t-p5" class="tab">
+<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
+  <div style="font-size:32px;font-weight:500;color:var(--color-text-primary);line-height:1;">5</div>
+  <div>
+    <div style="font-size:16px;font-weight:500;">Agentic Support Workflow Orchestration System</div>
+    <span class="badge b-coral" style="margin-top:4px;">Core Skill: Agentic Workflow — LangGraph</span>
+    <span class="badge b-gray" style="margin-top:4px;margin-left:4px;">Simulates: Airbnb Resolution Center / Salesforce Case Management</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Business Problem &amp; Architecture</div><span class="ci op">▾</span></div>
+  <div class="cb op">
+    <div class="g2">
+      <div class="mc"><div class="ml">Business Problem</div><div class="mv" style="font-size:12px;">Complex support cases require 7+ sequential steps: verify identity → check account → classify issue → diagnose → generate solution → get approval → notify customer. A single agent cannot reliably maintain state across all steps.</div></div>
+      <div class="mc"><div class="ml">Real-World Use Case</div><div class="mv" style="font-size:12px;">Mirrors Airbnb's resolution workflow and Salesforce Service Cloud automation — structured workflow ensures every complex case follows the same quality-controlled process with audit trail and human checkpoints.</div></div>
+    </div>
+    <div class="mc" style="margin-top:8px;"><div class="ml">LangGraph Workflow — 7 Nodes</div>
+    <div style="font-size:12px;color:var(--color-text-primary);line-height:1.8;margin-top:6px;">
+      Ticket arrives <span style="color:var(--color-text-secondary);">→</span>
+      [1] Identity Verify <span style="color:var(--color-text-secondary);">→</span>
+      [2] Account Check <span style="color:var(--color-text-secondary);">→</span>
+      [3] Issue Classifier — CONDITIONAL EDGE:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;If billing → [4a] Billing Check <span style="color:var(--color-text-secondary);">→</span> [5] Solution Generator<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;If technical → [4b] Tech Diagnostic <span style="color:var(--color-text-secondary);">→</span> [5] Solution Generator<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;If complex → [4c] INTERRUPT — human review required<br>
+      [5] Solution Generator <span style="color:var(--color-text-secondary);">→</span>
+      [6] QA Checker <span style="color:var(--color-text-secondary);">→</span>
+      [7] Resolution + Email notification
+    </div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Tech Stack &amp; Folder Structure</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="g2">
+      <div>
+        <div class="ml" style="margin-bottom:6px;">Tech Stack</div>
+        <div class="tags">
+          <span class="tag">langgraph StateGraph</span><span class="tag">openai gpt-4o-mini</span>
+          <span class="tag">fastapi + websockets</span><span class="tag">streamlit</span>
+          <span class="tag">langsmith free tier</span><span class="tag">sqlite3</span>
+        </div>
+        <div class="ml" style="margin-top:10px;margin-bottom:4px;">LangGraph State Schema</div>
+        <div class="code" style="font-size:11px;">from typing import TypedDict, List
+
+class WorkflowState(TypedDict):
+    ticket_id: str
+    customer_id: str
+    customer_verified: bool
+    issue_type: str  # billing|tech|general
+    account_data: dict
+    diagnostic_result: str
+    solution: str
+    qa_passed: bool
+    steps_completed: List[str]
+    final_resolution: str
+    needs_human: bool</div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:6px;">Folder Structure</div>
+        <div class="code" style="font-size:11px;">agentic-workflow-system/
+├── app/
+│   ├── main.py
+│   ├── workflow/
+│   │   ├── graph.py          ← StateGraph def
+│   │   ├── state.py          ← TypedDict schema
+│   │   ├── nodes/
+│   │   │   ├── identity.py
+│   │   │   ├── account.py
+│   │   │   ├── classifier.py
+│   │   │   ├── billing.py
+│   │   │   ├── technical.py
+│   │   │   ├── solution.py
+│   │   │   └── qa_checker.py
+│   │   └── edges.py          ← Routing logic
+│   └── monitoring.py
+├── ui/
+│   ├── ops_dashboard.py
+│   └── ticket_submit.py
+└── README.md</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Implementation Steps &amp; Interview Prep</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="step"><div class="sn">1</div><div><div style="font-size:12px;font-weight:500;">Define TypedDict state in state.py</div><div class="sd">All workflow data lives in one state dict. Nodes receive state, perform their task, return updated state dict. Never mutate state — always return a new dict.</div></div></div>
+    <div class="step"><div class="sn">2</div><div><div style="font-size:12px;font-weight:500;">Build StateGraph in graph.py</div><div class="sd">workflow = StateGraph(WorkflowState) → add_node for each of 7 nodes → add_edge for linear transitions → add_conditional_edges at classifier node for issue_type routing.</div></div></div>
+    <div class="step"><div class="sn">3</div><div><div style="font-size:12px;font-weight:500;">Implement conditional edge routing in edges.py</div><div class="sd">route_by_issue_type(state) → returns "billing_node" | "technical_node" | "human_review". LangGraph calls this function after classifier node to determine next node.</div></div></div>
+    <div class="step"><div class="sn">4</div><div><div style="font-size:12px;font-weight:500;">Add human-in-loop with interrupt_before</div><div class="sd">graph.compile(interrupt_before=["human_review"]). When complex case hits this node, workflow pauses. Ops team reviews via dashboard, approves/modifies, then resumes with graph.invoke(config, input).</div></div></div>
+    <div class="step"><div class="sn">5</div><div><div style="font-size:12px;font-weight:500;">Stream progress via WebSockets</div><div class="sd">FastAPI WebSocket endpoint streams node completion events to Streamlit ops dashboard in real-time. Each node emits {node_name, status, timestamp} as it completes.</div></div></div>
+    <div class="step"><div class="sn">6</div><div><div style="font-size:12px;font-weight:500;">Add LangSmith tracing</div><div class="sd">Set LANGCHAIN_TRACING_V2=true in .env. Every node execution is automatically traced. View full workflow execution tree, input/output per node, latency, and token cost in LangSmith dashboard.</div></div></div>
+    <div class="divider"></div>
+    <div class="g2">
+      <div>
+        <div class="ml" style="margin-bottom:8px;">Interview Questions</div>
+        <div class="iq">Why use LangGraph over a simple if-else Python chain for workflows?</div>
+        <div class="iq">How do you persist workflow state across restarts or failures?</div>
+        <div class="iq">Explain interrupt_before vs interrupt_after in LangGraph</div>
+        <div class="iq">How do you test complex branching workflows reliably?</div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:8px;">Resume Bullets</div>
+        <div class="rb">Architected LangGraph-based support workflow with 7 nodes, conditional branching on issue type, and human-in-loop approval gate using interrupt_before</div>
+        <div class="rb">Implemented real-time workflow streaming via FastAPI WebSockets, providing ops team live visibility into each case step and SLA countdown</div>
+        <div class="rb">Integrated LangSmith observability capturing full execution traces, enabling debugging of complex branching scenarios and cost tracking per workflow run</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════ PROJECT 6 ═══════════════════════ -->
+<div id="t-p6" class="tab">
+<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
+  <div style="font-size:32px;font-weight:500;color:var(--color-text-primary);line-height:1;">6</div>
+  <div>
+    <div style="font-size:16px;font-weight:500;">Enterprise Multi-Agent CX Platform on AWS</div>
+    <span class="badge b-pink" style="margin-top:4px;">Core Skill: Multi-Agent Enterprise System</span>
+    <span class="badge b-gray" style="margin-top:4px;margin-left:4px;">Simulates: Salesforce Agentforce / Microsoft Azure AI</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Business Problem &amp; Architecture</div><span class="ci op">▾</span></div>
+  <div class="cb op">
+    <div class="g2">
+      <div class="mc"><div class="ml">Business Problem</div><div class="mv" style="font-size:12px;">Enterprise CX needs end-to-end automation: triage → research → draft → QA → send. One agent cannot specialize in all areas. Complex tickets need 4 types of expertise working in coordination. SLA compliance requires audit trail.</div></div>
+      <div class="mc"><div class="ml">Real-World Use Case</div><div class="mv" style="font-size:12px;">Mirrors Salesforce Agentforce architecture — supervisor coordinates specialist agents, each with its own knowledge, tools, and responsibilities. Runs on AWS serverless infrastructure for cost-efficient scaling.</div></div>
+    </div>
+    <div class="mc" style="margin-top:8px;"><div class="ml">Multi-Agent Architecture on AWS</div>
+    <div style="font-size:12px;color:var(--color-text-primary);line-height:1.8;margin-top:6px;">
+      Ticket arrives via API Gateway <span style="color:var(--color-text-secondary);">→</span> AWS SQS queue
+      <span style="color:var(--color-text-secondary);">→</span> Lambda triggered <span style="color:var(--color-text-secondary);">→</span> Supervisor Agent (GPT-4o)
+      <span style="color:var(--color-text-secondary);">→</span> Routes to: [Classifier Agent] → issue_type + priority
+      <span style="color:var(--color-text-secondary);">→</span> [Research Agent] → RAG search from Pinecone knowledge base
+      <span style="color:var(--color-text-secondary);">→</span> [Drafting Agent] → personalized response draft
+      <span style="color:var(--color-text-secondary);">→</span> [QA Agent] → compliance check + tone verification
+      <span style="color:var(--color-text-secondary);">→</span> Supervisor reviews final → AWS SES sends email
+      <span style="color:var(--color-text-secondary);">→</span> CloudWatch metrics: cost/ticket, latency p99, error rate
+    </div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Tech Stack, Folder Structure &amp; AWS Services</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="g2">
+      <div>
+        <div class="ml" style="margin-bottom:6px;">Tech Stack</div>
+        <div class="tags">
+          <span class="tag">langgraph multi-agent</span><span class="tag">openai gpt-4o + gpt-4o-mini</span>
+          <span class="tag">aws bedrock (claude haiku)</span><span class="tag">pinecone</span>
+          <span class="tag">fastapi on lambda</span><span class="tag">aws sqs</span>
+          <span class="tag">aws ses</span><span class="tag">cloudwatch</span>
+          <span class="tag">ecr + docker</span><span class="tag">github actions</span>
+        </div>
+        <div class="ml" style="margin-top:10px;margin-bottom:4px;">AWS Services (Free Tier)</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);line-height:1.8;">
+          Lambda: 1M requests/month free<br>
+          SQS: 1M messages/month free<br>
+          SES: 62k emails/month free (from Lambda)<br>
+          CloudWatch: 10 metrics free<br>
+          ECR: 500MB storage free
+        </div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:6px;">Folder Structure</div>
+        <div class="code" style="font-size:11px;">enterprise-multiagent-aws/
+├── agents/
+│   ├── supervisor.py
+│   ├── classifier_agent.py
+│   ├── research_agent.py
+│   ├── drafting_agent.py
+│   └── qa_agent.py
+├── api/
+│   ├── main.py            ← FastAPI app
+│   └── routes/
+│       ├── tickets.py
+│       └── monitoring.py
+├── infrastructure/
+│   ├── lambda_handler.py  ← AWS entry point
+│   ├── sqs_consumer.py
+│   └── cloudwatch.py
+├── .github/
+│   └── workflows/
+│       ├── test.yml
+│       └── deploy.yml     ← Deploy to Lambda
+├── Dockerfile
+└── README.md</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Implementation Steps &amp; Interview Prep</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="step"><div class="sn">1</div><div><div style="font-size:12px;font-weight:500;">Define agent roles with system prompts</div><div class="sd">Each agent gets a specific system prompt + limited tool access. Classifier: only classification tools. Research: only Pinecone RAG. Drafting: only text generation. QA: only checking/validation tools.</div></div></div>
+    <div class="step"><div class="sn">2</div><div><div style="font-size:12px;font-weight:500;">Build LangGraph multi-agent graph</div><div class="sd">Supervisor node receives ticket + previous agent outputs. Routes to next agent via conditional edge. Each worker node runs its LLM chain and returns result to shared state. Supervisor collects all results.</div></div></div>
+    <div class="step"><div class="sn">3</div><div><div style="font-size:12px;font-weight:500;">Containerize with Docker for Lambda</div><div class="sd">Lambda supports container images up to 10GB. Dockerfile installs all dependencies. lambda_handler.py wraps FastAPI app. Test locally with docker run before deploying.</div></div></div>
+    <div class="step"><div class="sn">4</div><div><div style="font-size:12px;font-weight:500;">Set up SQS → Lambda trigger</div><div class="sd">Create SQS queue in AWS console. Set Lambda event source mapping to SQS. Each new message in queue triggers Lambda. Lambda processes ticket and sends SES email on completion.</div></div></div>
+    <div class="step"><div class="sn">5</div><div><div style="font-size:12px;font-weight:500;">GitHub Actions CI/CD pipeline</div><div class="sd">On push to main: run pytest → build Docker → push to ECR → aws lambda update-function-code --image-uri. Full deploy takes under 3 minutes. Add manual approval gate for production.</div></div></div>
+    <div class="step"><div class="sn">6</div><div><div style="font-size:12px;font-weight:500;">CloudWatch monitoring + cost optimization</div><div class="sd">Custom metrics: tickets_processed, cost_per_ticket, agent_latency_ms, error_count. Use GPT-4o-mini for all 3 worker agents — only supervisor uses GPT-4o. Reduces cost by 10x.</div></div></div>
+    <div class="divider"></div>
+    <div class="g2">
+      <div>
+        <div class="ml" style="margin-bottom:8px;">Interview Questions</div>
+        <div class="iq">How does a supervisor-worker multi-agent pattern differ from a sequential pipeline?</div>
+        <div class="iq">How do you prevent agents from contradicting each other's outputs?</div>
+        <div class="iq">Explain your AWS architecture choices — why Lambda vs EC2 or ECS?</div>
+        <div class="iq">How do you monitor and optimize cost per resolved ticket in production?</div>
+        <div class="iq">How would you A/B test different agent configurations in production?</div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:8px;">Resume Bullets</div>
+        <div class="rb">Designed and deployed enterprise multi-agent CX platform on AWS — supervisor + 4 specialist agents autonomously resolving support tickets end-to-end without human intervention</div>
+        <div class="rb">Architected AWS serverless pipeline: FastAPI on Lambda + SQS queue + SES email delivery, processing 1,000 tickets/day within free tier limits</div>
+        <div class="rb">Built GitHub Actions CI/CD pipeline: test → Docker build → ECR push → Lambda deploy in under 3 minutes, with CloudWatch monitoring cost/ticket and p99 latency</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════ FREE TIER ═══════════════════════ -->
+<div id="t-free" class="tab">
+<h3>Free Tier Strategy — Target: $0–$30 Total</h3>
+<div class="g2">
+  <div class="card" style="margin-bottom:0;">
+    <div class="ct" style="margin-bottom:6px;">OpenAI</div>
+    <div class="cs" style="margin-bottom:6px;">$5 free credit on signup. Use GPT-4o-mini only ($0.15/1M input tokens). Batch API gives 50% discount. Set usage limit to $10 in account settings.</div>
+    <div class="warn" style="margin-top:0;">💡 When credits run low: switch to HuggingFace Mistral-7B-Instruct — completely free, same LangChain interface</div>
+  </div>
+  <div class="card" style="margin-bottom:0;">
+    <div class="ct" style="margin-bottom:6px;">HuggingFace (100% Free)</div>
+    <div class="cs" style="margin-bottom:6px;">Free Inference API for Mistral-7B, Llama-3-8B, Zephyr-7B. Free sentence-transformers run locally. Free datasets for evaluation. No credit card required.</div>
+    <div class="code" style="font-size:11px;">from langchain_community.llms import HuggingFaceHub
+llm = HuggingFaceHub(
+  repo_id="mistralai/Mistral-7B-Instruct-v0.3",
+  huggingfacehub_api_token="hf_..."
+)</div>
+  </div>
+  <div class="card" style="margin-bottom:0;">
+    <div class="ct" style="margin-bottom:6px;">ChromaDB (100% Free)</div>
+    <div class="cs">Runs completely locally on your Mac. No account needed. Persistent storage. Perfect for Projects 1–4. Only migrate to Pinecone when you need cloud hosting for demos.</div>
+  </div>
+  <div class="card" style="margin-bottom:0;">
+    <div class="ct" style="margin-bottom:6px;">Pinecone Free Tier</div>
+    <div class="cs">1 free serverless index. 100,000 vectors. 5 namespaces. Enough for Projects 3–6. Delete old vectors between projects to stay within limits. No credit card for free tier.</div>
+  </div>
+  <div class="card" style="margin-bottom:0;">
+    <div class="ct" style="margin-bottom:6px;">AWS 12-Month Free Tier</div>
+    <div class="cs" style="margin-bottom:6px;">Lambda (1M requests), SQS (1M messages), SES (62k emails from Lambda), CloudWatch (10 custom metrics), ECR (500MB). Set billing alert at $5 immediately after account creation.</div>
+    <div class="warn" style="margin-top:0;">⚠️ AWS Bedrock is NOT in free tier — use OpenAI API for development, only test Bedrock in final Project 6 week</div>
+  </div>
+  <div class="card" style="margin-bottom:0;">
+    <div class="ct" style="margin-bottom:6px;">LangSmith + Streamlit Cloud</div>
+    <div class="cs">LangSmith free: 5,000 traces/month — enough for all debugging. Streamlit Cloud: free hosting for public repos — deploy your portfolio demos here for interviewers to click and test live.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+<h3>Cost Breakdown by Month</h3>
+<div class="g3">
+  <div class="mc"><div class="ml">Month 1–2 (P1+P2)</div><div class="mv">~$2–5<br><span style="font-size:11px;color:var(--color-text-secondary);">OpenAI testing + embeddings. Use HF models for most dev work.</span></div></div>
+  <div class="mc"><div class="ml">Month 3 (P3 Advanced RAG)</div><div class="mv">~$3–8<br><span style="font-size:11px;color:var(--color-text-secondary);">More OpenAI calls for RAGAS evaluation. Pinecone free.</span></div></div>
+  <div class="mc"><div class="ml">Month 4–5 (P4+P5 Agents)</div><div class="mv">~$5–10<br><span style="font-size:11px;color:var(--color-text-secondary);">Agents use more tokens. Use mini model exclusively.</span></div></div>
+  <div class="mc"><div class="ml">Month 6 (P6 AWS)</div><div class="mv">~$5–10<br><span style="font-size:11px;color:var(--color-text-secondary);">AWS costs minimal in free tier. Brief Bedrock testing.</span></div></div>
+  <div class="mc"><div class="ml">Total 6 Months</div><div class="mv" style="font-size:15px;font-weight:500;">$15–33</div></div>
+  <div class="mc"><div class="ml">If Using Only HF</div><div class="mv" style="font-size:15px;font-weight:500;">$0</div></div>
+</div>
+</div>
+
+<!-- ═══════════════════════ DEPLOY + AWS ═══════════════════════ -->
+<div id="t-deploy" class="tab">
+<h3>Deployment, Docker &amp; AWS Architecture</h3>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">Dockerfile — Standard Template for All Projects</div><span class="ci op">▾</span></div>
+  <div class="cb op">
+    <div class="code">FROM python:3.11-slim
+WORKDIR /app
+
+# Install dependencies first (cached layer)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+EXPOSE 8000
+
+# FastAPI with uvicorn
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# Build and run locally:
+# docker build -t cx-app .
+# docker run -p 8000:8000 --env-file .env cx-app</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">GitHub Actions — CI/CD Pipeline Template</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="code">name: CI/CD Pipeline
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: pytest tests/ -v --tb=short
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Build and push to ECR
+        run: |
+          aws ecr get-login-password | docker login --username AWS \
+            --password-stdin $ECR_REGISTRY
+          docker build -t $ECR_REGISTRY/$IMAGE_NAME:$GITHUB_SHA .
+          docker push $ECR_REGISTRY/$IMAGE_NAME:$GITHUB_SHA
+      - name: Deploy to Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name cx-multiagent \
+            --image-uri $ECR_REGISTRY/$IMAGE_NAME:$GITHUB_SHA</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ch" onclick="tog(this)"><div class="ct">AWS Architecture for Project 6</div><span class="ci">▾</span></div>
+  <div class="cb">
+    <div class="g2">
+      <div class="mc"><div class="ml">API Gateway + Lambda</div><div class="mv" style="font-size:12px;">POST /tickets → API Gateway → Lambda (FastAPI container). Lambda scales to 0 when idle — pay only per invocation. Container image up to 10GB supports all ML libraries.</div></div>
+      <div class="mc"><div class="ml">SQS Queue</div><div class="mv" style="font-size:12px;">Ticket arrives → SQS standard queue → Lambda polled automatically. Decouples ingestion from processing. Dead Letter Queue for failed messages. Free: 1M messages/month.</div></div>
+      <div class="mc"><div class="ml">AWS Bedrock</div><div class="mv" style="font-size:12px;">Use Claude Haiku (cheapest) for worker agents. No API key management — uses IAM role. Input: $0.25/1M tokens. Consistent pricing vs OpenAI rate limits at scale.</div></div>
+      <div class="mc"><div class="ml">SES + CloudWatch</div><div class="mv" style="font-size:12px;">SES sends resolution emails (62k/month free from Lambda). CloudWatch custom metrics: tickets_processed, avg_cost, error_rate. Alarm at error_rate &gt; 5%.</div></div>
+    </div>
+    <div class="mc" style="margin-top:10px;"><div class="ml">IAM Policy — Least Privilege (Important for interviews)</div>
+    <div class="code" style="font-size:11px;">{
+  "Version": "2012-10-17",
+  "Statement": [
+    {"Effect":"Allow","Action":["sqs:ReceiveMessage","sqs:DeleteMessage"],
+     "Resource":"arn:aws:sqs:us-east-1:ACCOUNT:cx-tickets"},
+    {"Effect":"Allow","Action":["ses:SendEmail"],
+     "Resource":"arn:aws:ses:us-east-1:ACCOUNT:identity/*"},
+    {"Effect":"Allow","Action":["bedrock:InvokeModel"],
+     "Resource":"arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-haiku*"},
+    {"Effect":"Allow","Action":["cloudwatch:PutMetricData"],
+     "Resource":"*"}
+  ]
+}</div></div>
+  </div>
+</div>
+
+</div>
+
+</div><!-- end padding -->
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  var el = document.getElementById('t-'+id);
+  if (el) el.classList.add('on');
+  if (btn) btn.classList.add('on');
+}
+
+function tog(ch) {
+  var cb = ch.nextElementSibling;
+  var ci = ch.querySelector('.ci');
+  if (!cb) return;
+  var isOpen = cb.classList.contains('op');
+  cb.classList.toggle('op', !isOpen);
+  if (ci) ci.classList.toggle('op', !isOpen);
+}
+</script>
+</body>
+</html>
