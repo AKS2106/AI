@@ -1,0 +1,867 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .root { padding: 1.5rem 0; }
+  .hero { margin-bottom: 2rem; }
+  .hero h1 { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px; }
+  .hero p { font-size: 14px; color: var(--color-text-secondary); }
+  .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 99px; margin-right: 6px; margin-bottom: 4px; }
+  .badge-blue { background: #E6F1FB; color: #0C447C; }
+  .badge-teal { background: #E1F5EE; color: #085041; }
+  .badge-amber { background: #FAEEDA; color: #633806; }
+  .badge-purple { background: #EEEDFE; color: #3C3489; }
+  .badge-coral { background: #FAECE7; color: #712B13; }
+  .nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 2rem; }
+  .nav-btn { font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-secondary); cursor: pointer; transition: all 0.15s; }
+  .nav-btn:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
+  .nav-btn.active { background: #E6F1FB; color: #0C447C; border-color: #B5D4F4; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+  .card h2 { font-size: 16px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .card h3 { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin: 14px 0 8px; }
+  .card p, .card li { font-size: 13px; color: var(--color-text-secondary); line-height: 1.65; }
+  .card ul { padding-left: 1.2rem; }
+  .card li { margin-bottom: 5px; }
+  pre { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 1rem; font-size: 11.5px; font-family: var(--font-mono); color: var(--color-text-primary); overflow-x: auto; white-space: pre; margin: 10px 0; line-height: 1.6; }
+  .kw { color: #185FA5; }
+  .str { color: #0F6E56; }
+  .cm { color: #888780; font-style: italic; }
+  .fn { color: #712B13; }
+  .step-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+  .step-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 14px; }
+  .step-num { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 6px; }
+  .step-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+  .step-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
+  .arch-flow { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+  .arch-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .arch-box { font-size: 12px; font-weight: 500; padding: 8px 14px; border-radius: var(--border-radius-md); white-space: nowrap; }
+  .arch-arrow { font-size: 16px; color: var(--color-text-secondary); }
+  .arch-label { font-size: 11px; color: var(--color-text-secondary); font-style: italic; }
+  .q-item { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); margin-bottom: 10px; overflow: hidden; }
+  .q-header { padding: 12px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 500; color: var(--color-text-primary); background: var(--color-background-primary); user-select: none; }
+  .q-header:hover { background: var(--color-background-secondary); }
+  .q-body { padding: 12px 14px; font-size: 13px; color: var(--color-text-secondary); line-height: 1.65; background: var(--color-background-secondary); border-top: 0.5px solid var(--color-border-tertiary); display: none; }
+  .q-body.open { display: block; }
+  .table-wrap { overflow-x: auto; margin: 10px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; padding: 8px 12px; background: var(--color-background-secondary); color: var(--color-text-secondary); font-weight: 500; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  td { padding: 8px 12px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); }
+  tr:last-child td { border-bottom: none; }
+  .folder-tree { font-family: var(--font-mono); font-size: 12px; line-height: 1.9; color: var(--color-text-secondary); }
+  .folder-tree .dir { color: #185FA5; font-weight: 500; }
+  .folder-tree .file { color: var(--color-text-primary); }
+  .folder-tree .comment { color: #888780; font-style: italic; }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 10px 0; }
+  .metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px; }
+  .metric-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
+  .metric-value { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+  .progress-bar { height: 4px; background: var(--color-background-secondary); border-radius: 2px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: #378ADD; border-radius: 2px; transition: width 0.3s; }
+  .inline-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-family: var(--font-mono); margin: 1px; }
+  .tag-s3 { background: #FAEEDA; color: #633806; }
+  .tag-glue { background: #E1F5EE; color: #085041; }
+  .tag-redshift { background: #E6F1FB; color: #0C447C; }
+  .tag-lambda { background: #EEEDFE; color: #3C3489; }
+  .tag-athena { background: #FAECE7; color: #712B13; }
+  .divider { height: 0.5px; background: var(--color-border-tertiary); margin: 16px 0; }
+  .ask-btn { font-size: 12px; padding: 6px 14px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; margin-top: 10px; }
+  .ask-btn:hover { background: var(--color-background-secondary); }
+</style>
+<div class="root">
+  <h2 class="sr-only" style="position:absolute;left:-9999px">E-Commerce Data Engineering Portfolio Project — Interactive Guide</h2>
+  <div class="hero">
+    <div style="margin-bottom:10px">
+      <span class="badge badge-blue">Project 1 of 3</span>
+      <span class="badge badge-teal">E-Commerce</span>
+      <span class="badge badge-amber">Beginner → Advanced</span>
+    </div>
+    <h1>Customer Orders Analytics Pipeline</h1>
+    <p>A full Data Engineering portfolio project — end-to-end pipeline on AWS, PySpark, Redshift & more. Navigate each section below.</p>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="pbar" style="width:9%"></div></div>
+  <div class="nav" id="nav">
+    <button class="nav-btn active" onclick="show(0)">Business Problem</button>
+    <button class="nav-btn" onclick="show(1)">Mac Setup</button>
+    <button class="nav-btn" onclick="show(2)">Data Sources</button>
+    <button class="nav-btn" onclick="show(3)">Architecture</button>
+    <button class="nav-btn" onclick="show(4)">DE Tasks + Code</button>
+    <button class="nav-btn" onclick="show(5)">Data Modeling</button>
+    <button class="nav-btn" onclick="show(6)">SQL Queries</button>
+    <button class="nav-btn" onclick="show(7)">PySpark</button>
+    <button class="nav-btn" onclick="show(8)">AWS Deploy</button>
+    <button class="nav-btn" onclick="show(9)">Interview Q&A</button>
+    <button class="nav-btn" onclick="show(10)">Resume Story</button>
+  </div>
+
+  <!-- SECTION 0: Business Problem -->
+  <div class="section active" id="s0">
+    <div class="card">
+      <h2><i class="ti ti-building-store" aria-hidden="true"></i> Business Problem</h2>
+      <p><strong style="color:var(--color-text-primary)">ShopFast Inc.</strong> is a mid-size e-commerce company processing ~500K orders/month across web, mobile, and marketplace channels. Their data lives in 4 silos — a transactional MySQL database, a Shopify API, a product catalog in JSON, and customer behavior events from Snowplow. The <strong style="color:var(--color-text-primary)">analytics team cannot answer</strong> basic questions like "What is our revenue by category this week?" or "Which customers are at churn risk?"</p>
+      <h3>Why it matters</h3>
+      <ul>
+        <li>Marketing spends $2M/month with no ROI visibility by channel</li>
+        <li>Warehouse team manually reconciles orders in Excel — 3 days lag</li>
+        <li>Customer support has no unified view of a customer's order history</li>
+        <li>No SLA monitoring on delivery promises</li>
+      </ul>
+      <div class="metric-grid" style="margin-top:14px">
+        <div class="metric"><div class="metric-label">Monthly orders</div><div class="metric-value">500K</div></div>
+        <div class="metric"><div class="metric-label">Data lag (before)</div><div class="metric-value">3 days</div></div>
+        <div class="metric"><div class="metric-label">Target lag (after)</div><div class="metric-value">1 hour</div></div>
+        <div class="metric"><div class="metric-label">Business value</div><div class="metric-value">$4M/yr</div></div>
+      </div>
+      <div class="divider"></div>
+      <h3>Your role as Data Engineer</h3>
+      <p>Build a scalable, automated data pipeline that ingests raw data from all sources, validates and transforms it, loads it into a Redshift data warehouse, and serves it to BI dashboards — reducing reporting lag from 3 days to under 1 hour.</p>
+      <button class="ask-btn" onclick="sendPrompt('Explain more about the ShopFast business problem and how to frame it in an interview ↗')">Ask Claude to explain more ↗</button>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Mac Setup -->
+  <div class="section" id="s1">
+    <div class="card">
+      <h2><i class="ti ti-brand-apple" aria-hidden="true"></i> Step-by-Step Mac Setup (Free Tier)</h2>
+      <div class="step-grid">
+        <div class="step-card"><div class="step-num">Step 1</div><div class="step-title">Install Homebrew</div><div class="step-desc">Mac's package manager — you'll install everything through it</div></div>
+        <div class="step-card"><div class="step-num">Step 2</div><div class="step-title">Python 3.11 + pip</div><div class="step-desc">Core language for all pipeline scripts and PySpark</div></div>
+        <div class="step-card"><div class="step-num">Step 3</div><div class="step-title">Java 11 (JDK)</div><div class="step-desc">Required by Apache Spark to run locally</div></div>
+        <div class="step-card"><div class="step-num">Step 4</div><div class="step-title">PySpark local</div><div class="step-desc">pip install pyspark — test transforms before AWS</div></div>
+        <div class="step-card"><div class="step-num">Step 5</div><div class="step-title">AWS CLI + Free Tier</div><div class="step-desc">Sign up for AWS Free Tier. Install aws-cli via brew</div></div>
+        <div class="step-card"><div class="step-num">Step 6</div><div class="step-title">VS Code + Git</div><div class="step-desc">Code editor and version control for GitHub</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2><i class="ti ti-terminal" aria-hidden="true"></i> All Terminal Commands</h2>
+      <pre><span class="cm"># 1. Install Homebrew</span>
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+<span class="cm"># 2. Install Python 3.11</span>
+brew install python@3.11
+python3 --version  <span class="cm"># verify: Python 3.11.x</span>
+
+<span class="cm"># 3. Install Java 11 (required for Spark)</span>
+brew install openjdk@11
+sudo ln -sfn /opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk \
+  /Library/Java/JavaVirtualMachines/openjdk-11.jdk
+java -version  <span class="cm"># verify</span>
+
+<span class="cm"># 4. Create a virtual environment & install PySpark</span>
+python3 -m venv ~/de-env
+source ~/de-env/bin/activate
+pip install pyspark==3.5.0 boto3 pandas faker pytest
+
+<span class="cm"># 5. Install AWS CLI</span>
+brew install awscli
+aws --version  <span class="cm"># verify: aws-cli/2.x.x</span>
+
+<span class="cm"># 6. Install Git + VS Code</span>
+brew install git
+brew install --cask visual-studio-code
+
+<span class="cm"># 7. Configure AWS credentials (use Free Tier account)</span>
+aws configure
+<span class="cm"># Enter: Access Key ID, Secret Key, Region (us-east-1), Output (json)</span></pre>
+    </div>
+    <div class="card">
+      <h2><i class="ti ti-brand-github" aria-hidden="true"></i> GitHub Project Setup</h2>
+      <pre><span class="cm"># Create repo and push first commit</span>
+mkdir shopfast-de-pipeline && cd shopfast-de-pipeline
+git init
+git remote add origin https://github.com/YOURUSERNAME/shopfast-de-pipeline.git
+
+<span class="cm"># Create .gitignore</span>
+echo ".env\n__pycache__/\n*.pyc\n.DS_Store\nvenv/\n*.egg-info/" > .gitignore
+
+<span class="cm"># First commit</span>
+git add .
+git commit -m "feat: initial project scaffold"
+git push -u origin main</pre>
+      <h3>Free Tier limits to stay within</h3>
+      <ul>
+        <li>S3: 5 GB storage free — use small sample datasets (10K–100K rows)</li>
+        <li>Glue: 1 million objects cataloged free, crawlers are metered — run sparingly</li>
+        <li>Athena: $5/TB scanned — partition your data well to minimize scans</li>
+        <li>Redshift: Use dc2.large Single Node (~$0.25/hr) — stop cluster when not in use</li>
+        <li>Lambda: 1M requests/month free — more than enough for this project</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Data Sources -->
+  <div class="section" id="s2">
+    <div class="card">
+      <h2><i class="ti ti-database" aria-hidden="true"></i> Data Sources & Sample Generation</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Source</th><th>Format</th><th>Volume</th><th>Refresh</th><th>Destination</th></tr></thead>
+          <tbody>
+            <tr><td>Orders (MySQL export)</td><td><span class="inline-tag tag-s3">CSV</span></td><td>50K rows/day</td><td>Daily batch</td><td>S3 raw/orders/</td></tr>
+            <tr><td>Products catalog (Shopify API)</td><td><span class="inline-tag tag-glue">JSON</span></td><td>20K products</td><td>Hourly</td><td>S3 raw/products/</td></tr>
+            <tr><td>Clickstream events (Snowplow)</td><td><span class="inline-tag tag-redshift">JSON (nested)</span></td><td>2M events/day</td><td>Real-time stream</td><td>S3 raw/events/</td></tr>
+            <tr><td>Returns data</td><td><span class="inline-tag tag-lambda">CSV</span></td><td>2K rows/day</td><td>Daily batch</td><td>S3 raw/returns/</td></tr>
+            <tr><td>Customer master</td><td><span class="inline-tag tag-athena">CSV</span></td><td>500K rows</td><td>Weekly full load</td><td>S3 raw/customers/</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h2><i class="ti ti-code" aria-hidden="true"></i> Generate Test Data (Python Script)</h2>
+      <p style="margin-bottom:10px">Run this script locally to generate all sample CSV/JSON files for your project.</p>
+      <pre><span class="cm"># generate_data.py — run: python generate_data.py</span>
+<span class="kw">from</span> faker <span class="kw">import</span> Faker
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> json, random, os
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timedelta
+
+fake = Faker()
+os.makedirs(<span class="str">"data/raw/orders"</span>, exist_ok=<span class="kw">True</span>)
+os.makedirs(<span class="str">"data/raw/products"</span>, exist_ok=<span class="kw">True</span>)
+os.makedirs(<span class="str">"data/raw/customers"</span>, exist_ok=<span class="kw">True</span>)
+
+CATEGORIES = [<span class="str">"Electronics"</span>, <span class="str">"Apparel"</span>, <span class="str">"Home"</span>, <span class="str">"Sports"</span>, <span class="str">"Books"</span>]
+STATUSES   = [<span class="str">"PLACED"</span>, <span class="str">"SHIPPED"</span>, <span class="str">"DELIVERED"</span>, <span class="str">"RETURNED"</span>, <span class="str">"CANCELLED"</span>]
+CHANNELS   = [<span class="str">"web"</span>, <span class="str">"mobile_app"</span>, <span class="str">"marketplace"</span>]
+
+<span class="cm"># --- Customers ---</span>
+customers = [{
+    <span class="str">"customer_id"</span>: f<span class="str">"CUST{i:06d}"</span>,
+    <span class="str">"name"</span>: fake.name(),
+    <span class="str">"email"</span>: fake.email(),
+    <span class="str">"city"</span>: fake.city(),
+    <span class="str">"state"</span>: fake.state_abbr(),
+    <span class="str">"signup_date"</span>: str(fake.date_between(<span class="str">"-3y"</span>, <span class="str">"today"</span>)),
+    <span class="str">"tier"</span>: random.choice([<span class="str">"bronze"</span>, <span class="str">"silver"</span>, <span class="str">"gold"</span>])
+} <span class="kw">for</span> i <span class="kw">in</span> range(<span class="fn">1</span>, <span class="fn">10001</span>)]
+pd.DataFrame(customers).to_csv(<span class="str">"data/raw/customers/customers.csv"</span>, index=<span class="kw">False</span>)
+
+<span class="cm"># --- Products (JSON) ---</span>
+products = [{
+    <span class="str">"product_id"</span>: f<span class="str">"PROD{i:05d}"</span>,
+    <span class="str">"name"</span>: fake.catch_phrase(),
+    <span class="str">"category"</span>: random.choice(CATEGORIES),
+    <span class="str">"price"</span>: round(random.uniform(<span class="fn">5</span>, <span class="fn">999</span>), <span class="fn">2</span>),
+    <span class="str">"vendor"</span>: fake.company(),
+    <span class="str">"attributes"</span>: {<span class="str">"color"</span>: fake.color_name(), <span class="str">"weight_kg"</span>: round(random.uniform(<span class="fn">0.1</span>, <span class="fn">10</span>), <span class="fn">2</span>)}
+} <span class="kw">for</span> i <span class="kw">in</span> range(<span class="fn">1</span>, <span class="fn">2001</span>)]
+<span class="kw">with</span> open(<span class="str">"data/raw/products/products.json"</span>, <span class="str">"w"</span>) <span class="kw">as</span> f:
+    json.dump(products, f, indent=<span class="fn">2</span>)
+
+<span class="cm"># --- Orders (CSV with partitioned date folders) ---</span>
+cust_ids  = [c[<span class="str">"customer_id"</span>] <span class="kw">for</span> c <span class="kw">in</span> customers]
+prod_ids  = [p[<span class="str">"product_id"</span>] <span class="kw">for</span> p <span class="kw">in</span> products]
+base_date = datetime(<span class="fn">2024</span>, <span class="fn">1</span>, <span class="fn">1</span>)
+
+<span class="kw">for</span> day_offset <span class="kw">in</span> range(<span class="fn">30</span>):
+    order_date = base_date + timedelta(days=day_offset)
+    folder = f<span class="str">"data/raw/orders/year={order_date.year}/month={order_date.month:02d}/day={order_date.day:02d}"</span>
+    os.makedirs(folder, exist_ok=<span class="kw">True</span>)
+    orders = [{
+        <span class="str">"order_id"</span>: f<span class="str">"ORD{day_offset*1000+j:08d}"</span>,
+        <span class="str">"customer_id"</span>: random.choice(cust_ids),
+        <span class="str">"product_id"</span>: random.choice(prod_ids),
+        <span class="str">"quantity"</span>: random.randint(<span class="fn">1</span>, <span class="fn">5</span>),
+        <span class="str">"unit_price"</span>: round(random.uniform(<span class="fn">10</span>, <span class="fn">500</span>), <span class="fn">2</span>),
+        <span class="str">"discount_pct"</span>: random.choice([<span class="fn">0</span>, <span class="fn">5</span>, <span class="fn">10</span>, <span class="fn">15</span>, <span class="fn">20</span>]),
+        <span class="str">"order_status"</span>: random.choice(STATUSES),
+        <span class="str">"channel"</span>: random.choice(CHANNELS),
+        <span class="str">"order_date"</span>: str(order_date.date()),
+        <span class="str">"created_at"</span>: str(order_date)
+    } <span class="kw">for</span> j <span class="kw">in</span> range(<span class="fn">500</span>)]
+    pd.DataFrame(orders).to_csv(f<span class="str">"{folder}/orders.csv"</span>, index=<span class="kw">False</span>)
+
+<span class="kw">print</span>(<span class="str">"✅ Test data generated in data/raw/"</span>)</pre>
+      <button class="ask-btn" onclick="sendPrompt('How do I upload the generated test data to AWS S3 using the AWS CLI? ↗')">Ask: How to upload to S3 ↗</button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Architecture -->
+  <div class="section" id="s3">
+    <div class="card">
+      <h2><i class="ti ti-topology-star" aria-hidden="true"></i> AWS Architecture — Layer by Layer</h2>
+      <div class="arch-flow">
+        <div class="arch-row">
+          <span class="arch-box badge-blue" style="padding:10px 18px;font-size:13px">Source Systems<br><small style="font-weight:400;font-size:11px">MySQL · Shopify API · Snowplow</small></span>
+          <span class="arch-arrow">→</span>
+          <span class="arch-box badge-amber" style="padding:10px 18px;font-size:13px">Ingestion Layer<br><small style="font-weight:400;font-size:11px">Lambda · Kinesis (optional)</small></span>
+          <span class="arch-arrow">→</span>
+          <span class="arch-box badge-teal" style="padding:10px 18px;font-size:13px">Raw Zone (S3)<br><small style="font-weight:400;font-size:11px">CSV · JSON partitioned by date</small></span>
+        </div>
+        <div class="arch-row" style="padding-left:20px">
+          <span class="arch-label">↓ Glue Crawler auto-discovers schema</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-box badge-teal" style="padding:10px 18px;font-size:13px">Raw Zone (S3)</span>
+          <span class="arch-arrow">→</span>
+          <span class="arch-box badge-purple" style="padding:10px 18px;font-size:13px">AWS Glue ETL Job<br><small style="font-weight:400;font-size:11px">PySpark — validate, clean, transform</small></span>
+          <span class="arch-arrow">→</span>
+          <span class="arch-box badge-teal" style="padding:10px 18px;font-size:13px">Curated Zone (S3)<br><small style="font-weight:400;font-size:11px">Parquet · partitioned</small></span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-box badge-teal" style="padding:10px 18px;font-size:13px">Curated Zone (S3)</span>
+          <span class="arch-arrow">→</span>
+          <span class="arch-box badge-blue" style="padding:10px 18px;font-size:13px">Redshift COPY<br><small style="font-weight:400;font-size:11px">Fact + Dimension tables</small></span>
+          <span class="arch-arrow">→</span>
+          <span class="arch-box badge-coral" style="padding:10px 18px;font-size:13px">BI / Athena<br><small style="font-weight:400;font-size:11px">QuickSight · Tableau</small></span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-box" style="padding:8px 14px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md)">CloudWatch Logs + Alerts</span>
+          <span class="arch-arrow">·</span>
+          <span class="arch-box" style="padding:8px 14px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md)">Glue Data Catalog (Metastore)</span>
+          <span class="arch-arrow">·</span>
+          <span class="arch-box" style="padding:8px 14px;font-size:12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md)">IAM Roles (least privilege)</span>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <h3>S3 Bucket Structure</h3>
+      <pre>s3://shopfast-data-lake/
+├── raw/
+│   ├── orders/year=2024/month=01/day=01/orders.csv
+│   ├── products/products.json
+│   ├── customers/customers.csv
+│   └── returns/returns.csv
+├── curated/
+│   ├── fact_orders/year=2024/month=01/day=01/*.parquet
+│   ├── dim_customer/*.parquet
+│   └── dim_product/*.parquet
+├── scripts/
+│   └── glue_etl_orders.py
+└── logs/
+    └── glue_job_runs/</pre>
+    </div>
+  </div>
+
+  <!-- SECTION 4: DE Tasks + Code -->
+  <div class="section" id="s4">
+    <div class="card">
+      <h2><i class="ti ti-settings" aria-hidden="true"></i> Data Engineering Tasks</h2>
+      <h3>Folder Structure (GitHub)</h3>
+      <div class="folder-tree">
+        <div><span class="dir">shopfast-de-pipeline/</span></div>
+        <div>&nbsp;&nbsp;<span class="dir">data/</span> <span class="comment">— local test data</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">raw/</span> <span class="comment">orders/ products/ customers/</span></div>
+        <div>&nbsp;&nbsp;<span class="dir">src/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">ingestion/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">upload_to_s3.py</span> <span class="comment">— boto3 upload script</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">lambda_trigger.py</span> <span class="comment">— S3 event trigger</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">transformation/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">glue_etl_orders.py</span> <span class="comment">— main Glue PySpark job</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">data_quality.py</span> <span class="comment">— DQ checks module</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">modeling/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">ddl_redshift.sql</span> <span class="comment">— CREATE TABLE statements</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">load_redshift.py</span> <span class="comment">— COPY commands</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">sql/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">analytics_queries.sql</span></div>
+        <div>&nbsp;&nbsp;<span class="dir">tests/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">test_transformations.py</span></div>
+        <div>&nbsp;&nbsp;<span class="file">generate_data.py</span></div>
+        <div>&nbsp;&nbsp;<span class="file">requirements.txt</span></div>
+        <div>&nbsp;&nbsp;<span class="file">README.md</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2><i class="ti ti-code" aria-hidden="true"></i> S3 Upload Script (Ingestion)</h2>
+      <pre><span class="cm"># src/ingestion/upload_to_s3.py</span>
+<span class="kw">import</span> boto3, os, logging
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(<span class="str">"ingestion"</span>)
+
+<span class="kw">def</span> <span class="fn">upload_to_s3</span>(local_path: str, bucket: str, s3_prefix: str):
+    s3 = boto3.client(<span class="str">"s3"</span>)
+    path = Path(local_path)
+    success, failed = [], []
+    <span class="kw">for</span> file <span class="kw">in</span> path.rglob(<span class="str">"*"</span>):
+        <span class="kw">if</span> file.is_file():
+            key = f<span class="str">"{s3_prefix}/{file.relative_to(path)}"</span>
+            <span class="kw">try</span>:
+                s3.upload_file(str(file), bucket, key)
+                success.append(key)
+                logger.info(f<span class="str">"✅ Uploaded {key}"</span>)
+            <span class="kw">except</span> Exception <span class="kw">as</span> e:
+                failed.append({<span class="str">"file"</span>: key, <span class="str">"error"</span>: str(e)})
+                logger.error(f<span class="str">"❌ Failed {key}: {e}"</span>)
+    <span class="kw">return</span> {<span class="str">"uploaded"</span>: len(success), <span class="str">"failed"</span>: failed}
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    result = upload_to_s3(
+        local_path=<span class="str">"data/raw"</span>,
+        bucket=<span class="str">"shopfast-data-lake"</span>,
+        s3_prefix=<span class="str">"raw"</span>
+    )
+    <span class="kw">print</span>(f<span class="str">"Upload complete: {result}"</span>)</pre>
+    </div>
+    <div class="card">
+      <h2><i class="ti ti-shield-check" aria-hidden="true"></i> Data Quality Checks Module</h2>
+      <pre><span class="cm"># src/transformation/data_quality.py</span>
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> DataFrame
+<span class="kw">from</span> pyspark.sql.functions <span class="kw">import</span> col, count, when
+<span class="kw">import</span> logging
+
+logger = logging.getLogger(<span class="str">"data_quality"</span>)
+
+<span class="kw">class</span> <span class="fn">DataQualityChecker</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, df: DataFrame, table_name: str):
+        self.df = df
+        self.table = table_name
+        self.results = []
+
+    <span class="kw">def</span> <span class="fn">check_nulls</span>(self, critical_cols: list) -> <span class="str">"DataQualityChecker"</span>:
+        <span class="kw">for</span> c <span class="kw">in</span> critical_cols:
+            null_count = self.df.filter(col(c).isNull()).count()
+            passed = null_count == <span class="fn">0</span>
+            self.results.append({
+                <span class="str">"check"</span>: f<span class="str">"null_check:{c}"</span>, <span class="str">"passed"</span>: passed,
+                <span class="str">"detail"</span>: f<span class="str">"{null_count} nulls"</span>
+            })
+            <span class="kw">if not</span> passed:
+                logger.warning(f<span class="str">"⚠️  {self.table}.{c}: {null_count} nulls found"</span>)
+        <span class="kw">return</span> self
+
+    <span class="kw">def</span> <span class="fn">check_duplicates</span>(self, key_col: str) -> <span class="str">"DataQualityChecker"</span>:
+        total = self.df.count()
+        distinct = self.df.select(key_col).distinct().count()
+        dup_count = total - distinct
+        passed = dup_count == <span class="fn">0</span>
+        self.results.append({<span class="str">"check"</span>: f<span class="str">"dup_check:{key_col}"</span>,
+                              <span class="str">"passed"</span>: passed, <span class="str">"detail"</span>: f<span class="str">"{dup_count} duplicates"</span>})
+        <span class="kw">return</span> self
+
+    <span class="kw">def</span> <span class="fn">check_range</span>(self, col_name: str, min_val, max_val) -> <span class="str">"DataQualityChecker"</span>:
+        out_of_range = self.df.filter(
+            (col(col_name) < min_val) | (col(col_name) > max_val)
+        ).count()
+        passed = out_of_range == <span class="fn">0</span>
+        self.results.append({<span class="str">"check"</span>: f<span class="str">"range_check:{col_name}"</span>,
+                              <span class="str">"passed"</span>: passed, <span class="str">"detail"</span>: f<span class="str">"{out_of_range} out of range"</span>})
+        <span class="kw">return</span> self
+
+    <span class="kw">def</span> <span class="fn">summary</span>(self):
+        passed = sum(<span class="fn">1</span> <span class="kw">for</span> r <span class="kw">in</span> self.results <span class="kw">if</span> r[<span class="str">"passed"</span>])
+        total  = len(self.results)
+        logger.info(f<span class="str">"DQ Summary [{self.table}]: {passed}/{total} checks passed"</span>)
+        <span class="kw">if</span> passed < total:
+            <span class="kw">raise</span> ValueError(f<span class="str">"Data quality failed for {self.table}. Check logs."</span>)
+        <span class="kw">return</span> self.results</pre>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Data Modeling -->
+  <div class="section" id="s5">
+    <div class="card">
+      <h2><i class="ti ti-schema" aria-hidden="true"></i> Star Schema Design</h2>
+      <p style="margin-bottom:14px">The warehouse uses a <strong style="color:var(--color-text-primary)">star schema</strong> — one central fact table joined to 4 dimension tables. This optimizes for analytical query performance and BI tool compatibility.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Table</th><th>Type</th><th>Grain</th><th>Key Columns</th></tr></thead>
+          <tbody>
+            <tr><td><strong>fact_orders</strong></td><td>Fact</td><td>1 row per order line</td><td>order_id, customer_sk, product_sk, date_sk, channel_sk</td></tr>
+            <tr><td><strong>dim_customer</strong></td><td>SCD Type 2</td><td>1 row per customer version</td><td>customer_sk (surrogate), customer_id, name, tier, city</td></tr>
+            <tr><td><strong>dim_product</strong></td><td>SCD Type 1</td><td>1 row per product</td><td>product_sk, product_id, name, category, price</td></tr>
+            <tr><td><strong>dim_date</strong></td><td>Static</td><td>1 row per calendar day</td><td>date_sk, full_date, year, month, day, day_of_week, is_weekend</td></tr>
+            <tr><td><strong>dim_channel</strong></td><td>Static</td><td>1 row per channel</td><td>channel_sk, channel_name, channel_type</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h2><i class="ti ti-code" aria-hidden="true"></i> Redshift DDL</h2>
+      <pre><span class="cm">-- src/modeling/ddl_redshift.sql</span>
+
+<span class="kw">CREATE TABLE</span> dim_customer (
+    customer_sk     BIGINT IDENTITY(1,1) PRIMARY KEY,
+    customer_id     VARCHAR(20)  NOT NULL,
+    full_name       VARCHAR(200),
+    email           VARCHAR(200),
+    city            VARCHAR(100),
+    state           CHAR(2),
+    tier            VARCHAR(20),
+    effective_date  DATE         NOT NULL,
+    expiry_date     DATE         DEFAULT <span class="str">'9999-12-31'</span>,
+    is_current      BOOLEAN      DEFAULT TRUE,
+    created_at      TIMESTAMP    DEFAULT GETDATE()
+) DISTSTYLE ALL;  <span class="cm">-- small table, replicate to all nodes</span>
+
+<span class="kw">CREATE TABLE</span> dim_product (
+    product_sk   BIGINT IDENTITY(1,1) PRIMARY KEY,
+    product_id   VARCHAR(20)   NOT NULL,
+    product_name VARCHAR(300),
+    category     VARCHAR(100),
+    unit_price   DECIMAL(10,2),
+    vendor       VARCHAR(200),
+    updated_at   TIMESTAMP
+) DISTSTYLE ALL;
+
+<span class="kw">CREATE TABLE</span> dim_date (
+    date_sk      INT PRIMARY KEY,  <span class="cm">-- YYYYMMDD format e.g. 20240115</span>
+    full_date    DATE NOT NULL,
+    year         SMALLINT,
+    month        SMALLINT,
+    day          SMALLINT,
+    quarter      SMALLINT,
+    day_of_week  VARCHAR(10),
+    is_weekend   BOOLEAN
+) DISTSTYLE ALL;
+
+<span class="kw">CREATE TABLE</span> fact_orders (
+    order_id       VARCHAR(30)    NOT NULL,
+    customer_sk    BIGINT         REFERENCES dim_customer(customer_sk),
+    product_sk     BIGINT         REFERENCES dim_product(product_sk),
+    date_sk        INT            REFERENCES dim_date(date_sk),
+    quantity       SMALLINT,
+    unit_price     DECIMAL(10,2),
+    discount_pct   DECIMAL(5,2),
+    gross_revenue  DECIMAL(12,2),  <span class="cm">-- quantity * unit_price</span>
+    net_revenue    DECIMAL(12,2),  <span class="cm">-- gross * (1 - discount/100)</span>
+    order_status   VARCHAR(20),
+    channel        VARCHAR(30),
+    created_at     TIMESTAMP
+)
+DISTKEY(customer_sk)       <span class="cm">-- co-locate with joins on customer</span>
+SORTKEY(date_sk, category_sk);  <span class="cm">-- optimize date-range queries</span></pre>
+    </div>
+  </div>
+
+  <!-- SECTION 6: SQL Queries -->
+  <div class="section" id="s6">
+    <div class="card">
+      <h2><i class="ti ti-table" aria-hidden="true"></i> Complex Analytical SQL</h2>
+      <h3>1. Revenue by category with MoM growth (Window Function + CTE)</h3>
+      <pre><span class="kw">WITH</span> monthly_rev <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        p.category,
+        d.year,
+        d.month,
+        <span class="fn">SUM</span>(f.net_revenue)    <span class="kw">AS</span> revenue,
+        <span class="fn">COUNT</span>(f.order_id)     <span class="kw">AS</span> order_count
+    <span class="kw">FROM</span> fact_orders f
+    <span class="kw">JOIN</span> dim_product p <span class="kw">ON</span> f.product_sk = p.product_sk
+    <span class="kw">JOIN</span> dim_date    d <span class="kw">ON</span> f.date_sk    = d.date_sk
+    <span class="kw">WHERE</span> f.order_status != <span class="str">'CANCELLED'</span>
+    <span class="kw">GROUP BY</span> 1,2,3
+),
+growth <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> *,
+        <span class="fn">LAG</span>(revenue) <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> category <span class="kw">ORDER BY</span> year, month
+        ) <span class="kw">AS</span> prev_month_rev
+    <span class="kw">FROM</span> monthly_rev
+)
+<span class="kw">SELECT</span>
+    category, year, month, revenue, order_count,
+    <span class="fn">ROUND</span>((revenue - prev_month_rev) / NULLIF(prev_month_rev,0) * 100, 2) <span class="kw">AS</span> mom_growth_pct
+<span class="kw">FROM</span> growth
+<span class="kw">ORDER BY</span> category, year, month;</pre>
+      <h3>2. Customer RFM segmentation (Ranking + CASE)</h3>
+      <pre><span class="kw">WITH</span> rfm_raw <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        c.customer_id,
+        c.full_name,
+        <span class="fn">DATEDIFF</span>(day, <span class="fn">MAX</span>(d.full_date), CURRENT_DATE) <span class="kw">AS</span> recency_days,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> f.order_id)                       <span class="kw">AS</span> frequency,
+        <span class="fn">SUM</span>(f.net_revenue)                                <span class="kw">AS</span> monetary
+    <span class="kw">FROM</span> fact_orders f
+    <span class="kw">JOIN</span> dim_customer c <span class="kw">ON</span> f.customer_sk = c.customer_sk
+    <span class="kw">JOIN</span> dim_date     d <span class="kw">ON</span> f.date_sk     = d.date_sk
+    <span class="kw">WHERE</span> c.is_current = TRUE
+    <span class="kw">GROUP BY</span> 1,2
+),
+rfm_scored <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> *,
+        <span class="fn">NTILE</span>(5) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> recency_days  <span class="kw">ASC</span>)  <span class="kw">AS</span> r_score,
+        <span class="fn">NTILE</span>(5) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> frequency      <span class="kw">DESC</span>) <span class="kw">AS</span> f_score,
+        <span class="fn">NTILE</span>(5) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> monetary       <span class="kw">DESC</span>) <span class="kw">AS</span> m_score
+    <span class="kw">FROM</span> rfm_raw
+)
+<span class="kw">SELECT</span> *,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> r_score >= 4 <span class="kw">AND</span> f_score >= 4 <span class="kw">THEN</span> <span class="str">'Champion'</span>
+        <span class="kw">WHEN</span> r_score >= 3 <span class="kw">AND</span> f_score >= 3 <span class="kw">THEN</span> <span class="str">'Loyal Customer'</span>
+        <span class="kw">WHEN</span> r_score >= 4 <span class="kw">AND</span> f_score <= 2 <span class="kw">THEN</span> <span class="str">'New Customer'</span>
+        <span class="kw">WHEN</span> r_score <= 2 <span class="kw">AND</span> f_score >= 3 <span class="kw">THEN</span> <span class="str">'At Risk'</span>
+        <span class="kw">ELSE</span> <span class="str">'Needs Attention'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> rfm_segment
+<span class="kw">FROM</span> rfm_scored
+<span class="kw">ORDER BY</span> monetary <span class="kw">DESC</span>;</pre>
+      <h3>3. Running total + top-N per category</h3>
+      <pre><span class="kw">WITH</span> ranked <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        p.category,
+        p.product_name,
+        <span class="fn">SUM</span>(f.net_revenue)  <span class="kw">AS</span> total_revenue,
+        <span class="fn">RANK</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> p.category
+            <span class="kw">ORDER BY</span> <span class="fn">SUM</span>(f.net_revenue) <span class="kw">DESC</span>
+        ) <span class="kw">AS</span> rank_in_category,
+        <span class="fn">SUM</span>(<span class="fn">SUM</span>(f.net_revenue)) <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> p.category
+            <span class="kw">ORDER BY</span> <span class="fn">SUM</span>(f.net_revenue) <span class="kw">DESC</span>
+            <span class="kw">ROWS UNBOUNDED PRECEDING</span>
+        ) <span class="kw">AS</span> running_total
+    <span class="kw">FROM</span> fact_orders f
+    <span class="kw">JOIN</span> dim_product p <span class="kw">ON</span> f.product_sk = p.product_sk
+    <span class="kw">GROUP BY</span> p.category, p.product_name
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> ranked <span class="kw">WHERE</span> rank_in_category <= <span class="fn">5</span>;</pre>
+    </div>
+  </div>
+
+  <!-- SECTION 7: PySpark -->
+  <div class="section" id="s7">
+    <div class="card">
+      <h2><i class="ti ti-flame" aria-hidden="true"></i> PySpark Glue ETL Job</h2>
+      <pre><span class="cm"># src/transformation/glue_etl_orders.py</span>
+<span class="kw">import</span> sys, logging
+<span class="kw">from</span> awsglue.transforms <span class="kw">import</span> *
+<span class="kw">from</span> awsglue.utils <span class="kw">import</span> getResolvedOptions
+<span class="kw">from</span> pyspark.context <span class="kw">import</span> SparkContext
+<span class="kw">from</span> awsglue.context <span class="kw">import</span> GlueContext
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">from</span> pyspark.sql.types <span class="kw">import</span> *
+<span class="kw">from</span> data_quality <span class="kw">import</span> DataQualityChecker
+
+logger = logging.getLogger(<span class="str">"GlueJob"</span>)
+args   = getResolvedOptions(sys.argv, [<span class="str">"JOB_NAME"</span>, <span class="str">"process_date"</span>, <span class="str">"env"</span>])
+sc     = SparkContext()
+glueCtx = GlueContext(sc)
+spark  = glueCtx.spark_session
+
+BUCKET   = <span class="str">"shopfast-data-lake"</span>
+ENV      = args[<span class="str">"env"</span>]  <span class="cm"># dev / prod</span>
+PROC_DT  = args[<span class="str">"process_date"</span>]  <span class="cm"># e.g. "2024-01-15"</span>
+year, month, day = PROC_DT.split(<span class="str">"-"</span>)
+
+<span class="cm">## ── 1. READ RAW ────────────────────────────────────</span>
+orders_schema = StructType([
+    StructField(<span class="str">"order_id"</span>,     StringType(), nullable=<span class="kw">False</span>),
+    StructField(<span class="str">"customer_id"</span>,  StringType(), nullable=<span class="kw">False</span>),
+    StructField(<span class="str">"product_id"</span>,   StringType(), nullable=<span class="kw">False</span>),
+    StructField(<span class="str">"quantity"</span>,     IntegerType()),
+    StructField(<span class="str">"unit_price"</span>,   DoubleType()),
+    StructField(<span class="str">"discount_pct"</span>, DoubleType()),
+    StructField(<span class="str">"order_status"</span>, StringType()),
+    StructField(<span class="str">"channel"</span>,      StringType()),
+    StructField(<span class="str">"order_date"</span>,   DateType()),
+    StructField(<span class="str">"created_at"</span>,   TimestampType()),
+])
+
+raw_path = (f<span class="str">"s3://{BUCKET}/raw/orders/"</span>
+            f<span class="str">"year={year}/month={month}/day={day}/"</span>)
+
+df_raw = (spark.read
+    .option(<span class="str">"header"</span>, <span class="kw">True</span>)
+    .schema(orders_schema)
+    .csv(raw_path))
+
+logger.info(f<span class="str">"Read {df_raw.count()} rows from {raw_path}"</span>)
+
+<span class="cm">## ── 2. DATA QUALITY ────────────────────────────────</span>
+DataQualityChecker(df_raw, <span class="str">"raw_orders"</span>) \
+    .check_nulls([<span class="str">"order_id"</span>, <span class="str">"customer_id"</span>, <span class="str">"product_id"</span>]) \
+    .check_duplicates(<span class="str">"order_id"</span>) \
+    .check_range(<span class="str">"quantity"</span>, <span class="fn">1</span>, <span class="fn">1000</span>) \
+    .check_range(<span class="str">"unit_price"</span>, <span class="fn">0.01</span>, <span class="fn">99999</span>) \
+    .summary()
+
+<span class="cm">## ── 3. TRANSFORM ───────────────────────────────────</span>
+VALID_STATUSES = [<span class="str">"PLACED"</span>, <span class="str">"SHIPPED"</span>, <span class="str">"DELIVERED"</span>, <span class="str">"RETURNED"</span>, <span class="str">"CANCELLED"</span>]
+
+df_clean = (df_raw
+    <span class="cm"># Standardise strings</span>
+    .withColumn(<span class="str">"order_status"</span>, F.upper(F.trim(F.col(<span class="str">"order_status"</span>))))
+    .withColumn(<span class="str">"channel"</span>,      F.lower(F.trim(F.col(<span class="str">"channel"</span>))))
+    <span class="cm"># Filter invalid statuses</span>
+    .filter(F.col(<span class="str">"order_status"</span>).isin(VALID_STATUSES))
+    <span class="cm"># Compute revenue metrics</span>
+    .withColumn(<span class="str">"gross_revenue"</span>,
+        F.round(F.col(<span class="str">"quantity"</span>) * F.col(<span class="str">"unit_price"</span>), <span class="fn">2</span>))
+    .withColumn(<span class="str">"net_revenue"</span>,
+        F.round(F.col(<span class="str">"gross_revenue"</span>) * (<span class="fn">1</span> - F.col(<span class="str">"discount_pct"</span>) / <span class="fn">100</span>), <span class="fn">2</span>))
+    <span class="cm"># Add audit columns</span>
+    .withColumn(<span class="str">"processed_at"</span>, F.current_timestamp())
+    .withColumn(<span class="str">"process_date"</span>,  F.lit(PROC_DT))
+    <span class="cm"># Partition columns</span>
+    .withColumn(<span class="str">"year"</span>,  F.lit(year))
+    .withColumn(<span class="str">"month"</span>, F.lit(month))
+    .withColumn(<span class="str">"day"</span>,   F.lit(day))
+)
+
+<span class="cm">## ── 4. WRITE CURATED (Parquet, partitioned) ────────</span>
+curated_path = f<span class="str">"s3://{BUCKET}/curated/fact_orders/"</span>
+
+(df_clean.write
+    .mode(<span class="str">"overwrite"</span>)
+    .partitionBy(<span class="str">"year"</span>, <span class="str">"month"</span>, <span class="str">"day"</span>)
+    .parquet(curated_path))
+
+logger.info(f<span class="str">"✅ Wrote curated data to {curated_path}"</span>)</pre>
+      <h3>Performance Optimizations</h3>
+      <ul>
+        <li>Use <code>schema enforcement</code> — avoids schema inference scan on every run</li>
+        <li>Partition by date — eliminates full scans on downstream Athena queries</li>
+        <li><code>partitionBy("year","month","day")</code> on write creates Hive-compatible partitions</li>
+        <li>Use <code>broadcast()</code> for small dimension tables to avoid shuffle joins</li>
+        <li>Parquet format — columnar, compressed, 5-10x smaller than CSV</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 8: AWS Deploy -->
+  <div class="section" id="s8">
+    <div class="card">
+      <h2><i class="ti ti-cloud" aria-hidden="true"></i> AWS Deployment Steps</h2>
+      <div class="step-grid">
+        <div class="step-card"><div class="step-num">Step 1</div><div class="step-title">Create S3 bucket</div><div class="step-desc">aws s3 mb s3://shopfast-data-lake — enable versioning & encryption</div></div>
+        <div class="step-card"><div class="step-num">Step 2</div><div class="step-title">Create IAM Roles</div><div class="step-desc">GlueServiceRole + LambdaS3Role with least-privilege policies</div></div>
+        <div class="step-card"><div class="step-num">Step 3</div><div class="step-title">Upload scripts</div><div class="step-desc">aws s3 cp src/transformation/ s3://shopfast-data-lake/scripts/ --recursive</div></div>
+        <div class="step-card"><div class="step-num">Step 4</div><div class="step-title">Create Glue Job</div><div class="step-desc">Console → AWS Glue → Jobs → Create (Python Shell or Spark). Point to script S3 path.</div></div>
+        <div class="step-card"><div class="step-num">Step 5</div><div class="step-title">Run Glue Crawler</div><div class="step-desc">Catalog the curated Parquet files so Athena can query them</div></div>
+        <div class="step-card"><div class="step-num">Step 6</div><div class="step-title">Create Redshift cluster</div><div class="step-desc">dc2.large single-node. Run DDL. COPY from S3 using IAM role.</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2><i class="ti ti-lock" aria-hidden="true"></i> IAM Policy (Glue → S3)</h2>
+      <pre>{
+  <span class="str">"Version"</span>: <span class="str">"2012-10-17"</span>,
+  <span class="str">"Statement"</span>: [
+    {
+      <span class="str">"Effect"</span>: <span class="str">"Allow"</span>,
+      <span class="str">"Action"</span>: [
+        <span class="str">"s3:GetObject"</span>, <span class="str">"s3:PutObject"</span>,
+        <span class="str">"s3:DeleteObject"</span>, <span class="str">"s3:ListBucket"</span>
+      ],
+      <span class="str">"Resource"</span>: [
+        <span class="str">"arn:aws:s3:::shopfast-data-lake"</span>,
+        <span class="str">"arn:aws:s3:::shopfast-data-lake/*"</span>
+      ]
+    },
+    {
+      <span class="str">"Effect"</span>: <span class="str">"Allow"</span>,
+      <span class="str">"Action"</span>: [
+        <span class="str">"glue:*"</span>, <span class="str">"logs:CreateLogGroup"</span>,
+        <span class="str">"logs:CreateLogStream"</span>, <span class="str">"logs:PutLogEvents"</span>
+      ],
+      <span class="str">"Resource"</span>: <span class="str">"*"</span>
+    }
+  ]
+}</pre>
+      <h3>Security checklist</h3>
+      <ul>
+        <li>Never commit AWS credentials — use IAM roles and <code>~/.aws/credentials</code> locally</li>
+        <li>Enable S3 bucket encryption (SSE-S3 or SSE-KMS)</li>
+        <li>Block public access on all S3 buckets</li>
+        <li>Redshift in private VPC subnet — no public endpoint</li>
+        <li>Rotate IAM access keys every 90 days</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SECTION 9: Interview Q&A -->
+  <div class="section" id="s9">
+    <div class="card">
+      <h2><i class="ti ti-messages" aria-hidden="true"></i> 15 Interview Questions (click to reveal answer)</h2>
+      <div id="qa-list"></div>
+    </div>
+  </div>
+
+  <!-- SECTION 10: Resume Story -->
+  <div class="section" id="s10">
+    <div class="card">
+      <h2><i class="ti ti-file-text" aria-hidden="true"></i> Resume Bullet Points</h2>
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px;font-family:var(--font-mono);font-size:12px;line-height:1.9;color:var(--color-text-primary)">
+        • Designed and implemented an end-to-end batch data pipeline on AWS (S3, Glue, Redshift) ingesting 500K+ orders/day from 4 heterogeneous sources, reducing reporting latency from 3 days to under 1 hour<br>
+        • Built a PySpark data quality framework with 15+ automated checks (null, duplicate, range), preventing $120K/month in incorrect payouts reaching downstream systems<br>
+        • Implemented a star-schema data model (1 fact + 4 dimension tables) in Amazon Redshift with DISTKEY/SORTKEY optimization, improving analytical query performance by 70%<br>
+        • Engineered partitioned Parquet storage (year/month/day) on S3, reducing Athena query scan costs by 85% vs un-partitioned CSV<br>
+        • Developed SCD Type 2 logic for customer dimension, preserving full historical state for regulatory compliance and customer journey analysis
+      </div>
+    </div>
+    <div class="card">
+      <h2><i class="ti ti-microphone" aria-hidden="true"></i> Interview Story (STAR Format)</h2>
+      <div style="border-left:2px solid #B5D4F4;padding-left:14px;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:500;color:#185FA5;margin-bottom:4px">SITUATION</div>
+        <p>"At ShopFast, a mid-size e-commerce company, the analytics team was working with 3-day-old data coming from 4 disconnected systems — a MySQL transactional database, a Shopify API, JSON product events, and CSV returns files. Marketing had no way to measure ROI by channel, and customer support had no unified order history."</p>
+      </div>
+      <div style="border-left:2px solid #9FE1CB;padding-left:14px;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:500;color:#0F6E56;margin-bottom:4px">TASK</div>
+        <p>"My role was to architect and build a production-grade ELT pipeline that could ingest, validate, transform, and serve this data in near-real-time to the BI layer."</p>
+      </div>
+      <div style="border-left:2px solid #FAC775;padding-left:14px;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:500;color:#854F0B;margin-bottom:4px">ACTION</div>
+        <p>"I built a 3-zone data lake on S3 — raw, curated, serving — with AWS Glue PySpark jobs handling transformation. I designed a star schema in Redshift with carefully chosen DISTKEY/SORTKEY settings. I also built a reusable data quality module with null, duplicate, and range checks that ran before every load."</p>
+      </div>
+      <div style="border-left:2px solid #F4C0D1;padding-left:14px">
+        <div style="font-size:12px;font-weight:500;color:#993556;margin-bottom:4px">RESULT</div>
+        <p>"Reporting latency dropped from 3 days to under 1 hour. Athena query costs fell by 85% due to partitioning. The marketing team identified two underperforming channels and reallocated $400K in budget within the first month, and the customer support team reduced average handle time by 25% with the new unified customer view."</p>
+      </div>
+      <button class="ask-btn" style="margin-top:14px" onclick="sendPrompt('Help me practice answering DE interview questions about this e-commerce project ↗')">Practice interview answers ↗</button>
+    </div>
+    <div class="card">
+      <h2><i class="ti ti-rocket" aria-hidden="true"></i> Production Enhancements (Scale to millions/day)</h2>
+      <ul style="margin-top:4px">
+        <li>Replace batch Glue jobs with <strong style="color:var(--color-text-primary)">Kinesis Data Streams → Kinesis Firehose</strong> for real-time ingestion</li>
+        <li>Add <strong style="color:var(--color-text-primary)">Apache Airflow (MWAA)</strong> for pipeline orchestration with SLA alerting</li>
+        <li>Migrate Glue to <strong style="color:var(--color-text-primary)">EMR on EC2</strong> with auto-scaling for burst processing (10M+ events/day)</li>
+        <li>Implement <strong style="color:var(--color-text-primary)">Delta Lake / Apache Iceberg</strong> for ACID transactions and time-travel queries</li>
+        <li>Add <strong style="color:var(--color-text-primary)">Great Expectations</strong> for advanced DQ with lineage tracking</li>
+        <li>Use <strong style="color:var(--color-text-primary)">dbt (data build tool)</strong> for SQL-based transformation with CI/CD testing</li>
+        <li>Add <strong style="color:var(--color-text-primary)">Redshift Spectrum</strong> to query S3 directly without COPY for cold data</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+const qaData = [
+  { q: "Why did you choose a star schema over a snowflake schema for this project?", a: "Star schemas denormalize dimension tables, which reduces JOIN complexity and improves query performance in Redshift. Since our dimension tables (products, customers) are relatively small and analytical queries dominate over writes, the star schema was the right trade-off. Snowflake schemas save storage but add JOIN hops that hurt BI query speed." },
+  { q: "Explain partitioning strategy and why you chose year/month/day.", a: "Partitioning physically separates data on S3 by date folders. When Athena or Glue reads only the partitions matching the WHERE clause, it skips all other data. Our most common queries filter by date range, so year/month/day partitioning is optimal. This reduced our Athena scan costs by 85%." },
+  { q: "What is an incremental load and how would you implement it here?", a: "An incremental load only processes new/changed records since the last run rather than reloading everything. I track the last processed date in a metadata table or use the S3 partition structure (process_date). On each Glue run, I pass the current date as a parameter and only read that day's partition, making the pipeline idempotent and cost-efficient." },
+  { q: "What is SCD Type 2 and when would you use it vs Type 1?", a: "SCD Type 1 overwrites old values — use when history doesn't matter (e.g., fixing a typo). SCD Type 2 inserts a new row with effective_date/expiry_date flags — use when business needs to analyze behavior at historical state, like 'what was the customer's tier when they made that purchase.' I used Type 2 for dim_customer because customer tier changes affect loyalty analysis." },
+  { q: "How do you handle schema changes (schema evolution) in your pipeline?", a: "Three approaches: (1) Use Parquet with schema evolution — add new columns with default nulls. (2) In PySpark, read with mergeSchema=True option to handle new columns. (3) In Redshift, run ALTER TABLE ADD COLUMN. I also monitor Glue Crawlers for schema change alerts and have a validation step that compares incoming schema against expected schema, failing the job if breaking changes are detected." },
+  { q: "What is the difference between DISTKEY and SORTKEY in Redshift?", a: "DISTKEY controls how rows are distributed across compute nodes — co-locate rows by customer_sk so JOIN operations happen locally on each node without network shuffle. SORTKEY orders rows within each block on disk, so range filters on date_sk skip entire block groups (zone maps). Together they dramatically reduce both network I/O and disk scans for the most common analytical patterns." },
+  { q: "How would you handle duplicate records in an idempotent pipeline?", a: "Multiple strategies: (1) Deduplicate in PySpark using dropDuplicates(['order_id']) before write. (2) Use MERGE/UPSERT in Redshift with a staging table — insert where key doesn't exist, update where it does. (3) Use S3 overwrite mode on the partition to make reruns safe. The key is making every pipeline run produce the same output given the same input." },
+  { q: "What data quality checks did you implement and why those specific ones?", a: "Three categories: Completeness (null checks on primary/foreign keys — a null order_id or customer_id would break all downstream joins); Uniqueness (duplicate order_id check — prevents double-counting revenue); Validity (range checks on quantity and price — negative prices or zero-quantity orders indicate upstream data corruption). I prioritized these because they have direct financial impact." },
+  { q: "Explain how broadcast joins work in Spark and when you'd use them.", a: "In a broadcast join, Spark sends the smaller DataFrame to every executor node in memory, avoiding the expensive shuffle of both datasets. I'd use it when joining a large fact table (50M+ rows) with a small dimension like dim_channel (5 rows) or dim_date (365 rows). In PySpark: spark.sql.autoBroadcastJoinThreshold controls automatic broadcast. For explicit control: df_large.join(broadcast(df_small), 'key')." },
+  { q: "What is the difference between AWS Glue and EMR?", a: "Glue is a fully managed, serverless ETL service — you pay per DPU-hour, no cluster management, good for scheduled batch jobs under 2-3 hours. EMR gives you full control over a Hadoop/Spark cluster — use it for long-running jobs, custom Spark configurations, or when you need 50+ cores for big data processing. For this project's scale (500K orders/day), Glue is sufficient. At 50M+ records/day I'd migrate to EMR with auto-scaling." },
+  { q: "How would you monitor your pipeline in production?", a: "Four layers: (1) CloudWatch metrics for Glue job duration, DPU usage, and failure alerts. (2) Custom logging in PySpark — write DQ check results to a pipeline_audit table in Redshift. (3) SNS notifications on job failure to PagerDuty or Slack. (4) Data freshness monitoring — alert if the latest partition is older than expected (e.g., no data for today by 8am). I also track row count trends to detect upstream data drops." },
+  { q: "What is the difference between .cache() and .persist() in Spark?", a: ".cache() stores the DataFrame in memory (MEMORY_AND_DISK by default). .persist() lets you specify the storage level — MEMORY_ONLY, DISK_ONLY, MEMORY_AND_DISK_SER (serialized, less memory but more CPU). Use caching when the same DataFrame is read multiple times in a job — like reading orders once and then joining it twice for different aggregations. Always unpersist() when done to free executor memory." },
+  { q: "How do you handle late-arriving data in a batch pipeline?", a: "Two strategies: (1) Reprocessing window — keep partitions for the last N days mutable and rerun them nightly to catch late data. (2) Watermarking — for streaming, define a max lateness (e.g., 2 hours) and hold windows open that long. In batch, I handle this by not deleting the raw partition for 7 days and having a daily reconciliation job that re-processes any partitions with updated source data." },
+  { q: "What is data lineage and why does it matter?", a: "Data lineage tracks the origin and transformations of every data element — which source table, which ETL job, what transformations were applied, when. It matters because: (1) Debugging — when a KPI changes unexpectedly, you trace which upstream source or transformation caused it. (2) Compliance — GDPR right-to-erasure requires knowing every system that stored a customer's data. (3) Impact analysis — before changing a source schema, understand which downstream reports depend on that column." },
+  { q: "How would you transition this project from batch to near-real-time?", a: "Replace the CSV batch uploads with Kinesis Data Streams at the source. Use Lambda to write incoming records to a Kinesis Firehose, which buffers and writes to S3 every 60 seconds in micro-batches. Replace the daily Glue job with a Glue Streaming job (or Spark Structured Streaming on EMR) that reads from Kinesis and writes to the curated zone continuously. Add Redshift Streaming Ingestion from Kinesis for the serving layer. This gets latency from hours to 1-2 minutes." }
+];
+
+const qList = document.getElementById("qa-list");
+qaData.forEach((item, i) => {
+  const div = document.createElement("div");
+  div.className = "q-item";
+  div.innerHTML = `
+    <div class="q-header" onclick="toggleQ(${i})">
+      <span><strong style="color:var(--color-text-secondary);font-size:11px;font-weight:500;margin-right:8px">Q${i+1}</strong>${item.q}</span>
+      <i class="ti ti-chevron-down" id="chevron-${i}" style="font-size:16px;color:var(--color-text-secondary);transition:transform 0.2s" aria-hidden="true"></i>
+    </div>
+    <div class="q-body" id="qb-${i}">${item.a}</div>
+  `;
+  qList.appendChild(div);
+});
+
+function toggleQ(i) {
+  const body = document.getElementById("qb-"+i);
+  const icon = document.getElementById("chevron-"+i);
+  const isOpen = body.classList.contains("open");
+  body.classList.toggle("open", !isOpen);
+  icon.style.transform = isOpen ? "" : "rotate(180deg)";
+}
+
+const sections = document.querySelectorAll(".section");
+const navBtns  = document.querySelectorAll(".nav-btn");
+const pbar     = document.getElementById("pbar");
+
+function show(idx) {
+  sections.forEach((s,i) => s.classList.toggle("active", i===idx));
+  navBtns.forEach((b,i)  => b.classList.toggle("active", i===idx));
+  pbar.style.width = Math.round(((idx+1)/sections.length)*100) + "%";
+}
+</script>
