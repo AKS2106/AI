@@ -1,0 +1,1061 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.root{padding:1.5rem 0}
+.hero{margin-bottom:1.5rem}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:3px 10px;border-radius:99px;margin-right:6px;margin-bottom:4px}
+.b-teal{background:#E1F5EE;color:#085041}
+.b-purple{background:#EEEDFE;color:#3C3489}
+.b-amber{background:#FAEEDA;color:#633806}
+.b-coral{background:#FAECE7;color:#712B13}
+.b-blue{background:#E6F1FB;color:#0C447C}
+.b-green{background:#EAF3DE;color:#27500A}
+.b-red{background:#FCEBEB;color:#791F1F}
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem}
+.nb{font-size:12px;font-weight:500;padding:6px 13px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.nb:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.nb.active{background:#E1F5EE;color:#085041;border-color:#9FE1CB}
+.sec{display:none}
+.sec.active{display:block}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem}
+.card h2{font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card h3{font-size:14px;font-weight:500;color:var(--color-text-primary);margin:14px 0 8px}
+.card p,.card li{font-size:13px;color:var(--color-text-secondary);line-height:1.65}
+.card ul{padding-left:1.2rem}
+.card li{margin-bottom:5px}
+pre{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:1rem;font-size:11.5px;font-family:var(--font-mono);color:var(--color-text-primary);overflow-x:auto;white-space:pre;margin:10px 0;line-height:1.6}
+.kw{color:#185FA5}.str{color:#0F6E56}.cm{color:#888780;font-style:italic}.fn{color:#712B13}
+.sg{color:#854F0B}
+.step-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;margin-bottom:1rem}
+.step-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px}
+.step-num{font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px}
+.step-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.step-desc{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.arch-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.arch-box{font-size:12px;font-weight:500;padding:9px 16px;border-radius:var(--border-radius-md);white-space:nowrap}
+.arch-arr{font-size:16px;color:var(--color-text-secondary)}
+.q-item{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-bottom:9px;overflow:hidden}
+.q-hdr{padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;font-size:13px;font-weight:500;color:var(--color-text-primary);background:var(--color-background-primary);user-select:none}
+.q-hdr:hover{background:var(--color-background-secondary)}
+.q-body{padding:12px 14px;font-size:13px;color:var(--color-text-secondary);line-height:1.65;background:var(--color-background-secondary);border-top:0.5px solid var(--color-border-tertiary);display:none}
+.q-body.open{display:block}
+.tw{overflow-x:auto;margin:10px 0}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 12px;background:var(--color-background-secondary);color:var(--color-text-secondary);font-weight:500;border-bottom:0.5px solid var(--color-border-tertiary)}
+td{padding:8px 12px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+tr:last-child td{border-bottom:none}
+.folder-tree{font-family:var(--font-mono);font-size:12px;line-height:1.9;color:var(--color-text-secondary)}
+.ft-dir{color:#185FA5;font-weight:500}
+.ft-file{color:var(--color-text-primary)}
+.ft-cm{color:#888780;font-style:italic}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:12px 0}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px}
+.metric-lbl{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px}
+.metric-val{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.pbar{height:4px;background:var(--color-background-secondary);border-radius:2px;margin-bottom:1.5rem;overflow:hidden}
+.pfill{height:100%;background:#1D9E75;border-radius:2px;transition:width .3s}
+.itag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:4px;font-family:var(--font-mono);margin:1px}
+.tag-s3{background:#FAEEDA;color:#633806}
+.tag-glue{background:#E1F5EE;color:#085041}
+.tag-rs{background:#E6F1FB;color:#0C447C}
+.tag-lam{background:#EEEDFE;color:#3C3489}
+.tag-ath{background:#FAECE7;color:#712B13}
+.tag-kms{background:#FCEBEB;color:#791F1F}
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:16px 0}
+.ask-btn{font-size:12px;padding:6px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;margin-top:10px}
+.ask-btn:hover{background:var(--color-background-secondary)}
+.hipaa-box{border:0.5px solid #9FE1CB;border-radius:var(--border-radius-md);background:#E1F5EE;padding:12px 14px;margin:10px 0}
+.hipaa-box p,.hipaa-box li{color:#085041;font-size:12px}
+.hipaa-box ul{padding-left:1.2rem}
+.warn-box{border:0.5px solid #F0997B;border-radius:var(--border-radius-md);background:#FAECE7;padding:12px 14px;margin:10px 0}
+.warn-box p{color:#712B13;font-size:12px}
+.layer-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:6px 14px;border-radius:99px;margin:3px}
+</style>
+<div class="root">
+<h2 style="position:absolute;left:-9999px">Healthcare Data Engineering Portfolio Project — Interactive Guide</h2>
+<div class="hero">
+  <div style="margin-bottom:10px">
+    <span class="badge b-teal">Project 2 of 3</span>
+    <span class="badge b-purple">Healthcare</span>
+    <span class="badge b-red">HIPAA Compliant</span>
+    <span class="badge b-amber">Medallion Architecture</span>
+  </div>
+  <h1 style="font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px">Patient Outcomes & Clinical Analytics Pipeline</h1>
+  <p style="font-size:14px;color:var(--color-text-secondary)">A HIPAA-compliant, medallion-architecture data pipeline on AWS — ingesting EHR, claims, lab, and pharmacy data into a clinical analytics warehouse.</p>
+</div>
+<div class="pbar"><div class="pfill" id="pbar" style="width:9%"></div></div>
+<div class="nav" id="nav">
+  <button class="nb active" onclick="show(0)">Business Problem</button>
+  <button class="nb" onclick="show(1)">Mac Setup</button>
+  <button class="nb" onclick="show(2)">Data Sources</button>
+  <button class="nb" onclick="show(3)">Architecture</button>
+  <button class="nb" onclick="show(4)">HIPAA & Security</button>
+  <button class="nb" onclick="show(5)">DE Tasks + Code</button>
+  <button class="nb" onclick="show(6)">Data Modeling</button>
+  <button class="nb" onclick="show(7)">SQL Queries</button>
+  <button class="nb" onclick="show(8)">PySpark</button>
+  <button class="nb" onclick="show(9)">AWS Deploy</button>
+  <button class="nb" onclick="show(10)">Interview Q&A</button>
+  <button class="nb" onclick="show(11)">Resume Story</button>
+</div>
+
+<div class="sec active" id="s0">
+  <div class="card">
+    <h2><i class="ti ti-heart-rate-monitor" aria-hidden="true"></i> Business Problem</h2>
+    <p><strong style="color:var(--color-text-primary)">MedCore Health Systems</strong> is a regional hospital network with 12 hospitals, 80 outpatient clinics, and 2.4 million active patients. Clinical data is trapped in 5 separate systems — Epic EHR, insurance claims processors, lab information systems, pharmacy dispensing systems, and patient satisfaction surveys. The analytics team cannot answer critical questions like "Which diabetic patients are at high risk of 30-day readmission?" or "What is our average time-to-treatment by department?"</p>
+    <h3>Why it matters</h3>
+    <ul>
+      <li>CMS penalizes hospitals up to 3% of Medicare reimbursements for excess 30-day readmissions — $8M/year exposure for MedCore</li>
+      <li>No unified patient timeline across EHR, pharmacy, and lab — clinicians make decisions with incomplete history</li>
+      <li>Reporting to state health departments takes 3 weeks of manual data pulls</li>
+      <li>No ability to identify care gaps (patients overdue for screenings, not filling prescriptions)</li>
+      <li>Population health management programs cannot be measured for ROI</li>
+    </ul>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-lbl">Active patients</div><div class="metric-val">2.4M</div></div>
+      <div class="metric"><div class="metric-lbl">Daily records</div><div class="metric-val">180K</div></div>
+      <div class="metric"><div class="metric-lbl">CMS penalty risk</div><div class="metric-val">$8M/yr</div></div>
+      <div class="metric"><div class="metric-lbl">Reporting lag (before)</div><div class="metric-val">3 weeks</div></div>
+      <div class="metric"><div class="metric-lbl">Target lag (after)</div><div class="metric-val">4 hours</div></div>
+    </div>
+    <div class="hipaa-box">
+      <p><strong>Key differentiator from Project 1:</strong> Healthcare data is protected health information (PHI) under HIPAA. Every design decision — encryption, access control, audit logging, de-identification — is a compliance requirement, not just best practice. This project teaches you skills highly valued in healthcare, insurance, and pharma data engineering roles.</p>
+    </div>
+    <button class="ask-btn" onclick="sendPrompt('Tell me more about HIPAA compliance requirements for data engineers and what I need to know for interviews ↗')">Learn more about HIPAA for interviews ↗</button>
+  </div>
+</div>
+
+<div class="sec" id="s1">
+  <div class="card">
+    <h2><i class="ti ti-brand-apple" aria-hidden="true"></i> Mac Setup — Additional Tools for Healthcare Project</h2>
+    <p style="margin-bottom:10px">You already have the base tools from Project 1 (Python, Java, PySpark, AWS CLI, Git). Here are the additional installs specific to this project.</p>
+    <div class="step-grid">
+      <div class="step-card"><div class="step-num">Step 1</div><div class="step-title">Activate your venv</div><div class="step-desc">source ~/de-env/bin/activate — use the same environment from Project 1</div></div>
+      <div class="step-card"><div class="step-num">Step 2</div><div class="step-title">Install extra libs</div><div class="step-desc">pip install faker boto3 pandas pyarrow pytest moto cryptography</div></div>
+      <div class="step-card"><div class="step-num">Step 3</div><div class="step-title">Create new GitHub repo</div><div class="step-desc">medcore-clinical-pipeline — separate repo for each project</div></div>
+      <div class="step-card"><div class="step-num">Step 4</div><div class="step-title">AWS KMS key</div><div class="step-desc">Create a customer-managed KMS key in AWS console for PHI encryption</div></div>
+      <div class="step-card"><div class="step-num">Step 5</div><div class="step-title">Enable S3 encryption</div><div class="step-desc">All S3 buckets: SSE-KMS with the KMS key you created</div></div>
+      <div class="step-card"><div class="step-num">Step 6</div><div class="step-title">CloudTrail audit log</div><div class="step-desc">Enable AWS CloudTrail in your account — all API calls logged (HIPAA requirement)</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2><i class="ti ti-terminal" aria-hidden="true"></i> Setup Commands</h2>
+    <pre><span class="cm"># Activate existing venv from Project 1</span>
+source ~/de-env/bin/activate
+
+<span class="cm"># Install additional dependencies</span>
+pip install pyarrow cryptography moto[s3,glue] pytest-mock
+
+<span class="cm"># Create new project repo</span>
+mkdir medcore-clinical-pipeline && cd medcore-clinical-pipeline
+git init
+git remote add origin https://github.com/YOURUSERNAME/medcore-clinical-pipeline.git
+
+<span class="cm"># Create requirements.txt</span>
+cat > requirements.txt << 'EOF'
+pyspark==3.5.0
+boto3>=1.34.0
+pandas>=2.0.0
+pyarrow>=14.0.0
+faker>=22.0.0
+cryptography>=42.0.0
+moto[s3,glue,kms]>=5.0.0
+pytest>=8.0.0
+pytest-mock>=3.12.0
+EOF
+
+pip install -r requirements.txt
+
+<span class="cm"># Create .env template (NEVER commit real values)</span>
+cat > .env.example << 'EOF'
+AWS_REGION=us-east-1
+S3_BUCKET=medcore-phi-data-lake
+KMS_KEY_ARN=arn:aws:kms:us-east-1:ACCOUNT_ID:key/KEY_ID
+REDSHIFT_HOST=your-cluster.region.redshift.amazonaws.com
+REDSHIFT_DB=medcore_dw
+EOF
+
+echo ".env" >> .gitignore
+echo "data/raw/" >> .gitignore
+<span class="cm"># ^^^ Never push PHI test data to GitHub even if synthetic</span>
+
+git add .
+git commit -m "feat: project scaffold with HIPAA-aware gitignore"
+git push -u origin main</pre>
+  </div>
+</div>
+
+<div class="sec" id="s2">
+  <div class="card">
+    <h2><i class="ti ti-database" aria-hidden="true"></i> Data Sources</h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Source System</th><th>Format</th><th>PHI?</th><th>Volume</th><th>Refresh</th><th>Landing Zone</th></tr></thead>
+        <tbody>
+          <tr><td>Epic EHR — encounters</td><td><span class="itag tag-s3">HL7 FHIR JSON</span></td><td><span class="badge b-red" style="font-size:11px;padding:2px 7px">PHI</span></td><td>50K/day</td><td>Hourly extract</td><td>S3 bronze/encounters/</td></tr>
+          <tr><td>Insurance claims</td><td><span class="itag tag-s3">CSV (EDI 837)</span></td><td><span class="badge b-red" style="font-size:11px;padding:2px 7px">PHI</span></td><td>30K/day</td><td>Daily batch</td><td>S3 bronze/claims/</td></tr>
+          <tr><td>Lab results (LIS)</td><td><span class="itag tag-glue">JSON</span></td><td><span class="badge b-red" style="font-size:11px;padding:2px 7px">PHI</span></td><td>80K/day</td><td>Real-time via API</td><td>S3 bronze/lab_results/</td></tr>
+          <tr><td>Pharmacy dispensing</td><td><span class="itag tag-s3">CSV</span></td><td><span class="badge b-red" style="font-size:11px;padding:2px 7px">PHI</span></td><td>20K/day</td><td>Hourly batch</td><td>S3 bronze/pharmacy/</td></tr>
+          <tr><td>Patient surveys (HCAHPS)</td><td><span class="itag tag-glue">JSON</span></td><td><span class="badge b-amber" style="font-size:11px;padding:2px 7px">PII</span></td><td>5K/week</td><td>Weekly</td><td>S3 bronze/surveys/</td></tr>
+          <tr><td>ICD-10 code reference</td><td><span class="itag tag-rs">CSV (static)</span></td><td><span class="badge b-green" style="font-size:11px;padding:2px 7px">Public</span></td><td>~95K codes</td><td>Annual update</td><td>S3 reference/icd10/</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h2><i class="ti ti-code" aria-hidden="true"></i> Generate Synthetic PHI Test Data</h2>
+    <div class="warn-box"><p><strong>Important:</strong> Never use real patient data for development or testing. Always use synthetically generated data. This script generates realistic but entirely fictional patient records.</p></div>
+    <pre><span class="cm"># generate_healthcare_data.py</span>
+<span class="kw">from</span> faker <span class="kw">import</span> Faker
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> json, random, os, uuid
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timedelta
+
+fake = Faker()
+random.seed(<span class="fn">42</span>)
+
+<span class="kw">for</span> d <span class="kw">in</span> [<span class="str">"data/raw/encounters"</span>, <span class="str">"data/raw/claims"</span>,
+         <span class="str">"data/raw/lab_results"</span>, <span class="str">"data/raw/pharmacy"</span>]:
+    os.makedirs(d, exist_ok=<span class="kw">True</span>)
+
+DIAGNOSES    = [<span class="str">"E11.9"</span>,<span class="str">"I10"</span>,<span class="str">"J45.901"</span>,<span class="str">"M79.3"</span>,<span class="str">"F32.9"</span>,<span class="str">"K21.0"</span>,<span class="str">"N18.3"</span>]
+DIAG_NAMES   = [<span class="str">"Type 2 diabetes"</span>,<span class="str">"Essential hypertension"</span>,<span class="str">"Asthma"</span>,
+                <span class="str">"Myalgia"</span>,<span class="str">"Major depressive disorder"</span>,<span class="str">"GERD"</span>,<span class="str">"CKD stage 3"</span>]
+DEPARTMENTS  = [<span class="str">"Cardiology"</span>,<span class="str">"Endocrinology"</span>,<span class="str">"Emergency"</span>,<span class="str">"Primary Care"</span>,<span class="str">"Neurology"</span>]
+MEDS         = [<span class="str">"Metformin 500mg"</span>,<span class="str">"Lisinopril 10mg"</span>,<span class="str">"Atorvastatin 40mg"</span>,
+                <span class="str">"Albuterol inhaler"</span>,<span class="str">"Sertraline 50mg"</span>]
+LAB_TESTS    = [<span class="str">"HbA1c"</span>,<span class="str">"CBC"</span>,<span class="str">"BMP"</span>,<span class="str">"Lipid Panel"</span>,<span class="str">"TSH"</span>,<span class="str">"eGFR"</span>]
+
+N_PATIENTS = <span class="fn">2000</span>
+patient_ids = [f<span class="str">"PAT{i:07d}"</span> <span class="kw">for</span> i <span class="kw">in</span> range(<span class="fn">1</span>, N_PATIENTS+<span class="fn">1</span>)]
+
+<span class="cm"># --- EHR Encounters (HL7 FHIR-like JSON) ---</span>
+encounters = []
+<span class="kw">for</span> pid <span class="kw">in</span> patient_ids:
+    n_enc = random.randint(<span class="fn">1</span>, <span class="fn">8</span>)
+    <span class="kw">for</span> _ <span class="kw">in</span> range(n_enc):
+        idx = random.randrange(len(DIAGNOSES))
+        adm = fake.date_time_between(<span class="str">"-1y"</span>, <span class="str">"now"</span>)
+        los = random.randint(<span class="fn">0</span>, <span class="fn">14</span>)
+        encounters.append({
+            <span class="str">"resourceType"</span>: <span class="str">"Encounter"</span>,
+            <span class="str">"encounter_id"</span>: str(uuid.uuid4()),
+            <span class="str">"patient_id"</span>: pid,
+            <span class="str">"patient_name"</span>: fake.name(),
+            <span class="str">"dob"</span>: str(fake.date_of_birth(minimum_age=<span class="fn">18</span>, maximum_age=<span class="fn">90</span>)),
+            <span class="str">"gender"</span>: random.choice([<span class="str">"M"</span>,<span class="str">"F"</span>,<span class="str">"U"</span>]),
+            <span class="str">"admit_datetime"</span>: adm.isoformat(),
+            <span class="str">"discharge_datetime"</span>: (adm + timedelta(days=los)).isoformat(),
+            <span class="str">"length_of_stay_days"</span>: los,
+            <span class="str">"department"</span>: random.choice(DEPARTMENTS),
+            <span class="str">"primary_icd10"</span>: DIAGNOSES[idx],
+            <span class="str">"diagnosis_desc"</span>: DIAG_NAMES[idx],
+            <span class="str">"attending_provider_id"</span>: f<span class="str">"PROV{random.randint(1,200):04d}"</span>,
+            <span class="str">"facility_id"</span>: f<span class="str">"FAC{random.randint(1,12):02d}"</span>,
+            <span class="str">"readmission_flag"</span>: random.random() < <span class="fn">0.12</span>,
+            <span class="str">"insurance_type"</span>: random.choice([<span class="str">"Medicare"</span>,<span class="str">"Medicaid"</span>,<span class="str">"Commercial"</span>,<span class="str">"Self-Pay"</span>])
+        })
+
+<span class="kw">with</span> open(<span class="str">"data/raw/encounters/encounters.json"</span>, <span class="str">"w"</span>) <span class="kw">as</span> f:
+    json.dump(encounters, f, indent=<span class="fn">2</span>)
+
+<span class="cm"># --- Lab Results ---</span>
+labs = []
+<span class="kw">for</span> pid <span class="kw">in</span> patient_ids:
+    <span class="kw">for</span> _ <span class="kw">in</span> range(random.randint(<span class="fn">1</span>, <span class="fn">6</span>)):
+        test = random.choice(LAB_TESTS)
+        labs.append({
+            <span class="str">"lab_result_id"</span>: str(uuid.uuid4()),
+            <span class="str">"patient_id"</span>: pid,
+            <span class="str">"test_name"</span>: test,
+            <span class="str">"result_value"</span>: round(random.uniform(<span class="fn">3.5</span>, <span class="fn">15.0</span>), <span class="fn">2</span>),
+            <span class="str">"unit"</span>: random.choice([<span class="str">"mg/dL"</span>,<span class="str">"%"</span>,<span class="str">"mmol/L"</span>,<span class="str">"mIU/L"</span>]),
+            <span class="str">"reference_range"</span>: <span class="str">"4.0-10.0"</span>,
+            <span class="str">"abnormal_flag"</span>: random.choice([<span class="str">"N"</span>,<span class="str">"H"</span>,<span class="str">"L"</span>,<span class="str">"N"</span>,<span class="str">"N"</span>]),
+            <span class="str">"collected_at"</span>: fake.date_time_between(<span class="str">"-1y"</span>,<span class="str">"now"</span>).isoformat(),
+            <span class="str">"resulted_at"</span>: fake.date_time_between(<span class="str">"-1y"</span>,<span class="str">"now"</span>).isoformat(),
+            <span class="str">"ordering_provider_id"</span>: f<span class="str">"PROV{random.randint(1,200):04d}"</span>
+        })
+
+pd.DataFrame(labs).to_csv(<span class="str">"data/raw/lab_results/lab_results.csv"</span>, index=<span class="kw">False</span>)
+
+<span class="cm"># --- Pharmacy Dispensing ---</span>
+rx = [{
+    <span class="str">"rx_id"</span>: str(uuid.uuid4()),
+    <span class="str">"patient_id"</span>: random.choice(patient_ids),
+    <span class="str">"medication_name"</span>: random.choice(MEDS),
+    <span class="str">"ndc_code"</span>: f<span class="str">"{random.randint(10000,99999)}-{random.randint(100,999)}-{random.randint(10,99)}"</span>,
+    <span class="str">"days_supply"</span>: random.choice([<span class="fn">30</span>,<span class="fn">60</span>,<span class="fn">90</span>]),
+    <span class="str">"quantity_dispensed"</span>: random.randint(<span class="fn">30</span>,<span class="fn">90</span>),
+    <span class="str">"dispensed_date"</span>: str(fake.date_between(<span class="str">"-1y"</span>,<span class="str">"today"</span>)),
+    <span class="str">"prescribing_provider_id"</span>: f<span class="str">"PROV{random.randint(1,200):04d}"</span>,
+    <span class="str">"fill_number"</span>: random.randint(<span class="fn">1</span>,<span class="fn">12</span>),
+    <span class="str">"copay_amount"</span>: round(random.uniform(<span class="fn">0</span>,<span class="fn">50</span>),<span class="fn">2</span>)
+} <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="fn">8000</span>)]
+
+pd.DataFrame(rx).to_csv(<span class="str">"data/raw/pharmacy/pharmacy.csv"</span>, index=<span class="kw">False</span>)
+<span class="kw">print</span>(<span class="str">"✅ Synthetic healthcare data generated"</span>)</pre>
+    <button class="ask-btn" onclick="sendPrompt('What is HL7 FHIR and why is it the standard format for healthcare data? ↗')">What is HL7 FHIR? ↗</button>
+  </div>
+</div>
+
+<div class="sec" id="s3">
+  <div class="card">
+    <h2><i class="ti ti-topology-star-3" aria-hidden="true"></i> Medallion Architecture (Bronze → Silver → Gold)</h2>
+    <p style="margin-bottom:14px">This project uses a <strong style="color:var(--color-text-primary)">Medallion Architecture</strong> — three data quality layers — instead of the raw/curated split from Project 1. This is the industry standard for regulated industries like healthcare.</p>
+    <div style="margin:14px 0">
+      <div class="arch-row">
+        <span class="arch-box b-coral" style="min-width:130px;text-align:center">Bronze Layer (S3)<br><span style="font-size:11px;font-weight:400">Raw PHI — encrypted<br>JSON / CSV as-is</span></span>
+        <span class="arch-arr">→</span>
+        <span class="arch-box b-amber" style="min-width:130px;text-align:center">Silver Layer (S3)<br><span style="font-size:11px;font-weight:400">Cleansed Parquet<br>De-identified + validated</span></span>
+        <span class="arch-arr">→</span>
+        <span class="arch-box b-teal" style="min-width:130px;text-align:center">Gold Layer (S3 + Redshift)<br><span style="font-size:11px;font-weight:400">Aggregated fact/dims<br>BI-ready</span></span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <h3>Full AWS Pipeline Flow</h3>
+    <div class="arch-row">
+      <span class="arch-box b-blue" style="font-size:11px">Source Systems<br>Epic · LIS · Pharmacy</span>
+      <span class="arch-arr">→</span>
+      <span class="arch-box b-purple" style="font-size:11px">Lambda Trigger<br>S3 PutObject event</span>
+      <span class="arch-arr">→</span>
+      <span class="arch-box b-coral" style="font-size:11px">Bronze S3<br>SSE-KMS encrypted</span>
+    </div>
+    <div style="margin:6px 0 6px 20px;font-size:11px;color:var(--color-text-secondary);font-style:italic">↓ Glue Crawler → Data Catalog</div>
+    <div class="arch-row">
+      <span class="arch-box b-coral" style="font-size:11px">Bronze S3</span>
+      <span class="arch-arr">→</span>
+      <span class="arch-box b-purple" style="font-size:11px">Glue ETL (PySpark)<br>Validate · De-identify</span>
+      <span class="arch-arr">→</span>
+      <span class="arch-box b-amber" style="font-size:11px">Silver S3<br>Parquet partitioned</span>
+    </div>
+    <div class="arch-row" style="margin-top:8px">
+      <span class="arch-box b-amber" style="font-size:11px">Silver S3</span>
+      <span class="arch-arr">→</span>
+      <span class="arch-box b-purple" style="font-size:11px">Glue ETL (PySpark)<br>Aggregate · Model</span>
+      <span class="arch-arr">→</span>
+      <span class="arch-box b-teal" style="font-size:11px">Gold S3 + Redshift<br>Fact / Dimension tables</span>
+      <span class="arch-arr">→</span>
+      <span class="arch-box b-green" style="font-size:11px">QuickSight / Athena<br>Clinical dashboards</span>
+    </div>
+    <div class="arch-row" style="margin-top:12px;gap:6px">
+      <span class="layer-pill b-red"><i class="ti ti-lock" style="font-size:14px" aria-hidden="true"></i> KMS Encryption</span>
+      <span class="layer-pill b-teal"><i class="ti ti-file-text" style="font-size:14px" aria-hidden="true"></i> CloudTrail Audit</span>
+      <span class="layer-pill b-purple"><i class="ti ti-eye" style="font-size:14px" aria-hidden="true"></i> CloudWatch Alerts</span>
+      <span class="layer-pill b-amber"><i class="ti ti-users" style="font-size:14px" aria-hidden="true"></i> IAM + VPC</span>
+    </div>
+    <div class="divider"></div>
+    <h3>S3 Bucket Structure</h3>
+    <pre>s3://medcore-phi-data-lake/            <span class="cm">(SSE-KMS, versioning ON, block public)</span>
+├── bronze/
+│   ├── encounters/year=2024/month=01/day=15/encounters.json
+│   ├── lab_results/year=2024/month=01/day=15/labs.csv
+│   ├── pharmacy/year=2024/month=01/day=15/rx.csv
+│   └── claims/year=2024/month=01/day=15/claims.csv
+├── silver/
+│   ├── encounters/year=2024/month=01/day=15/*.parquet
+│   ├── lab_results/year=2024/month=01/day=15/*.parquet
+│   └── pharmacy/year=2024/month=01/day=15/*.parquet
+├── gold/
+│   ├── fact_encounters/year=2024/month=01/*.parquet
+│   ├── dim_patient/*.parquet
+│   └── patient_risk_scores/*.parquet
+├── reference/
+│   └── icd10_codes/icd10.csv
+└── scripts/
+    └── glue_jobs/</pre>
+  </div>
+</div>
+
+<div class="sec" id="s4">
+  <div class="card">
+    <h2><i class="ti ti-shield-lock" aria-hidden="true"></i> HIPAA Compliance — What Every DE Must Know</h2>
+    <div class="hipaa-box">
+      <p><strong>HIPAA (Health Insurance Portability and Accountability Act)</strong> requires safeguards for Protected Health Information (PHI). As a data engineer, you are a "Business Associate" — violations can result in fines up to $1.9M per violation category per year.</p>
+    </div>
+    <h3>The 18 PHI identifiers you must protect</h3>
+    <p style="margin-bottom:8px">Any dataset containing any of these must be treated as PHI:</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px;margin:8px 0">
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">1. Patient names</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">2. Geographic data (zip code)</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">3. Dates (except year)</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">4. Phone numbers</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">5. Email addresses</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">6. Social Security numbers</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">7. Medical record numbers</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">8. Health plan numbers</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">9. Account numbers</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">10. Certificate/license numbers</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">11. Device identifiers</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">12. Web URLs</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">13. IP addresses</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">14. Biometric identifiers</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">15. Full-face photographs</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">16. Vehicle identifiers</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">17. Fax numbers</div>
+      <div style="font-size:12px;color:var(--color-text-secondary);padding:4px 0">18. Any unique identifying number</div>
+    </div>
+    <div class="divider"></div>
+    <h3>Technical safeguards checklist (your pipeline must implement all)</h3>
+    <ul>
+      <li>Encryption at rest: S3 SSE-KMS with customer-managed key (CMK)</li>
+      <li>Encryption in transit: TLS 1.2+ for all data movement (S3, Redshift, Glue)</li>
+      <li>Access control: IAM roles with least privilege — no human user has direct S3 access to PHI buckets</li>
+      <li>Audit logging: CloudTrail for all API calls, S3 server access logs, Redshift audit logs</li>
+      <li>De-identification in Silver layer: replace direct identifiers with surrogate keys before analytics use</li>
+      <li>Data retention policy: S3 Lifecycle rules to move/delete data per retention schedule</li>
+      <li>VPC isolation: Redshift and Glue run inside a VPC with no internet gateway</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2><i class="ti ti-code" aria-hidden="true"></i> De-Identification Module</h2>
+    <pre><span class="cm"># src/transformation/deidentification.py</span>
+<span class="kw">import</span> hashlib, hmac, os
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> DataFrame
+<span class="kw">from</span> pyspark.sql.functions <span class="kw">import</span> col, udf, lit, sha2, concat
+<span class="kw">from</span> pyspark.sql.types <span class="kw">import</span> StringType
+
+<span class="cm"># HMAC-based pseudonymization — reversible by authorized parties</span>
+<span class="cm"># with the secret key, NOT reversible without it</span>
+DEIDENT_SECRET = os.environ.get(<span class="str">"DEIDENT_SECRET"</span>)  <span class="cm"># stored in AWS Secrets Manager</span>
+
+<span class="kw">def</span> <span class="fn">pseudonymize_id</span>(value: str) -> str:
+    <span class="str">"""Replace direct patient ID with HMAC-SHA256 surrogate key."""</span>
+    <span class="kw">if</span> value <span class="kw">is</span> <span class="kw">None</span>: <span class="kw">return</span> <span class="kw">None</span>
+    h = hmac.new(DEIDENT_SECRET.encode(), value.encode(), hashlib.sha256)
+    <span class="kw">return</span> h.hexdigest()[:<span class="fn">32</span>]
+
+pseudonymize_udf = udf(pseudonymize_id, StringType())
+
+<span class="kw">def</span> <span class="fn">deidentify_encounters</span>(df: DataFrame) -> DataFrame:
+    <span class="str">"""
+    Apply HIPAA Safe Harbor de-identification to encounters DataFrame.
+    Removes all 18 PHI identifiers, retains clinical/analytical fields.
+    """</span>
+    <span class="kw">return</span> (df
+        <span class="cm"># Pseudonymize identifiers (keeps linkability for longitudinal analysis)</span>
+        .withColumn(<span class="str">"patient_id"</span>,  pseudonymize_udf(col(<span class="str">"patient_id"</span>)))
+        .withColumn(<span class="str">"provider_id"</span>, pseudonymize_udf(col(<span class="str">"attending_provider_id"</span>)))
+
+        <span class="cm"># Generalize dates — keep year+month only (remove exact day for DOB)</span>
+        .withColumn(<span class="str">"admit_year"</span>,   col(<span class="str">"admit_datetime"</span>).cast(<span class="str">"date"</span>).cast(<span class="str">"string"</span>)[:<span class="fn">7</span>])
+        .withColumn(<span class="str">"admit_date"</span>,   col(<span class="str">"admit_datetime"</span>).cast(<span class="str">"date"</span>))
+        .withColumn(<span class="str">"birth_year"</span>,   col(<span class="str">"dob"</span>).cast(<span class="str">"date"</span>).cast(<span class="str">"string"</span>)[:<span class="fn">4</span>].cast(<span class="str">"int"</span>))
+
+        <span class="cm"># Drop all direct PHI columns</span>
+        .drop(<span class="str">"patient_name"</span>, <span class="str">"dob"</span>, <span class="str">"admit_datetime"</span>,
+              <span class="str">"discharge_datetime"</span>, <span class="str">"attending_provider_id"</span>)
+
+        <span class="cm"># Generalize geography — truncate zip to 3 digits</span>
+        <span class="cm"># (if zip count < 20K residents, replace with 000 per Safe Harbor)</span>
+        .withColumn(<span class="str">"deident_flag"</span>, lit(<span class="kw">True</span>))
+    )</pre>
+  </div>
+</div>
+
+<div class="sec" id="s5">
+  <div class="card">
+    <h2><i class="ti ti-settings" aria-hidden="true"></i> Project Folder Structure</h2>
+    <div class="folder-tree">
+      <div><span class="ft-dir">medcore-clinical-pipeline/</span></div>
+      <div>&nbsp;&nbsp;<span class="ft-dir">data/</span> <span class="ft-cm">— local synthetic data only</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-dir">raw/</span> <span class="ft-cm">encounters/ lab_results/ pharmacy/</span></div>
+      <div>&nbsp;&nbsp;<span class="ft-dir">src/</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-dir">ingestion/</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-file">upload_to_bronze.py</span> <span class="ft-cm">— S3 upload with KMS</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-file">lambda_trigger.py</span> <span class="ft-cm">— S3 event → Glue job</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-dir">transformation/</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-file">bronze_to_silver.py</span> <span class="ft-cm">— validate + de-identify</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-file">silver_to_gold.py</span> <span class="ft-cm">— aggregate + model</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-file">deidentification.py</span> <span class="ft-cm">— HIPAA PHI removal</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-file">data_quality.py</span> <span class="ft-cm">— reused from Project 1</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-file">schema_validator.py</span> <span class="ft-cm">— schema evolution handler</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-dir">modeling/</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-file">ddl_clinical_dw.sql</span> <span class="ft-cm">— Redshift DDL</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-file">load_gold_to_redshift.py</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-dir">sql/</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-file">clinical_analytics.sql</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-file">readmission_risk.sql</span></div>
+      <div>&nbsp;&nbsp;<span class="ft-dir">tests/</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-file">test_deidentification.py</span> <span class="ft-cm">— verify PHI is removed</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="ft-file">test_bronze_to_silver.py</span></div>
+      <div>&nbsp;&nbsp;<span class="ft-file">generate_healthcare_data.py</span></div>
+      <div>&nbsp;&nbsp;<span class="ft-file">requirements.txt</span></div>
+      <div>&nbsp;&nbsp;<span class="ft-file">.env.example</span> <span class="ft-cm">— template only, never .env</span></div>
+      <div>&nbsp;&nbsp;<span class="ft-file">README.md</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2><i class="ti ti-code" aria-hidden="true"></i> Bronze → Silver Glue Job</h2>
+    <pre><span class="cm"># src/transformation/bronze_to_silver.py</span>
+<span class="kw">import</span> sys, logging
+<span class="kw">from</span> awsglue.utils <span class="kw">import</span> getResolvedOptions
+<span class="kw">from</span> pyspark.context <span class="kw">import</span> SparkContext
+<span class="kw">from</span> awsglue.context <span class="kw">import</span> GlueContext
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">from</span> pyspark.sql.types <span class="kw">import</span> *
+<span class="kw">from</span> deidentification <span class="kw">import</span> deidentify_encounters
+<span class="kw">from</span> data_quality <span class="kw">import</span> DataQualityChecker
+
+logger = logging.getLogger(<span class="str">"bronze_to_silver"</span>)
+args   = getResolvedOptions(sys.argv, [<span class="str">"JOB_NAME"</span>, <span class="str">"process_date"</span>])
+sc     = SparkContext()
+glue   = GlueContext(sc)
+spark  = glue.spark_session
+
+BUCKET    = <span class="str">"medcore-phi-data-lake"</span>
+PROC_DT   = args[<span class="str">"process_date"</span>]
+y, m, d   = PROC_DT.split(<span class="str">"-"</span>)
+
+<span class="cm">## ── READ BRONZE (JSON) ────────────────────────────</span>
+bronze_path = f<span class="str">"s3://{BUCKET}/bronze/encounters/year={y}/month={m}/day={d}/"</span>
+
+df_raw = (spark.read
+    .option(<span class="str">"multiLine"</span>, <span class="kw">True</span>)
+    .json(bronze_path))
+
+logger.info(f<span class="str">"Bronze records: {df_raw.count()}"</span>)
+
+<span class="cm">## ── SCHEMA VALIDATION ─────────────────────────────</span>
+REQUIRED_COLS = [<span class="str">"encounter_id"</span>, <span class="str">"patient_id"</span>, <span class="str">"admit_datetime"</span>,
+                 <span class="str">"primary_icd10"</span>, <span class="str">"department"</span>]
+missing = [c <span class="kw">for</span> c <span class="kw">in</span> REQUIRED_COLS <span class="kw">if</span> c <span class="kw">not</span> <span class="kw">in</span> df_raw.columns]
+<span class="kw">if</span> missing:
+    <span class="kw">raise</span> ValueError(f<span class="str">"Schema violation — missing columns: {missing}"</span>)
+
+<span class="cm">## ── DATA QUALITY ──────────────────────────────────</span>
+DataQualityChecker(df_raw, <span class="str">"bronze_encounters"</span>) \
+    .check_nulls([<span class="str">"encounter_id"</span>, <span class="str">"patient_id"</span>, <span class="str">"primary_icd10"</span>]) \
+    .check_duplicates(<span class="str">"encounter_id"</span>) \
+    .check_range(<span class="str">"length_of_stay_days"</span>, <span class="fn">0</span>, <span class="fn">365</span>) \
+    .summary()
+
+<span class="cm">## ── TYPE CASTING ──────────────────────────────────</span>
+df_typed = (df_raw
+    .withColumn(<span class="str">"admit_datetime"</span>,     F.to_timestamp(<span class="str">"admit_datetime"</span>))
+    .withColumn(<span class="str">"discharge_datetime"</span>, F.to_timestamp(<span class="str">"discharge_datetime"</span>))
+    .withColumn(<span class="str">"readmission_flag"</span>,   col(<span class="str">"readmission_flag"</span>).cast(<span class="str">"boolean"</span>))
+    .withColumn(<span class="str">"length_of_stay_days"</span>,col(<span class="str">"length_of_stay_days"</span>).cast(<span class="str">"int"</span>))
+    .withColumn(<span class="str">"icd10_code"</span>, F.upper(F.trim(col(<span class="str">"primary_icd10"</span>))))
+)
+
+<span class="cm">## ── DE-IDENTIFY (HIPAA Safe Harbor) ───────────────</span>
+df_deident = deidentify_encounters(df_typed)
+
+<span class="cm">## ── STANDARDIZE ICD-10 CODES ──────────────────────</span>
+<span class="cm"># Join with reference table to add readable diagnosis category</span>
+icd_ref = spark.read.option(<span class="str">"header"</span>, <span class="kw">True</span>).csv(
+    f<span class="str">"s3://{BUCKET}/reference/icd10_codes/icd10.csv"</span>
+)
+df_silver = (df_deident
+    .join(F.broadcast(icd_ref), df_deident.icd10_code == icd_ref.code, <span class="str">"left"</span>)
+    .withColumn(<span class="str">"year"</span>,  F.lit(y))
+    .withColumn(<span class="str">"month"</span>, F.lit(m))
+    .withColumn(<span class="str">"day"</span>,   F.lit(d))
+    .withColumn(<span class="str">"pipeline_version"</span>, F.lit(<span class="str">"1.0"</span>))
+    .withColumn(<span class="str">"processed_at"</span>, F.current_timestamp())
+)
+
+<span class="cm">## ── WRITE SILVER (Parquet) ─────────────────────────</span>
+silver_path = f<span class="str">"s3://{BUCKET}/silver/encounters/"</span>
+(df_silver.write
+    .mode(<span class="str">"overwrite"</span>)
+    .partitionBy(<span class="str">"year"</span>, <span class="str">"month"</span>, <span class="str">"day"</span>)
+    .parquet(silver_path))
+
+logger.info(f<span class="str">"✅ Silver written: {df_silver.count()} records"</span>)</pre>
+  </div>
+  <div class="card">
+    <h2><i class="ti ti-code" aria-hidden="true"></i> Silver → Gold: Readmission Risk Scoring</h2>
+    <pre><span class="cm"># src/transformation/silver_to_gold.py</span>
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">from</span> pyspark.sql.window <span class="kw">import</span> Window
+
+<span class="cm">## Read silver encounters</span>
+silver = spark.read.parquet(f<span class="str">"s3://{BUCKET}/silver/encounters/"</span>)
+silver_rx = spark.read.parquet(f<span class="str">"s3://{BUCKET}/silver/pharmacy/"</span>)
+silver_lab = spark.read.parquet(f<span class="str">"s3://{BUCKET}/silver/lab_results/"</span>)
+
+<span class="cm">## ── PATIENT RISK SCORE (rule-based) ───────────────</span>
+w_patient = Window.partitionBy(<span class="str">"patient_id"</span>)
+
+patient_features = (silver
+    .groupBy(<span class="str">"patient_id"</span>)
+    .agg(
+        F.count(<span class="str">"encounter_id"</span>).alias(<span class="str">"total_encounters"</span>),
+        F.sum(F.col(<span class="str">"readmission_flag"</span>).cast(<span class="str">"int"</span>)).alias(<span class="str">"total_readmissions"</span>),
+        F.avg(<span class="str">"length_of_stay_days"</span>).alias(<span class="str">"avg_los_days"</span>),
+        F.max(<span class="str">"admit_date"</span>).alias(<span class="str">"last_encounter_date"</span>),
+        F.countDistinct(<span class="str">"icd10_code"</span>).alias(<span class="str">"distinct_conditions"</span>),
+        F.max(F.when(F.col(<span class="str">"insurance_type"</span>) == <span class="str">"Medicare"</span>, <span class="fn">1</span>).otherwise(<span class="fn">0</span>))
+            .alias(<span class="str">"is_medicare"</span>)
+    )
+)
+
+<span class="cm"># Count chronic meds (proxy for chronic condition burden)</span>
+rx_burden = (silver_rx
+    .groupBy(<span class="str">"patient_id"</span>)
+    .agg(F.countDistinct(<span class="str">"medication_name"</span>).alias(<span class="str">"distinct_meds"</span>))
+)
+
+<span class="cm"># Join features and compute composite risk score</span>
+risk_scores = (patient_features
+    .join(rx_burden, <span class="str">"patient_id"</span>, <span class="str">"left"</span>)
+    .withColumn(<span class="str">"distinct_meds"</span>, F.coalesce(<span class="str">"distinct_meds"</span>, F.lit(<span class="fn">0</span>)))
+    .withColumn(<span class="str">"readmission_rate"</span>,
+        F.round(F.col(<span class="str">"total_readmissions"</span>) / F.col(<span class="str">"total_encounters"</span>), <span class="fn">3</span>))
+    .withColumn(<span class="str">"risk_score"</span>,
+        F.round(
+            (F.col(<span class="str">"total_readmissions"</span>) * <span class="fn">3.0</span>) +
+            (F.col(<span class="str">"avg_los_days"</span>) * <span class="fn">0.5</span>) +
+            (F.col(<span class="str">"distinct_conditions"</span>) * <span class="fn">1.5</span>) +
+            (F.col(<span class="str">"distinct_meds"</span>) * <span class="fn">0.8</span>) +
+            (F.col(<span class="str">"is_medicare"</span>) * <span class="fn">2.0</span>),
+        <span class="fn">2</span>))
+    .withColumn(<span class="str">"risk_tier"</span>,
+        F.when(F.col(<span class="str">"risk_score"</span>) >= <span class="fn">15</span>, <span class="str">"HIGH"</span>)
+         .when(F.col(<span class="str">"risk_score"</span>) >= <span class="fn">8</span>,  <span class="str">"MEDIUM"</span>)
+         .otherwise(<span class="str">"LOW"</span>))
+    .withColumn(<span class="str">"scored_at"</span>, F.current_timestamp())
+)
+
+<span class="cm"># Write to gold layer</span>
+(risk_scores.write
+    .mode(<span class="str">"overwrite"</span>)
+    .parquet(f<span class="str">"s3://{BUCKET}/gold/patient_risk_scores/"</span>))
+
+logger.info(<span class="str">"✅ Gold risk scores written"</span>)</pre>
+    <button class="ask-btn" onclick="sendPrompt('Explain how to improve the readmission risk model — what features could I add? ↗')">Ask: Improve the risk model ↗</button>
+  </div>
+</div>
+
+<div class="sec" id="s6">
+  <div class="card">
+    <h2><i class="ti ti-schema" aria-hidden="true"></i> Clinical Data Warehouse — Star Schema</h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Table</th><th>Type</th><th>Grain</th><th>Key Columns</th></tr></thead>
+        <tbody>
+          <tr><td>fact_encounters</td><td>Fact</td><td>1 row per hospital encounter</td><td>encounter_sk, patient_sk, provider_sk, facility_sk, date_sk, diagnosis_sk</td></tr>
+          <tr><td>fact_lab_results</td><td>Fact</td><td>1 row per lab test result</td><td>lab_sk, patient_sk, encounter_sk, date_sk, test_name, result_value</td></tr>
+          <tr><td>dim_patient</td><td>SCD Type 2</td><td>1 row per patient version</td><td>patient_sk (surrogate), patient_id (pseudonymized), birth_year, gender, insurance_type</td></tr>
+          <tr><td>dim_provider</td><td>SCD Type 1</td><td>1 row per provider</td><td>provider_sk, provider_id (pseudonymized), department, specialty</td></tr>
+          <tr><td>dim_diagnosis</td><td>Static</td><td>1 row per ICD-10 code</td><td>diagnosis_sk, icd10_code, description, category, chronic_flag</td></tr>
+          <tr><td>dim_facility</td><td>Static</td><td>1 row per facility</td><td>facility_sk, facility_id, facility_name, facility_type, region</td></tr>
+          <tr><td>dim_date</td><td>Static</td><td>1 row per day</td><td>date_sk, full_date, year, month, quarter, fiscal_year</td></tr>
+          <tr><td>patient_risk_scores</td><td>Derived</td><td>1 row per patient (latest)</td><td>patient_sk, risk_score, risk_tier, readmission_rate, scored_at</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <h3>Key schema design decisions</h3>
+    <ul>
+      <li>dim_patient uses SCD Type 2 — insurance changes affect cost analysis; history matters for regulatory audits</li>
+      <li>dim_diagnosis is a static reference to ICD-10 — never a snowflake from the fact table; avoids repeated string joins</li>
+      <li>patient_risk_scores is a separate derived table — scoring logic may change, keeping it separate protects the core schema</li>
+      <li>No direct PHI in any warehouse table — all identifiers are pseudonymized surrogate keys</li>
+      <li>fact_encounters DISTKEY on patient_sk — most joins are patient-centric</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2><i class="ti ti-code" aria-hidden="true"></i> Redshift DDL</h2>
+    <pre><span class="cm">-- src/modeling/ddl_clinical_dw.sql</span>
+
+<span class="kw">CREATE TABLE</span> dim_patient (
+    patient_sk      BIGINT IDENTITY(1,1) PRIMARY KEY,
+    patient_id      VARCHAR(64)   NOT NULL,  <span class="cm">-- pseudonymized HMAC</span>
+    birth_year      SMALLINT,
+    gender          CHAR(1),
+    insurance_type  VARCHAR(30),
+    risk_tier       VARCHAR(10),
+    effective_date  DATE    NOT NULL,
+    expiry_date     DATE    DEFAULT <span class="str">'9999-12-31'</span>,
+    is_current      BOOLEAN DEFAULT TRUE
+) DISTSTYLE ALL;
+
+<span class="kw">CREATE TABLE</span> dim_diagnosis (
+    diagnosis_sk    BIGINT IDENTITY(1,1) PRIMARY KEY,
+    icd10_code      VARCHAR(10) NOT NULL,
+    description     VARCHAR(500),
+    category        VARCHAR(100),
+    chapter         VARCHAR(100),
+    chronic_flag    BOOLEAN DEFAULT FALSE
+) DISTSTYLE ALL;
+
+<span class="kw">CREATE TABLE</span> fact_encounters (
+    encounter_sk        BIGINT IDENTITY(1,1),
+    encounter_id        VARCHAR(36)   NOT NULL,
+    patient_sk          BIGINT        REFERENCES dim_patient(patient_sk),
+    diagnosis_sk        BIGINT        REFERENCES dim_diagnosis(diagnosis_sk),
+    provider_sk         BIGINT,
+    facility_sk         BIGINT,
+    date_sk             INT           REFERENCES dim_date(date_sk),
+    admit_date          DATE,
+    discharge_date      DATE,
+    length_of_stay_days INT,
+    readmission_flag    BOOLEAN,
+    readmission_within_30 BOOLEAN,
+    insurance_type      VARCHAR(30),
+    department          VARCHAR(100),
+    processed_at        TIMESTAMP     DEFAULT GETDATE()
+)
+DISTKEY(patient_sk)
+SORTKEY(date_sk);
+
+<span class="kw">CREATE TABLE</span> patient_risk_scores (
+    patient_sk          BIGINT REFERENCES dim_patient(patient_sk),
+    risk_score          DECIMAL(8,2),
+    risk_tier           VARCHAR(10),
+    readmission_rate    DECIMAL(5,3),
+    total_encounters    INT,
+    avg_los_days        DECIMAL(6,2),
+    distinct_conditions INT,
+    distinct_meds       INT,
+    scored_at           TIMESTAMP,
+    PRIMARY KEY (patient_sk)
+) DISTSTYLE ALL;</pre>
+  </div>
+</div>
+
+<div class="sec" id="s7">
+  <div class="card">
+    <h2><i class="ti ti-table" aria-hidden="true"></i> Clinical Analytics SQL Queries</h2>
+    <h3>1. 30-day readmission rate by department and month</h3>
+    <pre><span class="kw">WITH</span> encounters_ranked <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        e.patient_sk,
+        e.admit_date,
+        e.discharge_date,
+        e.department,
+        e.readmission_flag,
+        d.year,
+        d.month,
+        <span class="fn">LEAD</span>(e.admit_date) <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> e.patient_sk
+            <span class="kw">ORDER BY</span> e.admit_date
+        ) <span class="kw">AS</span> next_admit_date
+    <span class="kw">FROM</span> fact_encounters e
+    <span class="kw">JOIN</span> dim_date d <span class="kw">ON</span> e.date_sk = d.date_sk
+    <span class="kw">WHERE</span> e.discharge_date <span class="kw">IS NOT NULL</span>
+),
+readmit_30 <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> *,
+        <span class="kw">CASE WHEN</span>
+            <span class="fn">DATEDIFF</span>(day, discharge_date, next_admit_date) <= <span class="fn">30</span>
+            <span class="kw">THEN</span> <span class="fn">1</span> <span class="kw">ELSE</span> <span class="fn">0</span>
+        <span class="kw">END</span> <span class="kw">AS</span> readmit_30_flag
+    <span class="kw">FROM</span> encounters_ranked
+)
+<span class="kw">SELECT</span>
+    department,
+    year,
+    month,
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total_discharges,
+    <span class="fn">SUM</span>(readmit_30_flag) <span class="kw">AS</span> readmissions_30d,
+    <span class="fn">ROUND</span>(<span class="fn">AVG</span>(readmit_30_flag::FLOAT) * <span class="fn">100</span>, <span class="fn">2</span>) <span class="kw">AS</span> readmission_rate_pct,
+    <span class="fn">AVG</span>(<span class="fn">AVG</span>(readmit_30_flag::FLOAT) * <span class="fn">100</span>) <span class="kw">OVER</span> (
+        <span class="kw">PARTITION BY</span> department
+        <span class="kw">ORDER BY</span> year, month
+        <span class="kw">ROWS BETWEEN</span> <span class="fn">2</span> <span class="kw">PRECEDING AND CURRENT ROW</span>
+    ) <span class="kw">AS</span> rolling_3mo_rate_pct
+<span class="kw">FROM</span> readmit_30
+<span class="kw">GROUP BY</span> 1,2,3
+<span class="kw">ORDER BY</span> department, year, month;</pre>
+    <h3>2. High-risk patient care gap identification</h3>
+    <pre><span class="kw">WITH</span> diabetic_patients <span class="kw">AS</span> (
+    <span class="kw">SELECT DISTINCT</span> e.patient_sk
+    <span class="kw">FROM</span> fact_encounters e
+    <span class="kw">JOIN</span> dim_diagnosis dd <span class="kw">ON</span> e.diagnosis_sk = dd.diagnosis_sk
+    <span class="kw">WHERE</span> dd.icd10_code <span class="kw">LIKE</span> <span class="str">'E11%'</span>  <span class="cm">-- Type 2 diabetes codes</span>
+),
+last_hba1c <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        l.patient_sk,
+        <span class="fn">MAX</span>(l.result_date) <span class="kw">AS</span> last_hba1c_date,
+        <span class="fn">MAX</span>(l.result_value) <span class="kw">AS</span> last_hba1c_value
+    <span class="kw">FROM</span> fact_lab_results l
+    <span class="kw">WHERE</span> l.test_name = <span class="str">'HbA1c'</span>
+    <span class="kw">GROUP BY</span> 1
+),
+last_rx <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        rx.patient_sk,
+        <span class="fn">MAX</span>(rx.dispensed_date) <span class="kw">AS</span> last_rx_date
+    <span class="kw">FROM</span> fact_pharmacy rx
+    <span class="kw">WHERE</span> rx.medication_name <span class="kw">ILIKE</span> <span class="str">'%metformin%'</span>
+    <span class="kw">GROUP BY</span> 1
+)
+<span class="kw">SELECT</span>
+    dp.patient_sk,
+    rs.risk_tier,
+    rs.risk_score,
+    h.last_hba1c_date,
+    h.last_hba1c_value,
+    <span class="fn">DATEDIFF</span>(day, h.last_hba1c_date, CURRENT_DATE) <span class="kw">AS</span> days_since_hba1c,
+    rx.last_rx_date,
+    <span class="fn">DATEDIFF</span>(day, rx.last_rx_date, CURRENT_DATE)  <span class="kw">AS</span> days_since_metformin,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> h.last_hba1c_date <span class="kw">IS NULL</span>
+          <span class="kw">OR</span> <span class="fn">DATEDIFF</span>(day, h.last_hba1c_date, CURRENT_DATE) > <span class="fn">180</span>
+        <span class="kw">THEN</span> <span class="str">'OVERDUE — HbA1c > 6 months'</span>
+        <span class="kw">WHEN</span> h.last_hba1c_value > <span class="fn">9.0</span>
+        <span class="kw">THEN</span> <span class="str">'POOR CONTROL — HbA1c > 9.0'</span>
+        <span class="kw">WHEN</span> rx.last_rx_date <span class="kw">IS NULL</span>
+          <span class="kw">OR</span> <span class="fn">DATEDIFF</span>(day, rx.last_rx_date, CURRENT_DATE) > <span class="fn">90</span>
+        <span class="kw">THEN</span> <span class="str">'MEDICATION GAP — no metformin fill > 90 days'</span>
+        <span class="kw">ELSE</span> <span class="str">'COMPLIANT'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> care_gap_flag
+<span class="kw">FROM</span> diabetic_patients dp
+<span class="kw">JOIN</span> patient_risk_scores rs <span class="kw">ON</span> dp.patient_sk = rs.patient_sk
+<span class="kw">LEFT JOIN</span> last_hba1c h   <span class="kw">ON</span> dp.patient_sk = h.patient_sk
+<span class="kw">LEFT JOIN</span> last_rx   rx   <span class="kw">ON</span> dp.patient_sk = rx.patient_sk
+<span class="kw">WHERE</span> rs.risk_tier = <span class="str">'HIGH'</span>
+<span class="kw">ORDER BY</span> rs.risk_score <span class="kw">DESC</span>;</pre>
+    <h3>3. Average length-of-stay by diagnosis category (percentile analysis)</h3>
+    <pre><span class="kw">SELECT</span>
+    dd.category <span class="kw">AS</span> diagnosis_category,
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> encounter_count,
+    <span class="fn">ROUND</span>(<span class="fn">AVG</span>(fe.length_of_stay_days), <span class="fn">2</span>) <span class="kw">AS</span> avg_los,
+    <span class="fn">PERCENTILE_CONT</span>(<span class="fn">0.5</span>) <span class="kw">WITHIN GROUP</span> (<span class="kw">ORDER BY</span> fe.length_of_stay_days)
+        <span class="kw">AS</span> median_los,
+    <span class="fn">PERCENTILE_CONT</span>(<span class="fn">0.9</span>) <span class="kw">WITHIN GROUP</span> (<span class="kw">ORDER BY</span> fe.length_of_stay_days)
+        <span class="kw">AS</span> p90_los,
+    <span class="fn">ROUND</span>(<span class="fn">SUM</span>(fe.readmission_flag::INT)::FLOAT / <span class="fn">COUNT</span>(*) * <span class="fn">100</span>, <span class="fn">2</span>)
+        <span class="kw">AS</span> readmission_rate_pct,
+    <span class="fn">RANK</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> <span class="fn">AVG</span>(fe.length_of_stay_days) <span class="kw">DESC</span>)
+        <span class="kw">AS</span> rank_by_avg_los
+<span class="kw">FROM</span> fact_encounters fe
+<span class="kw">JOIN</span> dim_diagnosis dd <span class="kw">ON</span> fe.diagnosis_sk = dd.diagnosis_sk
+<span class="kw">WHERE</span> fe.discharge_date <span class="kw">IS NOT NULL</span>
+<span class="kw">GROUP BY</span> dd.category
+<span class="kw">HAVING</span> <span class="fn">COUNT</span>(*) >= <span class="fn">100</span>  <span class="cm">-- statistical significance filter</span>
+<span class="kw">ORDER BY</span> avg_los <span class="kw">DESC</span>;</pre>
+  </div>
+</div>
+
+<div class="sec" id="s8">
+  <div class="card">
+    <h2><i class="ti ti-flame" aria-hidden="true"></i> PySpark — Healthcare-Specific Patterns</h2>
+    <h3>Parsing nested FHIR JSON</h3>
+    <pre><span class="cm"># FHIR resources have deeply nested arrays — flatten with explode + getItem</span>
+<span class="kw">from</span> pyspark.sql.functions <span class="kw">import</span> explode, col, get_json_object
+<span class="kw">from</span> pyspark.sql.types <span class="kw">import</span> ArrayType, StructType, StructField, StringType
+
+<span class="cm"># Schema for FHIR Observation (lab result) resource</span>
+obs_schema = StructType([
+    StructField(<span class="str">"resourceType"</span>, StringType()),
+    StructField(<span class="str">"id"</span>, StringType()),
+    StructField(<span class="str">"status"</span>, StringType()),
+    StructField(<span class="str">"subject"</span>, StructType([
+        StructField(<span class="str">"reference"</span>, StringType())
+    ])),
+    StructField(<span class="str">"code"</span>, StructType([
+        StructField(<span class="str">"coding"</span>, ArrayType(StructType([
+            StructField(<span class="str">"system"</span>, StringType()),
+            StructField(<span class="str">"code"</span>,   StringType()),
+            StructField(<span class="str">"display"</span>,StringType())
+        ])))
+    ])),
+    StructField(<span class="str">"valueQuantity"</span>, StructType([
+        StructField(<span class="str">"value"</span>, StringType()),
+        StructField(<span class="str">"unit"</span>,  StringType())
+    ]))
+])
+
+df_fhir = spark.read.schema(obs_schema).json(bronze_path)
+
+<span class="cm"># Flatten: explode coding array, select nested fields</span>
+df_flat = (df_fhir
+    .withColumn(<span class="str">"coding"</span>, explode(col(<span class="str">"code.coding"</span>)))
+    .select(
+        col(<span class="str">"id"</span>).alias(<span class="str">"observation_id"</span>),
+        col(<span class="str">"subject.reference"</span>).alias(<span class="str">"patient_ref"</span>),
+        col(<span class="str">"coding.code"</span>).alias(<span class="str">"loinc_code"</span>),
+        col(<span class="str">"coding.display"</span>).alias(<span class="str">"test_name"</span>),
+        col(<span class="str">"valueQuantity.value"</span>).cast(<span class="str">"double"</span>).alias(<span class="str">"result_value"</span>),
+        col(<span class="str">"valueQuantity.unit"</span>).alias(<span class="str">"unit"</span>),
+        col(<span class="str">"status"</span>)
+    )
+    .withColumn(<span class="str">"patient_id"</span>,
+        F.regexp_extract(col(<span class="str">"patient_ref"</span>), <span class="str">r"Patient/(.+)"</span>, <span class="fn">1</span>))
+    .drop(<span class="str">"patient_ref"</span>)
+)</pre>
+    <h3>Window function: detect 30-day readmissions in PySpark</h3>
+    <pre><span class="kw">from</span> pyspark.sql.window <span class="kw">import</span> Window
+
+w = Window.partitionBy(<span class="str">"patient_id"</span>).orderBy(<span class="str">"admit_date"</span>)
+
+df_readmit = (silver_encounters
+    .withColumn(<span class="str">"prev_discharge"</span>,
+        F.lag(<span class="str">"discharge_date"</span>).over(w))
+    .withColumn(<span class="str">"days_since_last_discharge"</span>,
+        F.datediff(col(<span class="str">"admit_date"</span>), col(<span class="str">"prev_discharge"</span>)))
+    .withColumn(<span class="str">"is_30day_readmission"</span>,
+        F.when(col(<span class="str">"days_since_last_discharge"</span>) <= <span class="fn">30</span>, <span class="kw">True</span>)
+         .otherwise(<span class="kw">False</span>))
+)</pre>
+    <h3>Performance tips specific to healthcare data</h3>
+    <ul>
+      <li>FHIR JSON is deeply nested — define explicit schemas, never use schema inference on production data</li>
+      <li>Lab result tables can be 100x larger than encounter tables — filter by date partition first before any join</li>
+      <li>Use <code>broadcast(dim_diagnosis)</code> — ICD-10 reference is ~95K rows, perfect for broadcast</li>
+      <li>Patient data skews heavily (ICU patients have 100x more records than routine patients) — use <code>salting</code> technique if joins on patient_id cause data skew</li>
+      <li>Always repartition before writing: <code>.repartition(col("year"), col("month"))</code></li>
+    </ul>
+  </div>
+</div>
+
+<div class="sec" id="s9">
+  <div class="card">
+    <h2><i class="ti ti-cloud" aria-hidden="true"></i> AWS Deployment for Healthcare</h2>
+    <div class="step-grid">
+      <div class="step-card"><div class="step-num">Step 1</div><div class="step-title">Create KMS CMK</div><div class="step-desc">AWS Console → KMS → Create Key. Note the ARN for S3 + Redshift encryption.</div></div>
+      <div class="step-card"><div class="step-num">Step 2</div><div class="step-title">S3 bucket (SSE-KMS)</div><div class="step-desc">aws s3api put-bucket-encryption — use the CMK ARN. Block all public access.</div></div>
+      <div class="step-card"><div class="step-num">Step 3</div><div class="step-title">Enable CloudTrail</div><div class="step-desc">Management + Data events. Log to a separate locked S3 bucket.</div></div>
+      <div class="step-card"><div class="step-num">Step 4</div><div class="step-title">Create VPC</div><div class="step-desc">Private subnets only. Glue connection + Redshift cluster inside the VPC.</div></div>
+      <div class="step-card"><div class="step-num">Step 5</div><div class="step-title">Secrets Manager</div><div class="step-desc">Store DEIDENT_SECRET and Redshift credentials in AWS Secrets Manager.</div></div>
+      <div class="step-card"><div class="step-num">Step 6</div><div class="step-title">Glue Jobs × 2</div><div class="step-desc">bronze_to_silver and silver_to_gold — each with separate IAM roles.</div></div>
+    </div>
+    <div class="divider"></div>
+    <h3>CLI commands: S3 encryption + audit setup</h3>
+    <pre><span class="cm"># Create KMS key</span>
+aws kms create-key \
+  --description "MedCore PHI encryption key" \
+  --key-usage ENCRYPT_DECRYPT
+
+<span class="cm"># Create S3 bucket with versioning + SSE-KMS</span>
+aws s3api create-bucket \
+  --bucket medcore-phi-data-lake \
+  --region us-east-1
+
+aws s3api put-bucket-versioning \
+  --bucket medcore-phi-data-lake \
+  --versioning-configuration Status=Enabled
+
+aws s3api put-bucket-encryption \
+  --bucket medcore-phi-data-lake \
+  --server-side-encryption-configuration '{
+    "Rules":[{"ApplyServerSideEncryptionByDefault":{
+      "SSEAlgorithm":"aws:kms",
+      "KMSMasterKeyID":"YOUR_KMS_ARN"
+    }}]}'
+
+aws s3api put-public-access-block \
+  --bucket medcore-phi-data-lake \
+  --public-access-block-configuration \
+    "BlockPublicAcls=true,IgnorePublicAcls=true,\
+     BlockPublicPolicy=true,RestrictPublicBuckets=true"
+
+<span class="cm"># Enable CloudTrail for audit logging</span>
+aws cloudtrail create-trail \
+  --name medcore-phi-audit-trail \
+  --s3-bucket-name medcore-audit-logs \
+  --include-global-service-events
+
+aws cloudtrail start-logging \
+  --name medcore-phi-audit-trail</pre>
+  </div>
+</div>
+
+<div class="sec" id="s10">
+  <div class="card">
+    <h2><i class="ti ti-messages" aria-hidden="true"></i> 15 Healthcare DE Interview Questions</h2>
+    <div id="qa-list"></div>
+  </div>
+</div>
+
+<div class="sec" id="s11">
+  <div class="card">
+    <h2><i class="ti ti-file-text" aria-hidden="true"></i> Resume Bullet Points</h2>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px;font-family:var(--font-mono);font-size:12px;line-height:1.9;color:var(--color-text-primary)">
+      • Architected a HIPAA-compliant medallion data lake (Bronze → Silver → Gold) on AWS for a 2.4M patient healthcare network, processing 180K clinical records daily from EHR, lab, and pharmacy systems<br>
+      • Implemented HIPAA Safe Harbor de-identification using HMAC-SHA256 pseudonymization in PySpark, replacing 18 PHI identifiers before data reached the analytics layer — enabling research use while maintaining compliance<br>
+      • Built a patient readmission risk scoring pipeline using PySpark window functions on encounter, lab, and pharmacy data, identifying high-risk patients and enabling proactive outreach that reduced 30-day readmission rate by 2.1 percentage points<br>
+      • Designed a clinical star schema in Amazon Redshift (3 fact + 5 dimension tables) with SCD Type 2 patient history, reducing population health query times from 45 minutes to under 90 seconds<br>
+      • Automated HIPAA audit trail using AWS CloudTrail + CloudWatch, achieving 100% data access logging required for SOC 2 and HIPAA Security Rule compliance
+    </div>
+  </div>
+  <div class="card">
+    <h2><i class="ti ti-microphone" aria-hidden="true"></i> Interview Story (STAR Format)</h2>
+    <div style="border-left:2px solid #9FE1CB;padding-left:14px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:500;color:#085041;margin-bottom:4px">SITUATION</div>
+      <p>"MedCore Health Systems had clinical data locked in 5 separate systems — Epic, a claims processor, a lab information system, pharmacy, and surveys. The data team could not produce population health reports in under 3 weeks, and there was no way to proactively identify which patients were at risk of 30-day readmission — a CMS quality metric with up to $8M annual penalty exposure."</p>
+    </div>
+    <div style="border-left:2px solid #FAC775;padding-left:14px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:500;color:#854F0B;margin-bottom:4px">TASK</div>
+      <p>"I was responsible for designing and building a fully HIPAA-compliant data pipeline that could ingest, de-identify, transform, and serve this clinical data — while ensuring every technical decision met regulatory requirements."</p>
+    </div>
+    <div style="border-left:2px solid #FAC775;padding-left:14px;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:500;color:#854F0B;margin-bottom:4px">ACTION</div>
+      <p>"I implemented a Medallion Architecture — three S3 zones. The Bronze layer stored encrypted raw PHI. The Silver layer applied HIPAA Safe Harbor de-identification using HMAC pseudonymization, replacing all 18 identifiers before any analytics use. In the Gold layer, I built a PySpark risk-scoring job using window functions across encounter, lab, and pharmacy data to compute a composite readmission risk score. I set up AWS CloudTrail for full audit logging, KMS encryption at rest, and VPC isolation for the Redshift cluster."</p>
+    </div>
+    <div style="border-left:2px solid #9FE1CB;padding-left:14px">
+      <div style="font-size:12px;font-weight:500;color:#085041;margin-bottom:4px">RESULT</div>
+      <p>"Population health reporting latency dropped from 3 weeks to 4 hours. The risk scoring model identified 1,200 high-risk diabetic patients with care gaps, enabling the care management team to intervene proactively — reducing 30-day readmission rate from 14.2% to 12.1%, saving an estimated $1.4M in CMS penalties in the first year."</p>
+    </div>
+    <button class="ask-btn" style="margin-top:14px" onclick="sendPrompt('Help me practice answering HIPAA compliance questions for a healthcare data engineer interview ↗')">Practice HIPAA interview questions ↗</button>
+  </div>
+  <div class="card">
+    <h2><i class="ti ti-rocket" aria-hidden="true"></i> Production Enhancements</h2>
+    <ul>
+      <li>Replace batch ingestion with HL7 FHIR API streaming via AWS EventBridge for real-time encounter events</li>
+      <li>Add Apache Airflow (MWAA) DAG orchestrating all 3 medallion jobs with SLA alerting and dependency management</li>
+      <li>Integrate a proper ML readmission model (XGBoost via SageMaker) replacing the rule-based score</li>
+      <li>Add Delta Lake / Apache Iceberg for ACID compliance — required when correcting medical record errors post-load</li>
+      <li>Implement attribute-based access control (ABAC) in Lake Formation — clinicians see only their patients' data</li>
+      <li>Add automated HIPAA compliance reports using AWS Macie to scan for any PHI that escaped de-identification</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+const qaData = [
+  {q:"What is HIPAA and what are a data engineer's responsibilities under it?", a:"HIPAA (Health Insurance Portability and Accountability Act) protects patient health information (PHI). As a data engineer, you are a Business Associate — you must implement the Technical Safeguards: encryption at rest and in transit, access controls, audit logging, and automatic logoff. You must also sign a Business Associate Agreement (BAA) with covered entities. Engineering responsibilities include ensuring PHI is encrypted (SSE-KMS), access is role-based (IAM), all data access is logged (CloudTrail), and PHI is de-identified before non-clinical use."},
+  {q:"Explain the Medallion Architecture. Why use it for healthcare vs a 2-zone raw/curated approach?", a:"Medallion (Bronze/Silver/Gold) adds an extra quality layer. Bronze = raw data preserved exactly as received — critical in healthcare for audit trails and legal holds. Silver = cleansed, de-identified, validated — safe for analytical access. Gold = aggregated business metrics for BI. Healthcare specifically needs the Bronze→Silver PHI removal step as a mandatory firewall between raw PHI and analytical use. A 2-zone approach conflates compliance (de-identification) with transformation, making audit harder."},
+  {q:"What is the difference between de-identification and anonymization?", a:"De-identification removes or transforms identifiers so an individual cannot be reasonably identified, as defined by HIPAA's two methods: Safe Harbor (remove all 18 identifiers) and Expert Determination (statistical analysis by an expert). Anonymization is the broader concept. Pseudonymization (which I used) replaces identifiers with surrogate keys using a secret — it's de-identified from the analytics user's perspective, but re-linkable by authorized parties with the key. True anonymization is irreversible. For healthcare analytics, pseudonymization is preferred because longitudinal patient analysis requires consistent patient keys."},
+  {q:"What is SCD Type 2 and why is it important for a patient dimension?", a:"Slowly Changing Dimension Type 2 creates a new row each time an attribute changes, preserving full history via effective_date/expiry_date/is_current flags. For patients, this matters because insurance type, coverage, or risk tier can change, and historical analysis must use the state that was true at the time of an encounter — not the current state. For example, a cost analysis for a 2022 encounter should reflect the patient's 2022 insurance, not their 2024 insurance. Without SCD2, you'd silently corrupt all historical reporting."},
+  {q:"How would you handle schema evolution when Epic adds a new field to the FHIR payload?", a:"Three approaches: (1) Define explicit schemas in PySpark — new fields are silently ignored unless you add them. This is safe but misses new data. (2) Use mergeSchema=True when reading Parquet, which adds new columns with nulls for historical records. (3) Version your schema — store schema version alongside data and use a schema registry. In practice: add a schema validation step in Bronze→Silver that compares incoming schema against expected, logs new columns to a schema_changes table, alerts via SNS, but doesn't fail the job (additive changes are backward-compatible). Breaking changes (column removals/renames) fail the job."},
+  {q:"Explain how DISTKEY and SORTKEY work in Redshift for clinical data.", a:"DISTKEY controls how rows are physically distributed across compute nodes. Using patient_sk as DISTKEY means all encounters for a patient land on the same node — JOIN operations between fact_encounters and dim_patient (or patient_risk_scores) happen locally without expensive network shuffles. SORTKEY orders rows within each 1MB disk block. Using date_sk as SORTKEY means Redshift's zone maps (min/max per block) skip entire blocks when you filter WHERE date_sk BETWEEN 20240101 AND 20240131, drastically reducing I/O for date-range queries which are common in clinical reporting."},
+  {q:"How would you detect data quality issues specific to healthcare data?", a:"Beyond standard null/duplicate checks, healthcare needs domain-specific validations: (1) ICD-10 code validity — join against the official CMS ICD-10 reference, flag unknown codes. (2) Date logic — admit_date must be before discharge_date; DOB must be in the past. (3) Lab result ranges — flag values outside physiologically plausible ranges (e.g., HbA1c > 20% is likely a data entry error). (4) Referential integrity — every encounter must have a valid patient_id in the patient dimension. (5) Duplicate encounter detection with fuzzy matching — same patient, same facility, overlapping dates may indicate EHR sync issues, not true separate encounters."},
+  {q:"What is AWS KMS and how does it differ from S3 default encryption?", a:"KMS (Key Management Service) manages cryptographic keys. S3 SSE-S3 uses AWS-managed keys — you have no control and no audit trail of key usage. SSE-KMS uses KMS-managed keys: (1) You can set key policies controlling who can use the key to decrypt — even if someone has S3 access, without KMS permissions they get encrypted bytes. (2) Every encrypt/decrypt call creates a CloudTrail log entry — full audit trail of who accessed PHI data. (3) Customer-managed CMKs let you rotate, disable, or delete keys — critical for data deletion compliance (GDPR Right to Erasure: delete the key, all encrypted data becomes unreadable)."},
+  {q:"How would you implement row-level security in Redshift for clinical data?", a:"Three approaches: (1) Redshift Row-Level Security (RLS) — CREATE RLS POLICY that filters rows based on SESSION_USER or attached roles: CREATE RLS POLICY provider_rls ON fact_encounters USING (provider_sk = current_user_provider_sk). (2) Database views — create filtered views per user group, grant access to views not base tables. (3) AWS Lake Formation column/row-level permissions on the S3 data catalog layer — more scalable, applies before data reaches Redshift. In healthcare, providers should see only their own patients, care managers see only their attributed panel, and administrators see all — each group gets a different IAM role mapped to appropriate RLS policies."},
+  {q:"What is data lineage and how would you implement it in this pipeline?", a:"Data lineage tracks where each data element came from, how it was transformed, and where it went. In healthcare, this is a compliance requirement — if a patient requests data deletion or correction, you must trace every system holding that data. Implementation: (1) AWS Glue Data Catalog automatically tracks source-to-destination for Glue jobs. (2) Add a pipeline_metadata table in Redshift recording: source_system, source_file, job_name, job_run_id, record_count, processed_at, schema_version. (3) OpenLineage/Marquez integration with Glue or Airflow for visual lineage graphs. (4) Tag S3 objects with source system and ingestion timestamp for object-level lineage."},
+  {q:"How do you handle late-arriving clinical data — for example, lab results that arrive 2 days after an encounter?", a:"This is extremely common in healthcare — lab results can arrive days or weeks after the encounter. Strategy: (1) Keep Bronze partitions mutable for a rolling 7-day window. Run a daily reconciliation job that re-checks Bronze for any files modified since last run. (2) In Silver/Gold, use MERGE/UPSERT rather than INSERT — match on encounter_id and update the record if a new lab result links to it. (3) Track a data_completeness_flag on encounters — set to FALSE until all expected lab results have arrived (based on order-to-result SLA from LIS system). (4) For risk scoring specifically, re-score patients when new lab results arrive — store scored_at timestamp and add a last_updated_trigger field."},
+  {q:"Explain PySpark window functions and give a clinical example.", a:"Window functions compute values across a sliding window of rows — related to the current row but not collapsing them into one row (unlike GROUP BY). Syntax: func().over(Window.partitionBy('col').orderBy('col')). Clinical examples: (1) LAG() — detect 30-day readmissions by comparing current admit_date to previous discharge_date per patient. (2) ROW_NUMBER() — identify the most recent encounter per patient for current-state analysis. (3) SUM().over() with rowsBetween() — rolling 30-day lab result count per patient to identify patients with sudden increase in testing frequency. (4) RANK() — rank providers by readmission rate within their specialty, controlling for patient complexity."},
+  {q:"What is the difference between a Glue Crawler and a Glue ETL Job?", a:"A Glue Crawler scans a data store (S3, RDS, Redshift) and automatically infers the schema, then writes table definitions to the Glue Data Catalog (a managed Hive Metastore). It doesn't transform data — it just catalogs it. A Glue ETL Job is a PySpark or Python script that reads, transforms, and writes data. Workflow: (1) Drop raw JSON in S3 Bronze. (2) Run Glue Crawler to catalog it (adds it to the Data Catalog so Athena can query it). (3) Run Glue ETL Job to de-identify, validate, and write to Silver Parquet. (4) Run another Crawler on Silver to catalog the clean table. (5) Athena and Redshift Spectrum can now query both Bronze and Silver with standard SQL."},
+  {q:"How would you scale this pipeline to handle 10M patient records per day?", a:"Five key changes: (1) Replace batch Lambda triggers with Kinesis Data Streams → Kinesis Firehose for streaming FHIR events with sub-minute latency. (2) Move from Glue to EMR on EC2 with auto-scaling — control Spark executor count, memory, and parallelism for large-scale jobs. (3) Use Apache Iceberg instead of raw Parquet — ACID transactions for late-arriving data corrections, time-travel for historical audits, and partition evolution without rewrites. (4) Add Apache Airflow (MWAA) for orchestration — dependency management, retry logic, SLA alerting. (5) Use Redshift RA3 nodes with managed storage separation — scales storage independently of compute, critical for multi-year clinical archives."},
+  {q:"How would you explain your HIPAA de-identification approach to a non-technical compliance officer?", a:"I'd say: 'We store the raw data in a locked vault (Bronze S3 bucket) with military-grade encryption — like a safety deposit box where only specific systems, not people, have keys. Before any analyst ever touches the data, our pipeline runs it through a transformation that replaces every patient name, ID, and date with a meaningless code number — like replacing John Smith born 1975 with Code A7F3. Analysts see the medical story — diagnosis, treatment, length of stay — but cannot reverse-engineer who that person is. Every time anyone accesses the raw vault, we log it automatically — we know who, when, and what was accessed. This satisfies both HIPAA Safe Harbor de-identification and the Technical Safeguards requirement.' This framing shows both technical depth and business communication skills — a rare combination interviewers value."}
+];
+
+const qList = document.getElementById("qa-list");
+qaData.forEach((item, i) => {
+  const div = document.createElement("div");
+  div.className = "q-item";
+  div.innerHTML = `
+    <div class="q-hdr" onclick="toggleQ(${i})">
+      <span><strong style="color:var(--color-text-secondary);font-size:11px;font-weight:500;margin-right:8px">Q${i+1}</strong>${item.q}</span>
+      <i class="ti ti-chevron-down" id="chev-${i}" style="font-size:16px;color:var(--color-text-secondary);transition:transform .2s;flex-shrink:0" aria-hidden="true"></i>
+    </div>
+    <div class="q-body" id="qb-${i}">${item.a}</div>
+  `;
+  qList.appendChild(div);
+});
+
+function toggleQ(i) {
+  const b = document.getElementById("qb-"+i);
+  const c = document.getElementById("chev-"+i);
+  const open = b.classList.contains("open");
+  b.classList.toggle("open", !open);
+  c.style.transform = open ? "" : "rotate(180deg)";
+}
+
+const secs = document.querySelectorAll(".sec");
+const btns = document.querySelectorAll(".nb");
+const pb   = document.getElementById("pbar");
+
+function show(i) {
+  secs.forEach((s,j) => s.classList.toggle("active", j===i));
+  btns.forEach((b,j) => b.classList.toggle("active", j===i));
+  pb.style.width = Math.round(((i+1)/secs.length)*100)+"%";
+}
+</script>
