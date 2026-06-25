@@ -1,0 +1,2451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DE Project 2 — Healthcare Claims Pipeline</title>
+<style>
+  :root {
+    --bg:#0d1117;--bg2:#161b22;--bg3:#1f2937;--card:#1a2233;
+    --border:#2d3748;--accent:#38bdf8;--accent2:#34d399;
+    --accent3:#f472b6;--accent4:#fbbf24;--text:#e2e8f0;
+    --text2:#94a3b8;--text3:#64748b;--code-bg:#0d1117;
+    --green:#34d399;--red:#f87171;--yellow:#fbbf24;
+    --blue:#38bdf8;--pink:#f472b6;--purple:#a78bfa;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7}
+
+  /* SIDEBAR */
+  .sidebar{position:fixed;top:0;left:0;width:268px;height:100vh;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;transition:transform .3s}
+  .sidebar-logo{padding:18px 20px 14px;border-bottom:1px solid var(--border)}
+  .sidebar-logo .proj-tag{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:4px}
+  .sidebar-logo h2{font-size:13px;color:var(--text);font-weight:600;line-height:1.4}
+  .sb-section{padding:10px 0;border-bottom:1px solid var(--border)}
+  .sb-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;padding:0 20px 8px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 20px;cursor:pointer;color:var(--text2);font-size:13px;border-left:3px solid transparent;transition:all .15s;text-decoration:none}
+  .nav-item:hover{color:var(--text);background:var(--bg3)}
+  .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(56,189,248,.08)}
+  .nav-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;background:var(--bg3);color:var(--text3)}
+  .nav-item.active .nav-dot{background:rgba(56,189,248,.2);color:var(--accent)}
+  .nav-item.done .nav-dot{background:rgba(52,211,153,.15);color:var(--green)}
+  .prog-wrap{padding:12px 20px 8px}
+  .prog-bar{height:4px;border-radius:2px;background:var(--border);overflow:hidden;margin-bottom:5px}
+  .prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s}
+  .prog-label{font-size:11px;color:var(--text3)}
+
+  /* MAIN */
+  .main{margin-left:268px;min-height:100vh}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(13,17,23,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 32px;display:flex;align-items:center;justify-content:space-between}
+  .topbar-left{display:flex;align-items:center;gap:12px}
+  .badge{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px}
+  .b-setup{background:rgba(56,189,248,.15);color:var(--blue)}
+  .b-code{background:rgba(167,139,250,.15);color:var(--purple)}
+  .b-sql{background:rgba(52,211,153,.15);color:var(--green)}
+  .b-interview{background:rgba(251,191,36,.15);color:var(--yellow)}
+  .b-hipaa{background:rgba(244,114,182,.15);color:var(--pink)}
+  .menu-btn{display:none;background:none;border:none;color:var(--text2);cursor:pointer;font-size:20px;padding:4px}
+  .content{padding:32px;max-width:920px}
+
+  /* SECTIONS */
+  .section{display:none}
+  .section.active{display:block}
+
+  /* HERO */
+  .hero{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:26px;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.1) 0%,transparent 70%);pointer-events:none}
+  .hero-tag{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .hero h1{font-size:26px;font-weight:700;margin-bottom:10px;line-height:1.3}
+  .hero p{color:var(--text2);font-size:14px;margin-bottom:20px;max-width:640px}
+  .hero-stats{display:flex;gap:24px;flex-wrap:wrap}
+  .stat-val{font-size:22px;font-weight:700;color:var(--accent2)}
+  .stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+
+  /* STEP CARDS */
+  .step-card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:18px;overflow:hidden}
+  .step-header{display:flex;align-items:center;gap:14px;padding:17px 22px;cursor:pointer;transition:background .15s}
+  .step-header:hover{background:rgba(255,255,255,.02)}
+  .step-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+  .step-num.active-s{background:rgba(56,189,248,.2);color:var(--accent);border-color:rgba(56,189,248,.4)}
+  .step-num.done-s{background:rgba(52,211,153,.15);color:var(--green);border-color:rgba(52,211,153,.3)}
+  .step-title{font-size:15px;font-weight:600}
+  .step-sub{font-size:12px;color:var(--text3);margin-top:2px}
+  .step-time{margin-left:auto;font-size:11px;color:var(--text3);background:var(--bg3);padding:3px 10px;border-radius:20px;flex-shrink:0}
+  .step-chev{margin-left:8px;color:var(--text3);font-size:12px;transition:transform .2s;flex-shrink:0}
+  .step-body{display:none;padding:0 22px 22px;border-top:1px solid var(--border)}
+  .step-body.open{display:block}
+  .step-body p{color:var(--text2);font-size:14px;margin:12px 0 8px}
+  .step-body ul,.step-body ol{color:var(--text2);font-size:14px;padding-left:20px;margin:8px 0}
+  .step-body li{margin-bottom:6px}
+
+  /* CODE */
+  .code-block{position:relative;margin:14px 0;border-radius:10px;overflow:hidden}
+  .code-header{background:#0a0c12;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+  .code-lang{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
+  .copy-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:11px;padding:4px 12px;border-radius:6px;cursor:pointer;transition:all .15s;font-family:inherit}
+  .copy-btn:hover{background:var(--accent);color:#000;border-color:var(--accent)}
+  .copy-btn.copied{background:rgba(52,211,153,.2);color:var(--green);border-color:var(--green)}
+  pre{background:var(--code-bg);padding:18px;overflow-x:auto;font-size:13px;line-height:1.7;font-family:'Cascadia Code','Fira Code','Consolas',monospace}
+  pre code{color:#c9d1d9}
+  .kw{color:#ff79c6}.fn{color:#50fa7b}.st{color:#f1fa8c}.cm{color:#6272a4;font-style:italic}.nm{color:#bd93f9}.op{color:#ff79c6}.de{color:#8be9fd}
+
+  /* CALLOUTS */
+  .callout{border-radius:10px;padding:14px 18px;margin:14px 0;font-size:14px;display:flex;gap:12px;align-items:flex-start}
+  .callout-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+  .c-tip{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);color:#a7f3d0}
+  .c-warn{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);color:#fde68a}
+  .c-info{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);color:#bae6fd}
+  .c-danger{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:#fecaca}
+  .c-hipaa{background:rgba(244,114,182,.08);border:1px solid rgba(244,114,182,.2);color:#fbcfe8}
+
+  /* CHECKLIST */
+  .checklist{list-style:none;padding:0;margin:14px 0}
+  .checklist li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--text2)}
+  .checklist li:last-child{border-bottom:none}
+  .checklist input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;margin-top:3px}
+  .checklist label{cursor:pointer}
+  .checklist input:checked+label{text-decoration:line-through;color:var(--text3)}
+
+  /* INTERVIEW */
+  .q-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
+  .q-header{padding:14px 18px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;transition:background .15s}
+  .q-header:hover{background:rgba(255,255,255,.02)}
+  .q-num{font-size:11px;font-weight:700;color:var(--accent);background:rgba(56,189,248,.15);padding:2px 8px;border-radius:10px;flex-shrink:0;margin-top:2px}
+  .q-cat{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:10px;flex-shrink:0;margin-top:2px}
+  .cat-arch{background:rgba(248,113,113,.15);color:var(--red)}
+  .cat-spark{background:rgba(167,139,250,.15);color:var(--purple)}
+  .cat-hipaa{background:rgba(244,114,182,.15);color:var(--pink)}
+  .cat-incr{background:rgba(52,211,153,.15);color:var(--green)}
+  .cat-sql{background:rgba(56,189,248,.15);color:var(--blue)}
+  .cat-prod{background:rgba(251,191,36,.15);color:var(--yellow)}
+  .q-text{font-size:14px;font-weight:500;color:var(--text);flex:1}
+  .q-body{display:none;padding:0 18px 18px;border-top:1px solid var(--border)}
+  .q-body.open{display:block}
+  .q-body p{font-size:14px;color:var(--text2);margin-top:12px;line-height:1.8}
+  .ans-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent2);margin-top:14px;margin-bottom:6px}
+
+  /* SCHEMA */
+  .schema-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  .schema-table th{background:var(--bg3);color:var(--text2);font-weight:600;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
+  .schema-table td{padding:9px 14px;border-bottom:1px solid rgba(45,55,72,.5);color:var(--text2);vertical-align:top}
+  .schema-table tr:hover td{background:rgba(255,255,255,.02)}
+  .col-pk{color:var(--yellow);font-weight:600;font-size:10px}
+  .col-fk{color:var(--blue);font-weight:600;font-size:10px}
+  .col-type{color:var(--accent2);font-size:12px;font-family:monospace}
+  .col-phi{color:var(--pink);font-weight:600;font-size:10px}
+
+  /* TABS */
+  .tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+  .tab-btn{padding:7px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;background:var(--bg3);border:1px solid var(--border);color:var(--text2);transition:all .15s;font-family:inherit}
+  .tab-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .tab-btn.active{background:rgba(56,189,248,.2);border-color:var(--accent);color:var(--accent)}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+
+  /* COMPARISON TABLE */
+  .comp-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  .comp-table th{background:var(--bg3);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);font-weight:600}
+  .comp-table td{padding:10px 14px;border-bottom:1px solid rgba(45,55,72,.5);color:var(--text2);vertical-align:top}
+  .comp-table .yes{color:var(--green)}
+  .comp-table .no{color:var(--red)}
+  .comp-table .mid{color:var(--yellow)}
+
+  /* RESUME */
+  .resume-box{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2);border-radius:12px;padding:22px;margin:16px 0}
+  .resume-box h4{color:var(--accent2);font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+  .resume-box p{color:#a7f3d0;font-size:14px;line-height:1.85}
+
+  /* SNOWFLAKE SCHEMA GRID */
+  .schema-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:16px 0}
+  .schema-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px}
+  .schema-card.fact-card{border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.06)}
+  .schema-card.dim-card{border-color:rgba(56,189,248,.3);background:rgba(56,189,248,.05)}
+  .schema-card.sub-card{border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.05)}
+  .schema-card .sc-title{font-size:12px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+  .schema-card .sc-col{font-size:12px;color:var(--text2);padding:2px 0;font-family:monospace}
+  .schema-card .sc-col.pk{color:var(--yellow)}
+  .schema-card .sc-col.fk{color:var(--blue)}
+  .schema-card .sc-col.phi{color:var(--pink)}
+
+  /* DIFF BADGE */
+  .diff-badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;margin-right:6px}
+  .diff-new{background:rgba(52,211,153,.15);color:var(--green)}
+  .diff-harder{background:rgba(251,191,36,.15);color:var(--yellow)}
+  .diff-same{background:rgba(56,189,248,.15);color:var(--blue)}
+
+  h3{font-size:17px;font-weight:600;margin:22px 0 12px;color:var(--text)}
+  h3:first-child{margin-top:14px}
+  .tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;margin-right:6px;margin-bottom:4px}
+  .tag-aws{background:rgba(255,153,0,.15);color:#ffaa44}
+  .tag-py{background:rgba(56,189,248,.15);color:var(--blue)}
+  .tag-sql{background:rgba(52,211,153,.15);color:var(--green)}
+  .tag-spark{background:rgba(248,113,113,.15);color:var(--red)}
+  .tag-hipaa{background:rgba(244,114,182,.15);color:var(--pink)}
+  .tag-new{background:rgba(167,139,250,.15);color:var(--purple)}
+
+  @media(max-width:768px){
+    .sidebar{transform:translateX(-100%)}
+    .sidebar.open{transform:translateX(0)}
+    .main{margin-left:0}
+    .menu-btn{display:block}
+    .content{padding:18px 14px}
+    .hero h1{font-size:20px}
+  }
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
+  .overlay.show{display:block}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="proj-tag">Project 02 · Healthcare</div>
+    <h2>Claims Processing Pipeline</h2>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-label" id="prog-label">0 of 12 tasks done</div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Overview</div>
+    <a class="nav-item active" onclick="show('overview')" href="#">
+      <span class="nav-dot">🏠</span> Overview & Goals
+    </a>
+    <a class="nav-item" onclick="show('vs-proj1')" href="#">
+      <span class="nav-dot">⬆️</span> What's New vs Proj 1
+    </a>
+    <a class="nav-item" onclick="show('hipaa')" href="#">
+      <span class="nav-dot">🔒</span> HIPAA Concepts
+    </a>
+    <a class="nav-item" onclick="show('arch')" href="#">
+      <span class="nav-dot">🏗</span> Architecture
+    </a>
+    <a class="nav-item" onclick="show('schema')" href="#">
+      <span class="nav-dot">📐</span> Snowflake Schema
+    </a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Build Steps</div>
+    <a class="nav-item" onclick="show('step1')" href="#">
+      <span class="nav-dot">1</span> Project Structure
+    </a>
+    <a class="nav-item" onclick="show('step2')" href="#">
+      <span class="nav-dot">2</span> Generate Claims Data
+    </a>
+    <a class="nav-item" onclick="show('step3')" href="#">
+      <span class="nav-dot">3</span> S3 Setup + Upload
+    </a>
+    <a class="nav-item" onclick="show('step4')" href="#">
+      <span class="nav-dot">4</span> PySpark ETL + SCD Type 2
+    </a>
+    <a class="nav-item" onclick="show('step5')" href="#">
+      <span class="nav-dot">5</span> Incremental Load Logic
+    </a>
+    <a class="nav-item" onclick="show('step6')" href="#">
+      <span class="nav-dot">6</span> Data Quality + PHI Masking
+    </a>
+    <a class="nav-item" onclick="show('step7')" href="#">
+      <span class="nav-dot">7</span> SQL Queries
+    </a>
+    <a class="nav-item" onclick="show('step8')" href="#">
+      <span class="nav-dot">8</span> Redshift Setup
+    </a>
+    <a class="nav-item" onclick="show('step9')" href="#">
+      <span class="nav-dot">9</span> GitHub + README
+    </a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Interview Prep</div>
+    <a class="nav-item" onclick="show('interview')" href="#">
+      <span class="nav-dot">🎯</span> 15 Questions + Answers
+    </a>
+    <a class="nav-item" onclick="show('resume')" href="#">
+      <span class="nav-dot">📄</span> Resume Story
+    </a>
+    <a class="nav-item" onclick="show('concepts')" href="#">
+      <span class="nav-dot">📚</span> Key Concepts
+    </a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <span class="badge b-setup" id="curr-badge">Overview</span>
+      <span style="color:var(--text3);font-size:13px" id="curr-title">Healthcare Claims Pipeline</span>
+    </div>
+    <div style="font-size:12px;color:var(--text3)">Level 2→3 · Weeks 3–4</div>
+  </div>
+
+  <div class="content">
+
+<!-- ══ OVERVIEW ══ -->
+<div class="section active" id="section-overview">
+  <div class="hero">
+    <div class="hero-tag">Project 02 · Level 2→3 · Healthcare Industry</div>
+    <h1>Healthcare Claims Processing Pipeline</h1>
+    <p>Build a HIPAA-aware ETL pipeline that processes medical insurance claims, handles slowly changing dimensions, runs incremental loads, and serves a snowflake schema data warehouse for payers and actuaries.</p>
+    <div class="hero-stats">
+      <div><div class="stat-val">50K+</div><div class="stat-label">Daily claims</div></div>
+      <div><div class="stat-val">5</div><div class="stat-label">Source systems</div></div>
+      <div><div class="stat-val">SCD2</div><div class="stat-label">Dim strategy</div></div>
+      <div><div class="stat-val">HIPAA</div><div class="stat-label">Compliance</div></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+    <div class="step-card" style="margin-bottom:0"><div style="padding:18px 20px">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Stack</div>
+      <span class="tag tag-py">Python 3.11</span>
+      <span class="tag tag-spark">PySpark 3.5</span>
+      <span class="tag tag-aws">S3</span>
+      <span class="tag tag-aws">Glue</span>
+      <span class="tag tag-aws">Redshift</span>
+      <span class="tag tag-hipaa">HIPAA</span>
+      <span class="tag tag-new">SCD Type 2</span>
+      <span class="tag tag-new">Incremental</span>
+    </div></div>
+    <div class="step-card" style="margin-bottom:0"><div style="padding:18px 20px">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">New Skills</div>
+      <ul style="color:var(--text2);font-size:13px;padding-left:18px">
+        <li>Snowflake schema vs star</li>
+        <li>SCD Type 2 (member history)</li>
+        <li>Incremental load with watermarks</li>
+        <li>PHI masking and HIPAA design</li>
+        <li>AWS Redshift loading</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <h3>Business Problem</h3>
+  <div class="callout c-info">
+    <div class="callout-icon">🏥</div>
+    <div>A regional health insurance payer processes <strong>50,000+ medical claims per day</strong> across three claim types: medical, pharmacy, and dental. Their data team runs nightly batch jobs that take 8+ hours and fail frequently. Actuaries can't analyze claim denial trends or provider performance in real time. Compliance teams have no automated PHI (Protected Health Information) audit trail. You're building a robust, HIPAA-aware claims pipeline that reduces processing time to under 2 hours and provides a clean, partitioned data warehouse.</div>
+  </div>
+
+  <h3>Why Healthcare is Special</h3>
+  <div class="callout c-hipaa">
+    <div class="callout-icon">🔒</div>
+    <div><strong>HIPAA (Health Insurance Portability and Accountability Act)</strong> governs how patient data is handled. As a Data Engineer, you must understand: what counts as PHI, how to mask or de-identify it in analytics layers, and how to maintain audit trails. This makes healthcare one of the most complex industries for data engineering — and one of the highest-paying.</div>
+  </div>
+</div>
+
+<!-- ══ VS PROJ 1 ══ -->
+<div class="section" id="section-vs-proj1">
+  <div class="hero">
+    <div class="hero-tag">Progression Map</div>
+    <h1>What's New vs Project 1</h1>
+    <p>Every new concept builds directly on what you learned. Nothing here comes out of nowhere.</p>
+  </div>
+
+  <table class="comp-table">
+    <tr>
+      <th>Concept</th>
+      <th>Project 1 (E-commerce)</th>
+      <th>Project 2 (Healthcare)</th>
+      <th>Why it's harder</th>
+    </tr>
+    <tr>
+      <td><strong>Schema</strong></td>
+      <td>Star schema</td>
+      <td>Snowflake schema</td>
+      <td class="mid">More JOINs, normalized dims, hierarchy</td>
+    </tr>
+    <tr>
+      <td><strong>Load type</strong></td>
+      <td>Full load (overwrite)</td>
+      <td>Incremental load (watermark)</td>
+      <td class="mid">Only process new/changed records</td>
+    </tr>
+    <tr>
+      <td><strong>Dim strategy</strong></td>
+      <td>Type 1 (overwrite)</td>
+      <td>Type 2 (history tracking)</td>
+      <td class="mid">Track member plan changes over time</td>
+    </tr>
+    <tr>
+      <td><strong>Compliance</strong></td>
+      <td>None</td>
+      <td>HIPAA — PHI masking + audit trail</td>
+      <td class="mid">Real-world regulatory requirement</td>
+    </tr>
+    <tr>
+      <td><strong>Serving layer</strong></td>
+      <td>Athena (serverless)</td>
+      <td>Redshift (data warehouse)</td>
+      <td class="mid">Proper DW with COPY command</td>
+    </tr>
+    <tr>
+      <td><strong>Data volume</strong></td>
+      <td>5,000 orders</td>
+      <td>50,000 claims across 3 types</td>
+      <td class="mid">10x more, multi-source</td>
+    </tr>
+    <tr>
+      <td><strong>Sources</strong></td>
+      <td>3 files</td>
+      <td>5 files (medical, pharma, dental, members, providers)</td>
+      <td class="mid">More joins, more quality checks</td>
+    </tr>
+    <tr>
+      <td><strong>Error handling</strong></td>
+      <td>Basic quarantine</td>
+      <td>Dead letter queue pattern + retry logic</td>
+      <td class="mid">Production-grade failure handling</td>
+    </tr>
+  </table>
+
+  <div class="callout c-tip">
+    <div class="callout-icon">💡</div>
+    <div><strong>Interview framing:</strong> "In Project 1 I built a foundation with star schema and batch processing. In Project 2 I stepped up to snowflake schema because healthcare data has deep hierarchies — ICD diagnosis codes belong to categories, categories to chapters. I also implemented SCD Type 2 because member insurance plans change and we need to know which plan was active when a claim was filed."</div>
+  </div>
+</div>
+
+<!-- ══ HIPAA ══ -->
+<div class="section" id="section-hipaa">
+  <div class="hero">
+    <div class="hero-tag">HIPAA Essentials for Data Engineers</div>
+    <h1>What You Must Know About HIPAA</h1>
+    <p>You don't need a law degree. You need to know enough to design systems that don't violate it — and to talk confidently about it in interviews.</p>
+  </div>
+
+  <h3>What is PHI?</h3>
+  <div class="callout c-hipaa">
+    <div class="callout-icon">🔒</div>
+    <div><strong>Protected Health Information (PHI)</strong> = any information that can identify a patient AND relates to their health. The 18 HIPAA identifiers include: names, dates (DOB, admission date), phone numbers, email addresses, SSN, medical record numbers, account numbers, certificate/license numbers, device identifiers, URLs, IP addresses, biometric identifiers, full-face photos, any unique identifying number.</div>
+  </div>
+
+  <h3>As a Data Engineer, Your Job is:</h3>
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num active-s">1</div>
+      <div><div class="step-title">PHI Masking in Analytics Layer</div><div class="step-sub">Never expose raw PHI in downstream tables analysts query</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body open">
+      <p>The raw layer can hold full PHI — it's encrypted at rest in S3. The processed/analytics layer replaces PHI with masked versions or drops it entirely:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PySpark — PHI Masking Examples</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="cm"># Name → first initial + last initial only</span>
+df = df.withColumn(<span class="st">"member_name_masked"</span>,
+    F.concat(F.substring(F.col(<span class="st">"first_name"</span>), <span class="nm">1</span>, <span class="nm">1</span>), F.lit(<span class="st">"."</span>),
+             F.substring(F.col(<span class="st">"last_name"</span>), <span class="nm">1</span>, <span class="nm">1</span>), F.lit(<span class="st">"."</span>)))
+
+<span class="cm"># SSN → last 4 digits only</span>
+df = df.withColumn(<span class="st">"ssn_masked"</span>,
+    F.concat(F.lit(<span class="st">"***-**-"</span>), F.substring(F.col(<span class="st">"ssn"</span>), <span class="nm">8</span>, <span class="nm">4</span>)))
+
+<span class="cm"># DOB → year only (de-identifies for analytics)</span>
+df = df.withColumn(<span class="st">"birth_year"</span>, F.year(F.col(<span class="st">"date_of_birth"</span>)))
+df = df.drop(<span class="st">"date_of_birth"</span>)
+
+<span class="cm"># Member ID → one-way hash (can join but can't reverse)</span>
+df = df.withColumn(<span class="st">"member_key"</span>,
+    F.sha2(F.concat(F.col(<span class="st">"member_id"</span>), F.lit(<span class="st">"SALT_2024_ECOM"</span>)), <span class="nm">256</span>))</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">2</div>
+      <div><div class="step-title">Audit Trail</div><div class="step-sub">Log every time PHI is accessed, modified, or exported</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p>Every ETL job writes to an audit log table with: who ran it, when, what data was touched, row counts. This is what compliance teams review. In AWS, you enable S3 server access logging and CloudTrail to automatically track all API calls to PHI buckets.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">Python — Audit Log Entry</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="kw">def</span> <span class="fn">write_audit_log</span>(job_name, table_name, rows_processed, rows_failed, status):
+    audit_entry = {
+        <span class="st">"audit_id"</span>:        str(uuid.uuid4()),
+        <span class="st">"job_name"</span>:        job_name,
+        <span class="st">"table_name"</span>:      table_name,
+        <span class="st">"run_timestamp"</span>:   datetime.utcnow().isoformat(),
+        <span class="st">"rows_processed"</span>:  rows_processed,
+        <span class="st">"rows_failed"</span>:     rows_failed,
+        <span class="st">"status"</span>:          status,   <span class="cm"># SUCCESS / FAILED / PARTIAL</span>
+        <span class="st">"pipeline_version"</span>: <span class="st">"2.0"</span>,
+        <span class="st">"phi_accessed"</span>:    <span class="kw">True</span>,
+    }
+    <span class="cm"># Write to S3 audit bucket (separate from data bucket)</span>
+    s3.put_object(
+        Bucket<span class="op">=</span><span class="st">"healthcare-audit-logs"</span>,
+        Key<span class="op">=</span><span class="st">f"audit/{datetime.utcnow().strftime('%Y/%m/%d')}/{audit_entry['audit_id']}.json"</span>,
+        Body<span class="op">=</span>json.dumps(audit_entry)
+    )</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">3</div>
+      <div><div class="step-title">Encryption + Access Control</div><div class="step-sub">S3 encryption, separate buckets, IAM policies</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p>Architecture rules for HIPAA-compliant AWS:</p>
+      <ul>
+        <li><strong>S3 SSE-KMS encryption</strong> on raw PHI bucket (not just SSE-S3)</li>
+        <li><strong>Separate S3 buckets</strong> for raw (with PHI) vs processed (masked)</li>
+        <li><strong>S3 bucket policies</strong> deny non-HTTPS access</li>
+        <li><strong>IAM roles</strong> with least-privilege — ETL role only reads raw, only writes processed</li>
+        <li><strong>CloudTrail</strong> enabled on the account to log all API access</li>
+        <li><strong>VPC endpoints</strong> so data never traverses public internet</li>
+        <li><strong>90-day retention</strong> on audit logs minimum</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout c-warn">
+    <div class="callout-icon">⚠️</div>
+    <div><strong>Interview talking point:</strong> When asked about HIPAA, don't just say "we encrypted the data." Say: "I separated the raw PHI bucket from the analytics bucket, applied SHA-256 salted hashing to member IDs so analysts can join data without seeing PHI, replaced DOBs with birth years, and wrote an audit log for every ETL run that compliance teams can review. All this without impacting query performance because masking happens at the transformation layer."</div>
+  </div>
+</div>
+
+<!-- ══ ARCH ══ -->
+<div class="section" id="section-arch">
+  <div class="hero">
+    <div class="hero-tag">Architecture · HIPAA-Aware</div>
+    <h1>Three-Zone Architecture</h1>
+    <p>Strict separation between PHI zone (raw), de-identified zone (processed), and serving zone (Redshift). No PHI ever leaves Zone 1 unmasked.</p>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num active-s">Z1</div>
+      <div><div class="step-title">Zone 1: Raw / PHI Zone (S3)</div><div class="step-sub">Full PHI · KMS encrypted · restricted IAM · audit logged</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body open">
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">S3 Structure — Zone 1 (PHI)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>s3://healthcare-raw-phi-yourname/          ← KMS encrypted, restricted
+├── claims/medical/
+│   └── year=2024/month=01/day=01/medical_claims_20240101.csv
+├── claims/pharmacy/
+│   └── year=2024/month=01/day=01/pharmacy_claims_20240101.json
+├── claims/dental/
+│   └── year=2024/month=01/day=01/dental_claims_20240101.csv
+├── members/
+│   └── year=2024/month=01/day=01/member_eligibility_20240101.csv
+└── providers/
+    └── year=2024/month=01/day=01/provider_npi_20240101.csv</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">Z2</div>
+      <div><div class="step-title">Zone 2: Processed / De-identified Zone (S3)</div><div class="step-sub">PHI masked · Parquet · partitioned · Glue Catalog registered</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">S3 Structure — Zone 2 (De-identified)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>s3://healthcare-processed-yourname/       ← PHI masked, analyst-accessible
+├── fact_claims/
+│   ├── claim_type=medical/year=2024/month=01/part-00000.parquet
+│   ├── claim_type=pharmacy/year=2024/month=01/part-00000.parquet
+│   └── claim_type=dental/year=2024/month=01/part-00000.parquet
+├── dim_member/part-00000.parquet         ← SCD2 with effective dates
+├── dim_provider/part-00000.parquet
+├── dim_diagnosis/part-00000.parquet
+├── dim_procedure/part-00000.parquet
+└── dim_date/part-00000.parquet</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">Z3</div>
+      <div><div class="step-title">Zone 3: Redshift (Serving Layer)</div><div class="step-sub">COPY from S3 · star schema views · analyst-facing</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p>Processed Parquet from Zone 2 is loaded into Redshift using the COPY command. Redshift is used here (instead of just Athena) because healthcare actuaries run complex multi-table queries and need consistent sub-second response times that Athena can't guarantee.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">Redshift COPY Command Pattern</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="cm">-- Load fact_claims from S3 into Redshift</span>
+<span class="kw">COPY</span> healthcare.fact_claims
+<span class="kw">FROM</span> <span class="st">'s3://healthcare-processed-yourname/fact_claims/'</span>
+<span class="kw">IAM_ROLE</span> <span class="st">'arn:aws:iam::ACCOUNT_ID:role/RedshiftS3Role'</span>
+FORMAT <span class="kw">AS</span> PARQUET;
+
+<span class="cm">-- Truncate-and-load pattern for dimension tables</span>
+<span class="kw">BEGIN</span>;
+  TRUNCATE healthcare.dim_member;
+  <span class="kw">COPY</span> healthcare.dim_member
+  <span class="kw">FROM</span> <span class="st">'s3://healthcare-processed-yourname/dim_member/'</span>
+  <span class="kw">IAM_ROLE</span> <span class="st">'arn:aws:iam::ACCOUNT_ID:role/RedshiftS3Role'</span>
+  FORMAT <span class="kw">AS</span> PARQUET;
+<span class="kw">COMMIT</span>;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <h3>Pipeline Flow</h3>
+  <div style="background:var(--code-bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin:14px 0;font-family:monospace;font-size:13px;color:var(--text2);line-height:2">
+    [CSV/JSON Sources] → S3 Raw (Zone 1, KMS encrypted)<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+    [AWS Glue PySpark ETL Job]<br>
+    &nbsp;&nbsp;├── Read raw files<br>
+    &nbsp;&nbsp;├── Validate + quality check<br>
+    &nbsp;&nbsp;├── Mask PHI (sha2 hash member_id, drop DOB, mask SSN)<br>
+    &nbsp;&nbsp;├── Apply SCD Type 2 to dim_member<br>
+    &nbsp;&nbsp;├── Write audit log<br>
+    &nbsp;&nbsp;└── Write Parquet to Zone 2<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+    [Redshift COPY] → Redshift DW (Zone 3)<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+    [Actuaries / Analysts query Redshift]
+  </div>
+</div>
+
+<!-- ══ SCHEMA ══ -->
+<div class="section" id="section-schema">
+  <div class="hero">
+    <div class="hero-tag">Data Modeling · Snowflake Schema</div>
+    <h1>Snowflake Schema Design</h1>
+    <p>Unlike the star schema in Project 1, dimension tables here are normalized into sub-dimensions. The diagnosis dimension points to a diagnosis category, which points to a chapter — this is the ICD-10 hierarchy.</p>
+  </div>
+
+  <div class="callout c-info">
+    <div class="callout-icon">❄️</div>
+    <div><strong>Why snowflake (not star) here?</strong> Healthcare has deep, standardized hierarchies. ICD-10 codes (diagnoses) have 70,000+ codes organized into chapters → blocks → categories → codes. CPT codes (procedures) have similar structure. Storing all hierarchy attributes in one dim_diagnosis table would be enormous and redundant. Snowflake schema normalizes these into separate tables, saving storage and making hierarchy queries cleaner.</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'fact-claims')">fact_claims</button>
+    <button class="tab-btn" onclick="switchTab(this,'dim-member')">dim_member (SCD2)</button>
+    <button class="tab-btn" onclick="switchTab(this,'dim-provider')">dim_provider</button>
+    <button class="tab-btn" onclick="switchTab(this,'dim-diagnosis')">dim_diagnosis</button>
+    <button class="tab-btn" onclick="switchTab(this,'dim-procedure')">dim_procedure</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-fact-claims">
+    <table class="schema-table">
+      <tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr>
+      <tr><td>claim_key</td><td class="col-type">STRING</td><td><span class="col-pk">PK</span></td><td>SHA-256 surrogate key</td></tr>
+      <tr><td>claim_id</td><td class="col-type">STRING</td><td></td><td>Source system natural key</td></tr>
+      <tr><td>member_key</td><td class="col-type">STRING</td><td><span class="col-fk">FK</span></td><td>→ dim_member (salted hash of member_id)</td></tr>
+      <tr><td>provider_key</td><td class="col-type">STRING</td><td><span class="col-fk">FK</span></td><td>→ dim_provider</td></tr>
+      <tr><td>diagnosis_key</td><td class="col-type">STRING</td><td><span class="col-fk">FK</span></td><td>→ dim_diagnosis (primary ICD-10 code)</td></tr>
+      <tr><td>procedure_key</td><td class="col-type">STRING</td><td><span class="col-fk">FK</span></td><td>→ dim_procedure (CPT code)</td></tr>
+      <tr><td>date_key</td><td class="col-type">INT</td><td><span class="col-fk">FK</span></td><td>→ dim_date (service date)</td></tr>
+      <tr><td>claim_type</td><td class="col-type">STRING</td><td></td><td>medical / pharmacy / dental</td></tr>
+      <tr><td>service_date</td><td class="col-type">DATE</td><td></td><td>Date of service (not claim submission)</td></tr>
+      <tr><td>billed_amount</td><td class="col-type">DOUBLE</td><td></td><td>Amount provider billed</td></tr>
+      <tr><td>allowed_amount</td><td class="col-type">DOUBLE</td><td></td><td>Amount payer allows per contract</td></tr>
+      <tr><td>paid_amount</td><td class="col-type">DOUBLE</td><td></td><td>Actual amount paid by payer</td></tr>
+      <tr><td>member_cost_share</td><td class="col-type">DOUBLE</td><td></td><td>Copay + deductible + coinsurance</td></tr>
+      <tr><td>claim_status</td><td class="col-type">STRING</td><td></td><td>PAID / DENIED / PENDING / ADJUSTED</td></tr>
+      <tr><td>denial_reason_code</td><td class="col-type">STRING</td><td></td><td>Null if paid</td></tr>
+      <tr><td>place_of_service</td><td class="col-type">STRING</td><td></td><td>Inpatient / Outpatient / ER / Office</td></tr>
+      <tr><td>year</td><td class="col-type">INT</td><td></td><td>Partition column</td></tr>
+      <tr><td>month</td><td class="col-type">INT</td><td></td><td>Partition column</td></tr>
+      <tr><td>claim_type_part</td><td class="col-type">STRING</td><td></td><td>Partition column (medical/pharmacy/dental)</td></tr>
+      <tr><td>etl_inserted_at</td><td class="col-type">TIMESTAMP</td><td></td><td>Audit: when ETL wrote this row</td></tr>
+      <tr><td>source_file</td><td class="col-type">STRING</td><td></td><td>Audit: which source file this came from</td></tr>
+    </table>
+  </div>
+
+  <div class="tab-panel" id="tab-dim-member">
+    <div class="callout c-hipaa">
+      <div class="callout-icon">🔒</div>
+      <div><strong>SCD Type 2 dimension.</strong> Member insurance plans change — when a member moves from Plan A to Plan B, we don't overwrite the old record. We close it (set effective_end_date) and insert a new one. This ensures historical claims correctly show which plan was active when the claim was filed.</div>
+    </div>
+    <table class="schema-table">
+      <tr><th>Column</th><th>Type</th><th>Key/PHI</th><th>Notes</th></tr>
+      <tr><td>member_key</td><td class="col-type">STRING</td><td><span class="col-pk">PK</span></td><td>SHA-256 salted hash — SCD2 surrogate key</td></tr>
+      <tr><td>member_id_hash</td><td class="col-type">STRING</td><td><span class="col-phi">PHI→masked</span></td><td>Hashed member ID for joins</td></tr>
+      <tr><td>member_name_masked</td><td class="col-type">STRING</td><td><span class="col-phi">PHI→masked</span></td><td>First initial + Last initial only</td></tr>
+      <tr><td>birth_year</td><td class="col-type">INT</td><td><span class="col-phi">PHI→masked</span></td><td>Year only — DOB dropped</td></tr>
+      <tr><td>gender</td><td class="col-type">STRING</td><td></td><td>M / F / U</td></tr>
+      <tr><td>state</td><td class="col-type">STRING</td><td></td><td>State abbreviation</td></tr>
+      <tr><td>plan_id</td><td class="col-type">STRING</td><td></td><td>Insurance plan code</td></tr>
+      <tr><td>plan_type</td><td class="col-type">STRING</td><td></td><td>HMO / PPO / EPO / HDHP</td></tr>
+      <tr><td>group_id</td><td class="col-type">STRING</td><td></td><td>Employer group</td></tr>
+      <tr><td>effective_start_date</td><td class="col-type">DATE</td><td></td><td><strong>SCD2:</strong> when this version became active</td></tr>
+      <tr><td>effective_end_date</td><td class="col-type">DATE</td><td></td><td><strong>SCD2:</strong> 9999-12-31 = current record</td></tr>
+      <tr><td>is_current</td><td class="col-type">BOOLEAN</td><td></td><td><strong>SCD2:</strong> True = latest version</td></tr>
+      <tr><td>version</td><td class="col-type">INT</td><td></td><td><strong>SCD2:</strong> version number (1, 2, 3...)</td></tr>
+    </table>
+  </div>
+
+  <div class="tab-panel" id="tab-dim-provider">
+    <table class="schema-table">
+      <tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr>
+      <tr><td>provider_key</td><td class="col-type">STRING</td><td><span class="col-pk">PK</span></td><td>Surrogate key</td></tr>
+      <tr><td>npi</td><td class="col-type">STRING</td><td></td><td>National Provider Identifier (10-digit)</td></tr>
+      <tr><td>provider_name</td><td class="col-type">STRING</td><td></td><td>Practice / hospital name</td></tr>
+      <tr><td>provider_type</td><td class="col-type">STRING</td><td></td><td>Individual / Group / Facility</td></tr>
+      <tr><td>specialty</td><td class="col-type">STRING</td><td></td><td>Cardiology / Primary Care / etc.</td></tr>
+      <tr><td>state</td><td class="col-type">STRING</td><td></td><td>Practice state</td></tr>
+      <tr><td>network_status</td><td class="col-type">STRING</td><td></td><td>IN_NETWORK / OUT_OF_NETWORK</td></tr>
+      <tr><td>is_active</td><td class="col-type">BOOLEAN</td><td></td><td>Currently contracted</td></tr>
+    </table>
+  </div>
+
+  <div class="tab-panel" id="tab-dim-diagnosis">
+    <div class="callout c-info">
+      <div class="callout-icon">💡</div>
+      <div><strong>This is the snowflake part.</strong> dim_diagnosis points to dim_diagnosis_category, which is a separate table. In a star schema, category info would be in dim_diagnosis. In a snowflake, it's normalized out. This matters because there are 70,000+ ICD-10 codes but only ~21 major chapters — storing chapters separately avoids massive redundancy.</div>
+    </div>
+    <table class="schema-table">
+      <tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr>
+      <tr><td>diagnosis_key</td><td class="col-type">STRING</td><td><span class="col-pk">PK</span></td><td>Surrogate key</td></tr>
+      <tr><td>icd10_code</td><td class="col-type">STRING</td><td></td><td>e.g. "E11.9" (Type 2 Diabetes)</td></tr>
+      <tr><td>icd10_description</td><td class="col-type">STRING</td><td></td><td>Human-readable description</td></tr>
+      <tr><td>category_key</td><td class="col-type">STRING</td><td><span class="col-fk">FK</span></td><td>→ dim_diagnosis_category (SNOWFLAKE)</td></tr>
+      <tr><td>is_chronic</td><td class="col-type">BOOLEAN</td><td></td><td>Chronic condition flag</td></tr>
+      <tr><td>is_preventable</td><td class="col-type">BOOLEAN</td><td></td><td>Preventable admission flag</td></tr>
+    </table>
+    <p style="margin-top:12px"><strong>dim_diagnosis_category (sub-dimension):</strong></p>
+    <table class="schema-table">
+      <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>category_key</td><td class="col-type">STRING</td><td>PK</td></tr>
+      <tr><td>category_code</td><td class="col-type">STRING</td><td>ICD-10 category block e.g. "E10-E14"</td></tr>
+      <tr><td>category_name</td><td class="col-type">STRING</td><td>e.g. "Diabetes mellitus"</td></tr>
+      <tr><td>chapter</td><td class="col-type">STRING</td><td>e.g. "Endocrine, nutritional and metabolic diseases"</td></tr>
+      <tr><td>chapter_number</td><td class="col-type">INT</td><td>ICD-10 chapter 1–22</td></tr>
+    </table>
+  </div>
+
+  <div class="tab-panel" id="tab-dim-procedure">
+    <table class="schema-table">
+      <tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr>
+      <tr><td>procedure_key</td><td class="col-type">STRING</td><td><span class="col-pk">PK</span></td><td>Surrogate key</td></tr>
+      <tr><td>cpt_code</td><td class="col-type">STRING</td><td></td><td>Current Procedural Terminology code</td></tr>
+      <tr><td>cpt_description</td><td class="col-type">STRING</td><td></td><td>Procedure description</td></tr>
+      <tr><td>procedure_category</td><td class="col-type">STRING</td><td></td><td>Surgery / Imaging / Lab / Office Visit</td></tr>
+      <tr><td>is_preventive</td><td class="col-type">BOOLEAN</td><td></td><td>Wellness / preventive care flag</td></tr>
+      <tr><td>typical_cost_range</td><td class="col-type">STRING</td><td></td><td>Low / Medium / High for benchmarking</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ══ STEP 1 ══ -->
+<div class="section" id="section-step1">
+  <div class="hero">
+    <div class="hero-tag">Step 1 · Project Structure</div>
+    <h1>Create the Project Folder</h1>
+    <p>This project has a more complex structure reflecting multiple claim types and separate PHI/non-PHI layers.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — create full project structure</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code>mkdir -p ~/de-portfolio/project-02-healthcare
+cd ~/de-portfolio/project-02-healthcare
+
+<span class="cm"># Source data directories</span>
+mkdir -p data/raw/claims/medical
+mkdir -p data/raw/claims/pharmacy
+mkdir -p data/raw/claims/dental
+mkdir -p data/raw/members
+mkdir -p data/raw/providers
+
+<span class="cm"># Processed / output directories</span>
+mkdir -p data/processed/fact_claims
+mkdir -p data/processed/dim_member
+mkdir -p data/processed/dim_provider
+mkdir -p data/processed/dim_diagnosis
+mkdir -p data/processed/dim_procedure
+mkdir -p data/processed/dim_date
+mkdir -p data/audit_logs
+mkdir -p data/quarantine
+
+<span class="cm"># Code directories</span>
+mkdir -p scripts notebooks tests docs config
+
+<span class="cm"># Create file stubs</span>
+touch scripts/generate_data.py
+touch scripts/upload_to_s3.py
+touch scripts/etl_claims.py
+touch scripts/incremental_load.py
+touch scripts/data_quality.py
+touch scripts/redshift_loader.py
+touch scripts/sql_queries.sql
+touch config/pipeline_config.yaml
+touch .gitignore README.md
+
+echo "Project structure created ✓"
+ls -la</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">.gitignore</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm"># Credentials — NEVER commit</span>
+.aws/
+*.env
+config/secrets.yaml
+redshift_credentials.json
+
+<span class="cm"># PHI data — NEVER commit real patient data</span>
+data/raw/
+data/processed/
+data/audit_logs/
+
+<span class="cm"># Python</span>
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+<span class="cm"># Spark</span>
+derby.log
+metastore_db/
+spark-warehouse/
+
+.DS_Store</code></pre>
+  </div>
+</div>
+
+<!-- ══ STEP 2 ══ -->
+<div class="section" id="section-step2">
+  <div class="hero">
+    <div class="hero-tag">Step 2 · Generate Data</div>
+    <h1>Synthetic Healthcare Data Generator</h1>
+    <p>Generates realistic HIPAA-style data: medical claims (CSV), pharmacy claims (JSON), dental claims (CSV), member eligibility (CSV), provider NPI registry (CSV). All synthetic — no real patient data.</p>
+  </div>
+
+  <div class="callout c-hipaa">
+    <div class="callout-icon">🔒</div>
+    <div>This script generates <strong>synthetic</strong> data only. Never use real patient data for development or testing. In real healthcare companies, they use de-identified datasets approved by the privacy team, or tools like Synthea (open-source synthetic patient generator).</div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">scripts/generate_data.py</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm">"""
+Synthetic healthcare data generator.
+Produces: medical_claims.csv, pharmacy_claims.json, dental_claims.csv,
+          member_eligibility.csv, provider_npi.csv
+"""</span>
+<span class="kw">import</span> csv, json, random, uuid
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timedelta
+<span class="kw">from</span> faker <span class="kw">import</span> Faker
+
+fake <span class="op">=</span> Faker()
+random.seed(<span class="nm">99</span>)
+
+<span class="cm"># ── Config ───────────────────────────────────────────────</span>
+NUM_MEMBERS   <span class="op">=</span> <span class="nm">2000</span>
+NUM_PROVIDERS <span class="op">=</span> <span class="nm">500</span>
+NUM_MEDICAL   <span class="op">=</span> <span class="nm">30000</span>
+NUM_PHARMACY  <span class="op">=</span> <span class="nm">15000</span>
+NUM_DENTAL    <span class="op">=</span> <span class="nm">5000</span>
+START_DATE    <span class="op">=</span> datetime(<span class="nm">2024</span>, <span class="nm">1</span>, <span class="nm">1</span>)
+END_DATE      <span class="op">=</span> datetime(<span class="nm">2024</span>, <span class="nm">12</span>, <span class="nm">31</span>)
+
+<span class="cm"># ICD-10 sample codes (real codes, synthetic context)</span>
+ICD10_CODES <span class="op">=</span> {
+    <span class="st">"E11.9"</span>:  <span class="st">"Type 2 diabetes mellitus without complications"</span>,
+    <span class="st">"I10"</span>:    <span class="st">"Essential hypertension"</span>,
+    <span class="st">"J06.9"</span>:  <span class="st">"Acute upper respiratory infection"</span>,
+    <span class="st">"M54.5"</span>:  <span class="st">"Low back pain"</span>,
+    <span class="st">"F32.9"</span>:  <span class="st">"Major depressive disorder, single episode"</span>,
+    <span class="st">"Z00.00"</span>: <span class="st">"Encounter for general adult medical examination"</span>,
+    <span class="st">"K21.0"</span>:  <span class="st">"Gastro-esophageal reflux disease with esophagitis"</span>,
+    <span class="st">"J45.909"</span>:<span class="st">"Unspecified asthma, uncomplicated"</span>,
+    <span class="st">"N39.0"</span>:  <span class="st">"Urinary tract infection, site not specified"</span>,
+    <span class="st">"S72.001A"</span>:<span class="st">"Fracture of unspecified part of femoral neck"</span>,
+}
+
+<span class="cm"># CPT procedure codes</span>
+CPT_CODES <span class="op">=</span> {
+    <span class="st">"99213"</span>: (<span class="st">"Office visit, established patient, low complexity"</span>, <span class="st">"Office Visit"</span>),
+    <span class="st">"99214"</span>: (<span class="st">"Office visit, established patient, moderate complexity"</span>, <span class="st">"Office Visit"</span>),
+    <span class="st">"93000"</span>: (<span class="st">"Electrocardiogram, routine ECG"</span>, <span class="st">"Diagnostic"</span>),
+    <span class="st">"85025"</span>: (<span class="st">"Complete blood count with differential"</span>, <span class="st">"Lab"</span>),
+    <span class="st">"71046"</span>: (<span class="st">"Chest X-ray, 2 views"</span>, <span class="st">"Imaging"</span>),
+    <span class="st">"27447"</span>: (<span class="st">"Replacement of knee joint"</span>, <span class="st">"Surgery"</span>),
+    <span class="st">"43239"</span>: (<span class="st">"Upper GI endoscopy with biopsy"</span>, <span class="st">"Procedure"</span>),
+    <span class="st">"99283"</span>: (<span class="st">"Emergency department visit, moderate severity"</span>, <span class="st">"Emergency"</span>),
+}
+
+SPECIALTIES <span class="op">=</span> [<span class="st">"Primary Care"</span>, <span class="st">"Cardiology"</span>, <span class="st">"Orthopedics"</span>, <span class="st">"Gastroenterology"</span>,
+               <span class="st">"Psychiatry"</span>, <span class="st">"Emergency Medicine"</span>, <span class="st">"Radiology"</span>, <span class="st">"Pathology"</span>]
+PLAN_TYPES  <span class="op">=</span> [<span class="st">"HMO"</span>, <span class="st">"PPO"</span>, <span class="st">"EPO"</span>, <span class="st">"HDHP"</span>]
+STATES      <span class="op">=</span> [<span class="st">"CA"</span>, <span class="st">"TX"</span>, <span class="st">"FL"</span>, <span class="st">"NY"</span>, <span class="st">"IL"</span>, <span class="st">"PA"</span>, <span class="st">"OH"</span>, <span class="st">"GA"</span>]
+DENIAL_CODES<span class="op">=</span> [<span class="st">"CO97"</span>, <span class="st">"CO4"</span>, <span class="st">"CO96"</span>, <span class="st">"PR1"</span>, <span class="st">"CO45"</span>, <span class="kw">None</span>, <span class="kw">None</span>, <span class="kw">None</span>]
+
+<span class="kw">def</span> <span class="fn">rand_date</span>(start<span class="op">=</span>START_DATE, end<span class="op">=</span>END_DATE):
+    <span class="kw">return</span> start <span class="op">+</span> timedelta(days<span class="op">=</span>random.randint(<span class="nm">0</span>, (end <span class="op">-</span> start).days))
+
+<span class="kw">def</span> <span class="fn">rand_date_str</span>(start<span class="op">=</span>START_DATE, end<span class="op">=</span>END_DATE):
+    <span class="kw">return</span> rand_date(start, end).strftime(<span class="st">"%Y-%m-%d"</span>)
+
+<span class="cm"># ── Members (with PHI — raw zone) ────────────────────────</span>
+print(<span class="st">"Generating members..."</span>)
+members <span class="op">=</span> []
+<span class="kw">for</span> _ <span class="kw">in</span> range(NUM_MEMBERS):
+    dob <span class="op">=</span> rand_date(datetime(<span class="nm">1940</span>,<span class="nm">1</span>,<span class="nm">1</span>), datetime(<span class="nm">2006</span>,<span class="nm">1</span>,<span class="nm">1</span>))
+    members.append({
+        <span class="st">"member_id"</span>:        <span class="st">f"MBR-{str(uuid.uuid4())[:8].upper()}"</span>,
+        <span class="st">"first_name"</span>:       fake.first_name(),
+        <span class="st">"last_name"</span>:        fake.last_name(),
+        <span class="st">"date_of_birth"</span>:    dob.strftime(<span class="st">"%Y-%m-%d"</span>),
+        <span class="st">"gender"</span>:           random.choice([<span class="st">"M"</span>, <span class="st">"F"</span>]),
+        <span class="st">"ssn"</span>:              fake.ssn(),   <span class="cm"># PHI — will be masked in processing</span>
+        <span class="st">"state"</span>:            random.choice(STATES),
+        <span class="st">"plan_id"</span>:          <span class="st">f"PLN-{random.randint(100,999)}"</span>,
+        <span class="st">"plan_type"</span>:        random.choice(PLAN_TYPES),
+        <span class="st">"group_id"</span>:         <span class="st">f"GRP-{random.randint(1000,9999)}"</span>,
+        <span class="st">"enrollment_date"</span>:  rand_date_str(datetime(<span class="nm">2020</span>,<span class="nm">1</span>,<span class="nm">1</span>), START_DATE),
+        <span class="st">"is_active"</span>:        random.choice([<span class="kw">True</span>,<span class="kw">True</span>,<span class="kw">True</span>,<span class="kw">False</span>]),
+    })
+member_ids <span class="op">=</span> [m[<span class="st">"member_id"</span>] <span class="kw">for</span> m <span class="kw">in</span> members]
+<span class="kw">with</span> open(<span class="st">"data/raw/members/member_eligibility_2024.csv"</span>, <span class="st">"w"</span>, newline<span class="op">=</span><span class="st">""</span>) <span class="kw">as</span> f:
+    writer <span class="op">=</span> csv.DictWriter(f, fieldnames<span class="op">=</span>members[<span class="nm">0</span>].keys())
+    writer.writeheader(); writer.writerows(members)
+print(<span class="st">f"  → {len(members)} members"</span>)
+
+<span class="cm"># ── Providers ─────────────────────────────────────────────</span>
+print(<span class="st">"Generating providers..."</span>)
+providers <span class="op">=</span> []
+<span class="kw">for</span> _ <span class="kw">in</span> range(NUM_PROVIDERS):
+    providers.append({
+        <span class="st">"npi"</span>:              <span class="st">f"{random.randint(1000000000,9999999999)}"</span>,
+        <span class="st">"provider_name"</span>:    fake.company() <span class="op">+</span> <span class="st">" Medical"</span>,
+        <span class="st">"provider_type"</span>:    random.choice([<span class="st">"Individual"</span>,<span class="st">"Group"</span>,<span class="st">"Facility"</span>]),
+        <span class="st">"specialty"</span>:        random.choice(SPECIALTIES),
+        <span class="st">"state"</span>:            random.choice(STATES),
+        <span class="st">"network_status"</span>:   random.choice([<span class="st">"IN_NETWORK"</span>,<span class="st">"IN_NETWORK"</span>,<span class="st">"OUT_OF_NETWORK"</span>]),
+        <span class="st">"is_active"</span>:        random.choice([<span class="kw">True</span>,<span class="kw">True</span>,<span class="kw">True</span>,<span class="kw">True</span>,<span class="kw">False</span>]),
+    })
+npi_list <span class="op">=</span> [p[<span class="st">"npi"</span>] <span class="kw">for</span> p <span class="kw">in</span> providers]
+<span class="kw">with</span> open(<span class="st">"data/raw/providers/provider_npi_2024.csv"</span>, <span class="st">"w"</span>, newline<span class="op">=</span><span class="st">""</span>) <span class="kw">as</span> f:
+    writer <span class="op">=</span> csv.DictWriter(f, fieldnames<span class="op">=</span>providers[<span class="nm">0</span>].keys())
+    writer.writeheader(); writer.writerows(providers)
+print(<span class="st">f"  → {len(providers)} providers"</span>)
+
+<span class="cm"># ── Medical Claims (CSV) ──────────────────────────────────</span>
+print(<span class="st">"Generating medical claims..."</span>)
+icd_codes <span class="op">=</span> list(ICD10_CODES.keys())
+cpt_codes  <span class="op">=</span> list(CPT_CODES.keys())
+med_claims <span class="op">=</span> []
+<span class="kw">for</span> _ <span class="kw">in</span> range(NUM_MEDICAL):
+    svc_date   <span class="op">=</span> rand_date()
+    billed     <span class="op">=</span> round(random.uniform(<span class="nm">50</span>, <span class="nm">15000</span>), <span class="nm">2</span>)
+    allowed    <span class="op">=</span> round(billed <span class="op">*</span> random.uniform(<span class="nm">0.4</span>, <span class="nm">0.85</span>), <span class="nm">2</span>)
+    status     <span class="op">=</span> random.choices([<span class="st">"PAID"</span>,<span class="st">"DENIED"</span>,<span class="st">"PENDING"</span>,<span class="st">"ADJUSTED"</span>], weights<span class="op">=</span>[<span class="nm">65</span>,<span class="nm">20</span>,<span class="nm">10</span>,<span class="nm">5</span>])[<span class="nm">0</span>]
+    paid       <span class="op">=</span> round(allowed <span class="op">*</span> <span class="nm">0.8</span>, <span class="nm">2</span>) <span class="kw">if</span> status <span class="op">==</span> <span class="st">"PAID"</span> <span class="kw">else</span> <span class="nm">0.0</span>
+    denial     <span class="op">=</span> random.choice(DENIAL_CODES) <span class="kw">if</span> status <span class="op">==</span> <span class="st">"DENIED"</span> <span class="kw">else</span> <span class="kw">None</span>
+    med_claims.append({
+        <span class="st">"claim_id"</span>:          <span class="st">f"MC-{str(uuid.uuid4())[:10].upper()}"</span>,
+        <span class="st">"member_id"</span>:         random.choice(member_ids),
+        <span class="st">"rendering_npi"</span>:     random.choice(npi_list),
+        <span class="st">"service_date"</span>:      svc_date.strftime(<span class="st">"%Y-%m-%d"</span>),
+        <span class="st">"claim_received_date"</span>:(svc_date <span class="op">+</span> timedelta(days<span class="op">=</span>random.randint(<span class="nm">1</span>,<span class="nm">30</span>))).strftime(<span class="st">"%Y-%m-%d"</span>),
+        <span class="st">"primary_diagnosis"</span>: random.choice(icd_codes),
+        <span class="st">"cpt_code"</span>:          random.choice(cpt_codes),
+        <span class="st">"place_of_service"</span>:  random.choice([<span class="st">"Office"</span>,<span class="st">"Outpatient"</span>,<span class="st">"Inpatient"</span>,<span class="st">"ER"</span>]),
+        <span class="st">"billed_amount"</span>:     billed,
+        <span class="st">"allowed_amount"</span>:    allowed,
+        <span class="st">"paid_amount"</span>:       paid,
+        <span class="st">"member_cost_share"</span>: round(allowed <span class="op">-</span> paid, <span class="nm">2</span>),
+        <span class="st">"claim_status"</span>:      status,
+        <span class="st">"denial_reason_code"</span>:denial,
+        <span class="st">"claim_type"</span>:        <span class="st">"medical"</span>,
+    })
+<span class="kw">with</span> open(<span class="st">"data/raw/claims/medical/medical_claims_2024.csv"</span>, <span class="st">"w"</span>, newline<span class="op">=</span><span class="st">""</span>) <span class="kw">as</span> f:
+    writer <span class="op">=</span> csv.DictWriter(f, fieldnames<span class="op">=</span>med_claims[<span class="nm">0</span>].keys())
+    writer.writeheader(); writer.writerows(med_claims)
+print(<span class="st">f"  → {len(med_claims)} medical claims"</span>)
+
+<span class="cm"># ── Pharmacy Claims (JSON) ────────────────────────────────</span>
+print(<span class="st">"Generating pharmacy claims..."</span>)
+DRUGS <span class="op">=</span> [(<span class="st">"Metformin"</span>,<span class="st">"E11.9"</span>),(<span class="st">"Lisinopril"</span>,<span class="st">"I10"</span>),(<span class="st">"Atorvastatin"</span>,<span class="st">"E78.5"</span>),
+         (<span class="st">"Amlodipine"</span>,<span class="st">"I10"</span>),(<span class="st">"Omeprazole"</span>,<span class="st">"K21.0"</span>),(<span class="st">"Albuterol"</span>,<span class="st">"J45.909"</span>)]
+rx_claims <span class="op">=</span> []
+<span class="kw">for</span> _ <span class="kw">in</span> range(NUM_PHARMACY):
+    drug, diag <span class="op">=</span> random.choice(DRUGS)
+    qty        <span class="op">=</span> random.choice([<span class="nm">30</span>,<span class="nm">60</span>,<span class="nm">90</span>])
+    cost       <span class="op">=</span> round(random.uniform(<span class="nm">5</span>, <span class="nm">800</span>), <span class="nm">2</span>)
+    rx_claims.append({
+        <span class="st">"claim_id"</span>:       <span class="st">f"RX-{str(uuid.uuid4())[:10].upper()}"</span>,
+        <span class="st">"member_id"</span>:      random.choice(member_ids),
+        <span class="st">"pharmacy_npi"</span>:   random.choice(npi_list),
+        <span class="st">"fill_date"</span>:      rand_date_str(),
+        <span class="st">"drug_name"</span>:      drug,
+        <span class="st">"ndc_code"</span>:       <span class="st">f"{random.randint(10000,99999)}-{random.randint(100,999)}-{random.randint(10,99)}"</span>,
+        <span class="st">"days_supply"</span>:    qty,
+        <span class="st">"quantity"</span>:       qty,
+        <span class="st">"related_diagnosis"</span>: diag,
+        <span class="st">"drug_cost"</span>:      cost,
+        <span class="st">"plan_paid"</span>:      round(cost <span class="op">*</span> <span class="nm">0.8</span>, <span class="nm">2</span>),
+        <span class="st">"member_copay"</span>:   round(cost <span class="op">*</span> <span class="nm">0.2</span>, <span class="nm">2</span>),
+        <span class="st">"claim_status"</span>:   random.choices([<span class="st">"PAID"</span>,<span class="st">"REJECTED"</span>], weights<span class="op">=</span>[<span class="nm">90</span>,<span class="nm">10</span>])[<span class="nm">0</span>],
+        <span class="st">"claim_type"</span>:     <span class="st">"pharmacy"</span>,
+    })
+<span class="kw">with</span> open(<span class="st">"data/raw/claims/pharmacy/pharmacy_claims_2024.json"</span>, <span class="st">"w"</span>) <span class="kw">as</span> f:
+    json.dump(rx_claims, f, indent<span class="op">=</span><span class="nm">2</span>)
+print(<span class="st">f"  → {len(rx_claims)} pharmacy claims"</span>)
+
+<span class="cm"># ── Dental Claims (CSV) ───────────────────────────────────</span>
+print(<span class="st">"Generating dental claims..."</span>)
+DENTAL_CODES <span class="op">=</span> [(<span class="st">"D0120"</span>,<span class="st">"Periodic oral evaluation"</span>),(<span class="st">"D1110"</span>,<span class="st">"Prophylaxis adult"</span>),
+                (<span class="st">"D2140"</span>,<span class="st">"Amalgam 1 surface"</span>),(<span class="st">"D3310"</span>,<span class="st">"Root canal anterior"</span>),
+                (<span class="st">"D7140"</span>,<span class="st">"Extraction erupted tooth"</span>)]
+dental_claims <span class="op">=</span> []
+<span class="kw">for</span> _ <span class="kw">in</span> range(NUM_DENTAL):
+    code, desc <span class="op">=</span> random.choice(DENTAL_CODES)
+    billed     <span class="op">=</span> round(random.uniform(<span class="nm">50</span>, <span class="nm">1500</span>), <span class="nm">2</span>)
+    dental_claims.append({
+        <span class="st">"claim_id"</span>:     <span class="st">f"DN-{str(uuid.uuid4())[:10].upper()}"</span>,
+        <span class="st">"member_id"</span>:    random.choice(member_ids),
+        <span class="st">"dentist_npi"</span>:  random.choice(npi_list),
+        <span class="st">"service_date"</span>: rand_date_str(),
+        <span class="st">"ada_code"</span>:     code,
+        <span class="st">"description"</span>:  desc,
+        <span class="st">"tooth_number"</span>: random.randint(<span class="nm">1</span>,<span class="nm">32</span>) <span class="kw">if</span> code <span class="kw">not</span> <span class="kw">in</span> [<span class="st">"D0120"</span>,<span class="st">"D1110"</span>] <span class="kw">else</span> <span class="kw">None</span>,
+        <span class="st">"billed_amount"</span>: billed,
+        <span class="st">"paid_amount"</span>:   round(billed <span class="op">*</span> <span class="nm">0.6</span>, <span class="nm">2</span>),
+        <span class="st">"claim_status"</span>: random.choices([<span class="st">"PAID"</span>,<span class="st">"DENIED"</span>,<span class="st">"PENDING"</span>], weights<span class="op">=</span>[<span class="nm">70</span>,<span class="nm">20</span>,<span class="nm">10</span>])[<span class="nm">0</span>],
+        <span class="st">"claim_type"</span>:   <span class="st">"dental"</span>,
+    })
+<span class="kw">with</span> open(<span class="st">"data/raw/claims/dental/dental_claims_2024.csv"</span>, <span class="st">"w"</span>, newline<span class="op">=</span><span class="st">""</span>) <span class="kw">as</span> f:
+    writer <span class="op">=</span> csv.DictWriter(f, fieldnames<span class="op">=</span>dental_claims[<span class="nm">0</span>].keys())
+    writer.writeheader(); writer.writerows(dental_claims)
+print(<span class="st">f"  → {len(dental_claims)} dental claims"</span>)
+
+print(<span class="st">"\n✅ All healthcare data generated!"</span>)</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — run it</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code>cd ~/de-portfolio/project-02-healthcare
+python3 scripts/generate_data.py
+
+<span class="cm"># Expected output:</span>
+<span class="cm"># Generating members...    → 2000 members</span>
+<span class="cm"># Generating providers...  → 500 providers</span>
+<span class="cm"># Generating medical claims... → 30000 medical claims</span>
+<span class="cm"># Generating pharmacy claims... → 15000 pharmacy claims</span>
+<span class="cm"># Generating dental claims... → 5000 dental claims</span></code></pre>
+  </div>
+</div>
+
+<!-- ══ STEP 3 ══ -->
+<div class="section" id="section-step3">
+  <div class="hero">
+    <div class="hero-tag">Step 3 · S3 Setup</div>
+    <h1>Two-Bucket S3 Strategy</h1>
+    <p>Create two separate buckets: one for raw PHI data (restricted), one for processed/masked data (analyst-accessible). This is the core HIPAA design pattern.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">scripts/upload_to_s3.py</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm">"""
+Upload raw healthcare data to S3 Zone 1 (PHI bucket).
+Two buckets: phi-raw (restricted) and processed (analyst access).
+"""</span>
+<span class="kw">import</span> boto3, os, json
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+PHI_BUCKET       <span class="op">=</span> <span class="st">"healthcare-raw-phi-yourname"</span>    <span class="cm"># CHANGE</span>
+PROCESSED_BUCKET <span class="op">=</span> <span class="st">"healthcare-processed-yourname"</span>  <span class="cm"># CHANGE</span>
+AUDIT_BUCKET     <span class="op">=</span> <span class="st">"healthcare-audit-yourname"</span>       <span class="cm"># CHANGE</span>
+REGION           <span class="op">=</span> <span class="st">"us-east-1"</span>
+
+s3 <span class="op">=</span> boto3.client(<span class="st">"s3"</span>, region_name<span class="op">=</span>REGION)
+
+<span class="kw">def</span> <span class="fn">create_bucket</span>(name, public<span class="op">=</span><span class="kw">False</span>):
+    <span class="kw">try</span>:
+        s3.head_bucket(Bucket<span class="op">=</span>name)
+        print(<span class="st">f"  Bucket {name} exists"</span>)
+    <span class="kw">except</span>:
+        s3.create_bucket(Bucket<span class="op">=</span>name)
+        <span class="cm"># Enable versioning for audit trail</span>
+        s3.put_bucket_versioning(Bucket<span class="op">=</span>name,
+            VersioningConfiguration<span class="op">=</span>{<span class="st">"Status"</span>: <span class="st">"Enabled"</span>})
+        <span class="cm"># Block all public access on PHI bucket</span>
+        <span class="kw">if</span> <span class="kw">not</span> public:
+            s3.put_public_access_block(Bucket<span class="op">=</span>name,
+                PublicAccessBlockConfiguration<span class="op">=</span>{
+                    <span class="st">"BlockPublicAcls"</span>: <span class="kw">True</span>,
+                    <span class="st">"IgnorePublicAcls"</span>: <span class="kw">True</span>,
+                    <span class="st">"BlockPublicPolicy"</span>: <span class="kw">True</span>,
+                    <span class="st">"RestrictPublicBuckets"</span>: <span class="kw">True</span>,
+                })
+        print(<span class="st">f"  Created {name} with versioning + public access block"</span>)
+
+<span class="kw">def</span> <span class="fn">upload</span>(local_path, bucket, key):
+    s3.upload_file(local_path, bucket, key,
+        ExtraArgs<span class="op">=</span>{<span class="st">"Metadata"</span>: {
+            <span class="st">"upload_ts"</span>: datetime.utcnow().isoformat(),
+            <span class="st">"contains_phi"</span>: <span class="st">"true"</span> <span class="kw">if</span> bucket <span class="op">==</span> PHI_BUCKET <span class="kw">else</span> <span class="st">"false"</span>,
+        }})
+    print(<span class="st">f"  ✓ {local_path} → s3://{bucket}/{key}"</span>)
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    print(<span class="st">"Creating S3 buckets..."</span>)
+    create_bucket(PHI_BUCKET,       public<span class="op">=</span><span class="kw">False</span>)
+    create_bucket(PROCESSED_BUCKET, public<span class="op">=</span><span class="kw">False</span>)
+    create_bucket(AUDIT_BUCKET,     public<span class="op">=</span><span class="kw">False</span>)
+
+    today <span class="op">=</span> <span class="st">"year=2024/month=01/day=01"</span>
+    uploads <span class="op">=</span> [
+        (<span class="st">"data/raw/members/member_eligibility_2024.csv"</span>,
+         PHI_BUCKET, <span class="st">f"members/{today}/member_eligibility_2024.csv"</span>),
+        (<span class="st">"data/raw/providers/provider_npi_2024.csv"</span>,
+         PHI_BUCKET, <span class="st">f"providers/{today}/provider_npi_2024.csv"</span>),
+        (<span class="st">"data/raw/claims/medical/medical_claims_2024.csv"</span>,
+         PHI_BUCKET, <span class="st">f"claims/medical/{today}/medical_claims_2024.csv"</span>),
+        (<span class="st">"data/raw/claims/pharmacy/pharmacy_claims_2024.json"</span>,
+         PHI_BUCKET, <span class="st">f"claims/pharmacy/{today}/pharmacy_claims_2024.json"</span>),
+        (<span class="st">"data/raw/claims/dental/dental_claims_2024.csv"</span>,
+         PHI_BUCKET, <span class="st">f"claims/dental/{today}/dental_claims_2024.csv"</span>),
+    ]
+    print(<span class="st">f"\nUploading {len(uploads)} files to PHI bucket..."</span>)
+    <span class="kw">for</span> local, bucket, key <span class="kw">in</span> uploads:
+        <span class="kw">if</span> os.path.exists(local):
+            upload(local, bucket, key)
+        <span class="kw">else</span>:
+            print(<span class="st">f"  ✗ Not found: {local}"</span>)
+    print(<span class="st">"\n✅ Upload complete. PHI bucket is restricted."</span>)
+
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    main()</code></pre>
+  </div>
+</div>
+
+<!-- ══ STEP 4 ══ -->
+<div class="section" id="section-step4">
+  <div class="hero">
+    <div class="hero-tag">Step 4 · PySpark ETL + SCD Type 2</div>
+    <h1>Claims ETL with SCD Type 2</h1>
+    <p>The most complex transformation in this project. Reads all three claim types, applies PHI masking, builds dimension tables with SCD Type 2 for members, and writes to the processed zone.</p>
+  </div>
+
+  <h3>Understanding SCD Type 2 First</h3>
+  <div class="callout c-info">
+    <div class="callout-icon">📚</div>
+    <div>
+      <strong>SCD = Slowly Changing Dimension.</strong><br><br>
+      <strong>Type 1:</strong> Overwrite the old value. No history. "Member moved from PPO to HMO → update the record." Problem: you lose the fact that their old claims were under a PPO plan.<br><br>
+      <strong>Type 2:</strong> Insert a new row, keep the old one. Each row has effective_start_date, effective_end_date (9999-12-31 = current), and is_current flag. When a member changes plans: close the old row (set effective_end_date = today), insert a new row. Now historical claims correctly join to the plan that was active when the claim was filed.
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">SCD Type 2 — Visual Example</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm">-- Member MBR-001 enrolled in PPO, then switched to HMO on July 1:</span>
+
+member_key  | member_id | plan_type | effective_start | effective_end | is_current | version
+------------|-----------|-----------|-----------------|---------------|------------|--------
+abc123_v1   | MBR-001   | PPO       | 2024-01-01      | 2024-06-30    | FALSE      | 1
+abc123_v2   | MBR-001   | HMO       | 2024-07-01      | 9999-12-31    | TRUE       | 2
+
+<span class="cm">-- A claim from March 2024 joins to version 1 (PPO).</span>
+<span class="cm">-- A claim from August 2024 joins to version 2 (HMO).</span>
+<span class="cm">-- This is the power of SCD Type 2!</span></code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">scripts/etl_claims.py — Part 1: Setup + PHI Masking</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm">"""
+Healthcare Claims ETL — PySpark
+Reads raw PHI data → masks PHI → applies SCD Type 2 → writes Parquet
+
+Run: python3 scripts/etl_claims.py --env local
+"""</span>
+<span class="kw">import</span> sys, argparse, logging, uuid, json
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> SparkSession, DataFrame
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">from</span> pyspark.sql.types <span class="kw">import</span> DoubleType, IntegerType, StringType, DateType
+
+logging.basicConfig(level<span class="op">=</span>logging.INFO, format<span class="op">=</span><span class="st">"%(asctime)s [%(levelname)s] %(message)s"</span>)
+log <span class="op">=</span> logging.getLogger(__name__)
+
+parser <span class="op">=</span> argparse.ArgumentParser()
+parser.add_argument(<span class="st">"--env"</span>, default<span class="op">=</span><span class="st">"local"</span>)
+parser.add_argument(<span class="st">"--phi-bucket"</span>, default<span class="op">=</span><span class="st">"healthcare-raw-phi-yourname"</span>)
+parser.add_argument(<span class="st">"--proc-bucket"</span>, default<span class="op">=</span><span class="st">"healthcare-processed-yourname"</span>)
+args, _ <span class="op">=</span> parser.parse_known_args()
+
+PHI_BASE  <span class="op">=</span> <span class="st">"data/raw"</span>       <span class="kw">if</span> args.env <span class="op">==</span> <span class="st">"local"</span> <span class="kw">else</span> <span class="st">f"s3://{args.phi_bucket}"</span>
+OUT_BASE  <span class="op">=</span> <span class="st">"data/processed"</span>  <span class="kw">if</span> args.env <span class="op">==</span> <span class="st">"local"</span> <span class="kw">else</span> <span class="st">f"s3://{args.proc_bucket}"</span>
+
+PHI_SALT <span class="op">=</span> <span class="st">"HEALTHCARE_SALT_2024_CHANGE_THIS"</span>  <span class="cm"># In prod: store in AWS Secrets Manager</span>
+
+spark <span class="op">=</span> (SparkSession.builder.appName(<span class="st">"healthcare-claims-etl"</span>)
+    .master(<span class="st">"local[*]"</span>)
+    .config(<span class="st">"spark.sql.adaptive.enabled"</span>, <span class="st">"true"</span>)
+    .config(<span class="st">"spark.sql.shuffle.partitions"</span>, <span class="st">"8"</span>)
+    .config(<span class="st">"spark.sql.parquet.compression.codec"</span>, <span class="st">"snappy"</span>)
+    .getOrCreate())
+spark.sparkContext.setLogLevel(<span class="st">"WARN"</span>)
+
+<span class="cm"># ── AUDIT LOG ────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">write_audit_log</span>(job_name, table, rows_ok, rows_fail, status):
+    entry <span class="op">=</span> {
+        <span class="st">"audit_id"</span>:       str(uuid.uuid4()),
+        <span class="st">"job_name"</span>:       job_name,
+        <span class="st">"table"</span>:          table,
+        <span class="st">"run_ts"</span>:         datetime.utcnow().isoformat(),
+        <span class="st">"rows_processed"</span>: rows_ok,
+        <span class="st">"rows_failed"</span>:    rows_fail,
+        <span class="st">"status"</span>:         status,
+        <span class="st">"phi_accessed"</span>:   <span class="kw">True</span>,
+        <span class="st">"pipeline_ver"</span>:   <span class="st">"2.0"</span>,
+    }
+    os_path <span class="op">=</span> <span class="st">f"data/audit_logs/{entry['audit_id']}.json"</span>
+    <span class="kw">with</span> open(os_path, <span class="st">"w"</span>) <span class="kw">as</span> f:
+        json.dump(entry, f, indent<span class="op">=</span><span class="nm">2</span>)
+    log.info(<span class="st">f"  Audit logged: {status} | {rows_ok} rows | {table}"</span>)
+
+<span class="cm"># ── PHI MASKING ──────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">mask_phi</span>(df: DataFrame) <span class="op">-></span> DataFrame:
+    <span class="st">"""
+    Apply PHI masking before writing to processed zone.
+    Rule: Never let raw PHI escape Zone 1.
+    """</span>
+    <span class="cm"># Member ID → salted SHA-256 hash (one-way, but joinable)</span>
+    df <span class="op">=</span> df.withColumn(<span class="st">"member_id_hash"</span>,
+        F.sha2(F.concat(F.col(<span class="st">"member_id"</span>), F.lit(PHI_SALT)), <span class="nm">256</span>))
+
+    <span class="cm"># Name → initials only</span>
+    <span class="kw">if</span> <span class="st">"first_name"</span> <span class="kw">in</span> df.columns:
+        df <span class="op">=</span> df.withColumn(<span class="st">"member_name_masked"</span>,
+            F.concat(F.substring(<span class="st">"first_name"</span>, <span class="nm">1</span>, <span class="nm">1</span>), F.lit(<span class="st">"."</span>),
+                     F.substring(<span class="st">"last_name"</span>, <span class="nm">1</span>, <span class="nm">1</span>), F.lit(<span class="st">"."</span>)))
+        df <span class="op">=</span> df.drop(<span class="st">"first_name"</span>, <span class="st">"last_name"</span>)
+
+    <span class="cm"># DOB → birth year only</span>
+    <span class="kw">if</span> <span class="st">"date_of_birth"</span> <span class="kw">in</span> df.columns:
+        df <span class="op">=</span> df.withColumn(<span class="st">"birth_year"</span>, F.year(F.to_date(<span class="st">"date_of_birth"</span>)))
+        df <span class="op">=</span> df.drop(<span class="st">"date_of_birth"</span>)
+
+    <span class="cm"># SSN → drop entirely (not needed for analytics)</span>
+    <span class="kw">if</span> <span class="st">"ssn"</span> <span class="kw">in</span> df.columns:
+        df <span class="op">=</span> df.drop(<span class="st">"ssn"</span>)
+
+    <span class="cm"># Drop raw member_id (use hash instead)</span>
+    df <span class="op">=</span> df.drop(<span class="st">"member_id"</span>)
+    <span class="kw">return</span> df</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">scripts/etl_claims.py — Part 2: SCD Type 2 Implementation</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm"># ── SCD TYPE 2 — BUILD DIM_MEMBER ────────────────────────</span>
+<span class="kw">def</span> <span class="fn">build_dim_member_scd2</span>(members_df: DataFrame) <span class="op">-></span> DataFrame:
+    <span class="st">"""
+    Build SCD Type 2 dim_member.
+    - Each unique combination of member + plan = one version
+    - effective_start_date and effective_end_date track when each version was active
+    - is_current = True means this is the latest plan for this member
+    - version number increments for each plan change
+    
+    In a real incremental run, you'd compare against the existing dim_member
+    to detect changes. For the initial full load, all records are version 1.
+    """</span>
+    log.info(<span class="st">"Building dim_member with SCD Type 2..."</span>)
+
+    masked <span class="op">=</span> mask_phi(members_df)
+
+    <span class="cm"># For initial load: all current records get version 1</span>
+    dim <span class="op">=</span> (masked
+        <span class="cm"># Create surrogate key: hash of member_id_hash + plan_id + version</span>
+        .withColumn(<span class="st">"version"</span>, F.lit(<span class="nm">1</span>).cast(IntegerType()))
+        .withColumn(<span class="st">"member_key"</span>,
+            F.sha2(F.concat(
+                F.col(<span class="st">"member_id_hash"</span>), F.lit(<span class="st">"_"</span>),
+                F.col(<span class="st">"plan_id"</span>), F.lit(<span class="st">"_"</span>),
+                F.col(<span class="st">"version"</span>).cast(StringType())
+            ), <span class="nm">256</span>))
+        <span class="cm"># SCD2 date tracking columns</span>
+        .withColumn(<span class="st">"effective_start_date"</span>,
+            F.to_date(F.col(<span class="st">"enrollment_date"</span>)))
+        .withColumn(<span class="st">"effective_end_date"</span>,
+            F.to_date(F.lit(<span class="st">"9999-12-31"</span>)))    <span class="cm"># 9999 = current record</span>
+        .withColumn(<span class="st">"is_current"</span>, F.lit(<span class="kw">True</span>))
+        .withColumn(<span class="st">"dw_inserted_at"</span>, F.current_timestamp())
+        .select(
+            <span class="st">"member_key"</span>, <span class="st">"member_id_hash"</span>, <span class="st">"member_name_masked"</span>,
+            <span class="st">"birth_year"</span>, <span class="st">"gender"</span>, <span class="st">"state"</span>,
+            <span class="st">"plan_id"</span>, <span class="st">"plan_type"</span>, <span class="st">"group_id"</span>,
+            <span class="st">"effective_start_date"</span>, <span class="st">"effective_end_date"</span>,
+            <span class="st">"is_current"</span>, <span class="st">"version"</span>, <span class="st">"dw_inserted_at"</span>
+        )
+    )
+    log.info(<span class="st">f"  → {dim.count()} member dimension rows (all version 1)"</span>)
+    <span class="kw">return</span> dim
+
+<span class="cm"># ── SCD TYPE 2 — INCREMENTAL UPDATE (for subsequent runs) ─</span>
+<span class="kw">def</span> <span class="fn">apply_scd2_changes</span>(existing_dim: DataFrame, new_members: DataFrame) <span class="op">-></span> DataFrame:
+    <span class="st">"""
+    Apply SCD Type 2 logic for incremental member plan changes.
+    Called on Day 2+ runs when new member data arrives.
+    
+    Logic:
+    1. Hash new member records
+    2. Find members where plan_type changed (join on member_id_hash)
+    3. Close old records (set effective_end_date = yesterday, is_current = False)
+    4. Insert new version records
+    5. Union with unchanged records
+    """</span>
+    log.info(<span class="st">"Applying SCD2 incremental changes..."</span>)
+    today <span class="op">=</span> datetime.utcnow().strftime(<span class="st">"%Y-%m-%d"</span>)
+    yesterday <span class="op">=</span> (datetime.utcnow() <span class="op">-</span> __import__(<span class="st">'datetime'</span>).timedelta(days<span class="op">=</span><span class="nm">1</span>)).strftime(<span class="st">"%Y-%m-%d"</span>)
+
+    new_masked <span class="op">=</span> mask_phi(new_members)
+
+    <span class="cm"># Find changed records: members where plan_type differs from current dim</span>
+    current_dim <span class="op">=</span> existing_dim.filter(F.col(<span class="st">"is_current"</span>) <span class="op">==</span> <span class="kw">True</span>)
+
+    changed <span class="op">=</span> (new_masked
+        .join(current_dim.select(<span class="st">"member_id_hash"</span>, <span class="st">"plan_type"</span>.alias(<span class="op">...)))
+</span>        <span class="cm"># simplified — in real code: filter where plan_type != existing plan_type</span>
+    )
+
+    <span class="cm"># Step 1: Close old records for changed members</span>
+    closed_old <span class="op">=</span> (existing_dim
+        .join(F.broadcast(changed.select(<span class="st">"member_id_hash"</span>)), <span class="st">"member_id_hash"</span>, <span class="st">"left_semi"</span>)
+        .withColumn(<span class="st">"effective_end_date"</span>, F.to_date(F.lit(yesterday)))
+        .withColumn(<span class="st">"is_current"</span>, F.lit(<span class="kw">False</span>))
+    )
+
+    <span class="cm"># Step 2: Get max version per member to increment</span>
+    max_versions <span class="op">=</span> (existing_dim
+        .groupBy(<span class="st">"member_id_hash"</span>)
+        .agg(F.max(<span class="st">"version"</span>).alias(<span class="st">"max_version"</span>)))
+
+    <span class="cm"># Step 3: Insert new version rows</span>
+    new_versions <span class="op">=</span> (new_masked
+        .join(max_versions, <span class="st">"member_id_hash"</span>, <span class="st">"left"</span>)
+        .withColumn(<span class="st">"version"</span>, F.coalesce(F.col(<span class="st">"max_version"</span>) <span class="op">+</span> <span class="nm">1</span>, F.lit(<span class="nm">1</span>)))
+        .withColumn(<span class="st">"effective_start_date"</span>, F.to_date(F.lit(today)))
+        .withColumn(<span class="st">"effective_end_date"</span>,   F.to_date(F.lit(<span class="st">"9999-12-31"</span>)))
+        .withColumn(<span class="st">"is_current"</span>, F.lit(<span class="kw">True</span>))
+    )
+
+    <span class="cm"># Step 4: Union all parts</span>
+    unchanged <span class="op">=</span> existing_dim.join(
+        changed.select(<span class="st">"member_id_hash"</span>), <span class="st">"member_id_hash"</span>, <span class="st">"left_anti"</span>)
+
+    <span class="kw">return</span> unchanged.unionByName(closed_old).unionByName(new_versions)</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">scripts/etl_claims.py — Part 3: Build Fact + Write</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm"># ── BUILD FACT_CLAIMS ─────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">build_fact_claims</span>(medical_df, pharmacy_df, dental_df, dim_member):
+    <span class="st">"""
+    Combine all 3 claim types into a unified fact table.
+    Join to dim_member using SCD2 logic: match on member_id_hash
+    AND service_date BETWEEN effective_start_date AND effective_end_date.
+    """</span>
+    log.info(<span class="st">"Building fact_claims..."</span>)
+
+    <span class="cm"># Normalize medical claims</span>
+    medical_norm <span class="op">=</span> (medical_df
+        .withColumn(<span class="st">"member_id_hash"</span>,
+            F.sha2(F.concat(F.col(<span class="st">"member_id"</span>), F.lit(PHI_SALT)), <span class="nm">256</span>))
+        .withColumn(<span class="st">"claim_key"</span>,     F.sha2(F.col(<span class="st">"claim_id"</span>), <span class="nm">256</span>))
+        .withColumn(<span class="st">"service_date"</span>,  F.to_date(<span class="st">"service_date"</span>))
+        .withColumn(<span class="st">"billed_amount"</span>, F.col(<span class="st">"billed_amount"</span>).cast(DoubleType()))
+        .withColumn(<span class="st">"allowed_amount"</span>,F.col(<span class="st">"allowed_amount"</span>).cast(DoubleType()))
+        .withColumn(<span class="st">"paid_amount"</span>,   F.col(<span class="st">"paid_amount"</span>).cast(DoubleType()))
+        .withColumnRenamed(<span class="st">"rendering_npi"</span>, <span class="st">"provider_npi"</span>)
+        .select(<span class="st">"claim_key"</span>, <span class="st">"claim_id"</span>, <span class="st">"member_id_hash"</span>, <span class="st">"provider_npi"</span>,
+                <span class="st">"service_date"</span>, <span class="st">"billed_amount"</span>, <span class="st">"allowed_amount"</span>, <span class="st">"paid_amount"</span>,
+                <span class="st">"member_cost_share"</span>, <span class="st">"claim_status"</span>, <span class="st">"denial_reason_code"</span>,
+                <span class="st">"primary_diagnosis"</span>, <span class="st">"cpt_code"</span>, <span class="st">"place_of_service"</span>, <span class="st">"claim_type"</span>)
+    )
+
+    <span class="cm"># Normalize pharmacy claims (different schema)</span>
+    pharmacy_norm <span class="op">=</span> (pharmacy_df
+        .withColumn(<span class="st">"member_id_hash"</span>,
+            F.sha2(F.concat(F.col(<span class="st">"member_id"</span>), F.lit(PHI_SALT)), <span class="nm">256</span>))
+        .withColumn(<span class="st">"claim_key"</span>,     F.sha2(F.col(<span class="st">"claim_id"</span>), <span class="nm">256</span>))
+        .withColumn(<span class="st">"service_date"</span>,  F.to_date(<span class="st">"fill_date"</span>))
+        .withColumn(<span class="st">"billed_amount"</span>, F.col(<span class="st">"drug_cost"</span>).cast(DoubleType()))
+        .withColumn(<span class="st">"allowed_amount"</span>,F.col(<span class="st">"drug_cost"</span>).cast(DoubleType()))
+        .withColumn(<span class="st">"paid_amount"</span>,   F.col(<span class="st">"plan_paid"</span>).cast(DoubleType()))
+        .withColumn(<span class="st">"member_cost_share"</span>, F.col(<span class="st">"member_copay"</span>).cast(DoubleType()))
+        .withColumn(<span class="st">"denial_reason_code"</span>, F.lit(<span class="kw">None</span>).cast(StringType()))
+        .withColumn(<span class="st">"place_of_service"</span>, F.lit(<span class="st">"Pharmacy"</span>))
+        .withColumnRenamed(<span class="st">"pharmacy_npi"</span>, <span class="st">"provider_npi"</span>)
+        .withColumnRenamed(<span class="st">"related_diagnosis"</span>, <span class="st">"primary_diagnosis"</span>)
+        .withColumnRenamed(<span class="st">"ndc_code"</span>, <span class="st">"cpt_code"</span>)  <span class="cm"># reuse column, different code type</span>
+        .select(<span class="st">"claim_key"</span>, <span class="st">"claim_id"</span>, <span class="st">"member_id_hash"</span>, <span class="st">"provider_npi"</span>,
+                <span class="st">"service_date"</span>, <span class="st">"billed_amount"</span>, <span class="st">"allowed_amount"</span>, <span class="st">"paid_amount"</span>,
+                <span class="st">"member_cost_share"</span>, <span class="st">"claim_status"</span>, <span class="st">"denial_reason_code"</span>,
+                <span class="st">"primary_diagnosis"</span>, <span class="st">"cpt_code"</span>, <span class="st">"place_of_service"</span>, <span class="st">"claim_type"</span>)
+    )
+
+    <span class="cm"># Union all claim types</span>
+    all_claims <span class="op">=</span> medical_norm.union(pharmacy_norm)
+
+    <span class="cm"># SCD2 join: find the correct member dim version for each claim's service date</span>
+    fact <span class="op">=</span> (all_claims
+        .join(
+            F.broadcast(dim_member.select(
+                <span class="st">"member_key"</span>, <span class="st">"member_id_hash"</span>,
+                <span class="st">"effective_start_date"</span>, <span class="st">"effective_end_date"</span>
+            )),
+            on<span class="op">=</span>[
+                all_claims.member_id_hash <span class="op">==</span> dim_member.member_id_hash,
+                all_claims.service_date <span class="op">>=</span> dim_member.effective_start_date,
+                all_claims.service_date <span class="op">&lt;=</span> dim_member.effective_end_date,
+            ],
+            how<span class="op">=</span><span class="st">"left"</span>
+        )
+        .withColumn(<span class="st">"year"</span>,             F.year(<span class="st">"service_date"</span>))
+        .withColumn(<span class="st">"month"</span>,            F.month(<span class="st">"service_date"</span>))
+        .withColumn(<span class="st">"claim_type_part"</span>,  F.col(<span class="st">"claim_type"</span>))
+        .withColumn(<span class="st">"date_key"</span>,
+            F.date_format(<span class="st">"service_date"</span>, <span class="st">"yyyyMMdd"</span>).cast(IntegerType()))
+        .withColumn(<span class="st">"etl_inserted_at"</span>, F.current_timestamp())
+        .drop(<span class="st">"effective_start_date"</span>, <span class="st">"effective_end_date"</span>)
+    )
+    log.info(<span class="st">f"  → {fact.count()} combined fact rows"</span>)
+    <span class="kw">return</span> fact
+
+<span class="cm"># ── WRITE ────────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">write_table</span>(df, name, partition_cols<span class="op">=</span><span class="kw">None</span>):
+    path   <span class="op">=</span> <span class="st">f"{OUT_BASE}/{name}"</span>
+    writer <span class="op">=</span> df.coalesce(<span class="nm">1</span>).write.mode(<span class="st">"overwrite"</span>).format(<span class="st">"parquet"</span>)
+    <span class="kw">if</span> partition_cols:
+        writer <span class="op">=</span> writer.partitionBy(<span class="op">*</span>partition_cols)
+    writer.save(path)
+    log.info(<span class="st">f"  ✓ Written: {path}"</span>)
+
+<span class="cm"># ── MAIN ─────────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">main</span>():
+    start <span class="op">=</span> datetime.now()
+    log.info(<span class="st">"="</span><span class="op">*</span><span class="nm">60</span>)
+    log.info(<span class="st">"Healthcare Claims ETL started"</span>)
+
+    <span class="cm"># Ingest</span>
+    medical_df  <span class="op">=</span> spark.read.option(<span class="st">"header"</span>,<span class="kw">True</span>).option(<span class="st">"inferSchema"</span>,<span class="kw">True</span>).csv(<span class="st">f"{PHI_BASE}/claims/medical/"</span>)
+    pharmacy_df <span class="op">=</span> spark.read.option(<span class="st">"multiline"</span>,<span class="kw">True</span>).json(<span class="st">f"{PHI_BASE}/claims/pharmacy/"</span>)
+    dental_df   <span class="op">=</span> spark.read.option(<span class="st">"header"</span>,<span class="kw">True</span>).option(<span class="st">"inferSchema"</span>,<span class="kw">True</span>).csv(<span class="st">f"{PHI_BASE}/claims/dental/"</span>)
+    members_df  <span class="op">=</span> spark.read.option(<span class="st">"header"</span>,<span class="kw">True</span>).option(<span class="st">"inferSchema"</span>,<span class="kw">True</span>).csv(<span class="st">f"{PHI_BASE}/members/"</span>)
+    providers_df<span class="op">=</span> spark.read.option(<span class="st">"header"</span>,<span class="kw">True</span>).option(<span class="st">"inferSchema"</span>,<span class="kw">True</span>).csv(<span class="st">f"{PHI_BASE}/providers/"</span>)
+
+    log.info(<span class="st">f"Ingested: medical={medical_df.count()}, pharmacy={pharmacy_df.count()}, dental={dental_df.count()}"</span>)
+
+    <span class="cm"># Build dimensions</span>
+    dim_member   <span class="op">=</span> build_dim_member_scd2(members_df)
+    dim_provider <span class="op">=</span> (providers_df
+        .withColumn(<span class="st">"provider_key"</span>, F.sha2(F.col(<span class="st">"npi"</span>), <span class="nm">256</span>))
+        .withColumn(<span class="st">"updated_at"</span>, F.current_timestamp()))
+    dim_date     <span class="op">=</span> spark.sql(<span class="st">"""
+        SELECT explode(sequence(to_date('2024-01-01'),
+               to_date('2024-12-31'), interval 1 day)) AS full_date"""</span>
+    ).select(
+        F.date_format(<span class="st">"full_date"</span>,<span class="st">"yyyyMMdd"</span>).cast(IntegerType()).alias(<span class="st">"date_key"</span>),
+        F.col(<span class="st">"full_date"</span>), F.year(<span class="st">"full_date"</span>).alias(<span class="st">"year"</span>),
+        F.quarter(<span class="st">"full_date"</span>).alias(<span class="st">"quarter"</span>), F.month(<span class="st">"full_date"</span>).alias(<span class="st">"month"</span>),
+        F.when(F.dayofweek(<span class="st">"full_date"</span>).isin([<span class="nm">1</span>,<span class="nm">7"</span>]),<span class="kw">True</span>).otherwise(<span class="kw">False</span>).alias(<span class="st">"is_weekend"</span>))
+
+    <span class="cm"># Build fact</span>
+    fact_claims <span class="op">=</span> build_fact_claims(medical_df, pharmacy_df, dental_df, dim_member)
+
+    <span class="cm"># Audit log</span>
+    write_audit_log(<span class="st">"healthcare-claims-etl"</span>, <span class="st">"fact_claims"</span>, fact_claims.count(), <span class="nm">0</span>, <span class="st">"SUCCESS"</span>)
+
+    <span class="cm"># Write outputs</span>
+    log.info(<span class="st">"Writing output tables..."</span>)
+    write_table(dim_member,   <span class="st">"dim_member"</span>)
+    write_table(dim_provider, <span class="st">"dim_provider"</span>)
+    write_table(dim_date,     <span class="st">"dim_date"</span>)
+    write_table(fact_claims,  <span class="st">"fact_claims"</span>, [<span class="st">"year"</span>, <span class="st">"month"</span>, <span class="st">"claim_type_part"</span>])
+
+    elapsed <span class="op">=</span> (datetime.now() <span class="op">-</span> start).seconds
+    log.info(<span class="st">f"✅ ETL complete in {elapsed}s"</span>)
+
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    main()</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — run it</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code>python3 scripts/etl_claims.py --env local
+
+<span class="cm"># Verify:</span>
+ls -la data/processed/
+ls data/audit_logs/    <span class="cm"># should have a .json audit file</span></code></pre>
+  </div>
+</div>
+
+<!-- ══ STEP 5 ══ -->
+<div class="section" id="section-step5">
+  <div class="hero">
+    <div class="hero-tag">Step 5 · Incremental Load</div>
+    <h1>Incremental Load with Watermark</h1>
+    <p>Instead of reprocessing all 50,000 claims every day, only process claims that arrived since the last successful run. This is what reduces runtime from 8 hours to under 2 hours.</p>
+  </div>
+
+  <div class="callout c-info">
+    <div class="callout-icon">💡</div>
+    <div><strong>Watermark pattern:</strong> After each successful run, save the timestamp of the latest record processed. Next run starts from that timestamp. If a run fails, the watermark isn't updated — so the next run reprocesses the same window safely (idempotent).</div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">scripts/incremental_load.py</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm">"""
+Incremental load logic using watermark pattern.
+Tracks the last successful run timestamp.
+Only processes records newer than the watermark.
+"""</span>
+<span class="kw">import</span> json, os
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> SparkSession, DataFrame
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+
+WATERMARK_FILE <span class="op">=</span> <span class="st">"config/watermark.json"</span>
+
+<span class="kw">def</span> <span class="fn">read_watermark</span>() <span class="op">-></span> str:
+    <span class="st">"""Read last successful run timestamp. Default to 30 days ago."""</span>
+    <span class="kw">if</span> os.path.exists(WATERMARK_FILE):
+        <span class="kw">with</span> open(WATERMARK_FILE) <span class="kw">as</span> f:
+            wm <span class="op">=</span> json.load(f)
+        print(<span class="st">f"Watermark loaded: {wm['last_success_ts']}"</span>)
+        <span class="kw">return</span> wm[<span class="st">"last_success_ts"</span>]
+    <span class="kw">else</span>:
+        <span class="cm"># First run: process last 30 days</span>
+        default <span class="op">=</span> <span class="st">"2024-01-01 00:00:00"</span>
+        print(<span class="st">f"No watermark found. Starting from: {default}"</span>)
+        <span class="kw">return</span> default
+
+<span class="kw">def</span> <span class="fn">save_watermark</span>(ts: str):
+    <span class="st">"""Save watermark ONLY after successful processing."""</span>
+    os.makedirs(<span class="st">"config"</span>, exist_ok<span class="op">=</span><span class="kw">True</span>)
+    <span class="kw">with</span> open(WATERMARK_FILE, <span class="st">"w"</span>) <span class="kw">as</span> f:
+        json.dump({
+            <span class="st">"last_success_ts"</span>: ts,
+            <span class="st">"saved_at"</span>:        datetime.utcnow().isoformat(),
+        }, f, indent<span class="op">=</span><span class="nm">2</span>)
+    print(<span class="st">f"Watermark saved: {ts}"</span>)
+
+<span class="kw">def</span> <span class="fn">filter_incremental</span>(df: DataFrame, date_col: str, watermark_ts: str) <span class="op">-></span> DataFrame:
+    <span class="st">"""
+    Filter DataFrame to only rows where date_col > watermark.
+    This is the core incremental logic.
+    """</span>
+    filtered <span class="op">=</span> df.filter(F.col(date_col) <span class="op">></span> F.lit(watermark_ts))
+    new_count <span class="op">=</span> filtered.count()
+    total     <span class="op">=</span> df.count()
+    print(<span class="st">f"  Incremental: {new_count}/{total} rows are new (watermark={watermark_ts})"</span>)
+    <span class="kw">return</span> filtered
+
+<span class="kw">def</span> <span class="fn">get_max_timestamp</span>(df: DataFrame, date_col: str) <span class="op">-></span> str:
+    <span class="st">"""Get the maximum timestamp from processed records to use as next watermark."""</span>
+    max_ts <span class="op">=</span> df.agg(F.max(date_col).cast(<span class="st">"string"</span>)).collect()[<span class="nm">0</span>][<span class="nm">0</span>]
+    <span class="kw">return</span> max_ts <span class="kw">if</span> max_ts <span class="kw">else</span> datetime.utcnow().isoformat()
+
+<span class="cm"># ── USAGE in main ETL flow ────────────────────────────────</span>
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    spark <span class="op">=</span> SparkSession.builder.master(<span class="st">"local[*]"</span>).appName(<span class="st">"incremental-test"</span>).getOrCreate()
+    spark.sparkContext.setLogLevel(<span class="st">"WARN"</span>)
+
+    <span class="cm"># Simulate reading claims</span>
+    claims <span class="op">=</span> spark.read.option(<span class="st">"header"</span>,<span class="kw">True</span>).csv(<span class="st">"data/raw/claims/medical/"</span>)
+
+    watermark <span class="op">=</span> read_watermark()
+
+    <span class="cm"># Filter to only new claims</span>
+    new_claims <span class="op">=</span> filter_incremental(claims, <span class="st">"service_date"</span>, watermark)
+
+    <span class="cm"># ... process new_claims ...</span>
+    <span class="cm"># ... if processing succeeds:</span>
+
+    new_max_ts <span class="op">=</span> get_max_timestamp(new_claims, <span class="st">"service_date"</span>)
+    save_watermark(new_max_ts)
+    print(<span class="st">f"Incremental run complete. New watermark: {new_max_ts}"</span>)</code></pre>
+  </div>
+
+  <div class="callout c-warn">
+    <div class="callout-icon">⚠️</div>
+    <div><strong>Key interview point:</strong> "I only advance the watermark after a successful run. If the ETL fails midway, the watermark isn't updated, so the next run reprocesses the same window. This makes the pipeline <strong>idempotent</strong> — you can safely re-run it without creating duplicate records, as long as downstream writes use <code>INSERT OVERWRITE</code> or a MERGE/upsert pattern."</div>
+  </div>
+</div>
+
+<!-- ══ STEP 6 ══ -->
+<div class="section" id="section-step6">
+  <div class="hero">
+    <div class="hero-tag">Step 6 · Data Quality + PHI Masking</div>
+    <h1>Healthcare-Specific Quality Checks</h1>
+    <p>Healthcare data quality goes beyond nulls and duplicates. Claims must be clinically valid: service dates can't be in the future, member must be eligible on service date, amounts must be sensible.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">scripts/data_quality.py — Healthcare Rules</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm">"""
+Healthcare-specific data quality checks.
+Goes beyond basic null/dup checks — validates business rules.
+"""</span>
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> SparkSession
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">from</span> pyspark.sql.types <span class="kw">import</span> DoubleType
+<span class="kw">import</span> json
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+spark <span class="op">=</span> SparkSession.builder.master(<span class="st">"local[*]"</span>).appName(<span class="st">"hc-dq"</span>).getOrCreate()
+spark.sparkContext.setLogLevel(<span class="st">"WARN"</span>)
+
+<span class="kw">def</span> <span class="fn">run_checks</span>(df, checks: dict, table_name: str):
+    total <span class="op">=</span> df.count()
+    results <span class="op">=</span> {}
+    <span class="kw">for</span> check_name, condition <span class="kw">in</span> checks.items():
+        failed <span class="op">=</span> df.filter(<span class="op">~</span>condition).count()
+        pct    <span class="op">=</span> round(failed <span class="op">/</span> total <span class="op">*</span> <span class="nm">100</span>, <span class="nm">2</span>) <span class="kw">if</span> total <span class="op">></span> <span class="nm">0</span> <span class="kw">else</span> <span class="nm">0</span>
+        results[check_name] <span class="op">=</span> {
+            <span class="st">"failed"</span>: failed, <span class="st">"total"</span>: total,
+            <span class="st">"pct"</span>: pct, <span class="st">"passed"</span>: pct <span class="op">&lt;</span> <span class="nm">2.0</span>  <span class="cm"># healthcare: &lt;2% failures acceptable</span>
+        }
+        status <span class="op">=</span> <span class="st">"✅"</span> <span class="kw">if</span> results[check_name][<span class="st">"passed"</span>] <span class="kw">else</span> <span class="st">"❌"</span>
+        print(<span class="st">f"  {status} {check_name}: {failed}/{total} failed ({pct}%)"</span>)
+    <span class="kw">return</span> results
+
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    medical <span class="op">=</span> spark.read.option(<span class="st">"header"</span>,<span class="kw">True</span>).option(<span class="st">"inferSchema"</span>,<span class="kw">True</span>).csv(
+        <span class="st">"data/raw/claims/medical/"</span>)
+
+    print(<span class="st">"=== Medical Claims Quality Checks ==="</span>)
+    results <span class="op">=</span> run_checks(medical, {
+        <span class="cm"># Basic completeness</span>
+        <span class="st">"claim_id_not_null"</span>:     F.col(<span class="st">"claim_id"</span>).isNotNull(),
+        <span class="st">"member_id_not_null"</span>:    F.col(<span class="st">"member_id"</span>).isNotNull(),
+        <span class="st">"service_date_not_null"</span>: F.col(<span class="st">"service_date"</span>).isNotNull(),
+
+        <span class="cm"># Financial validity</span>
+        <span class="st">"billed_positive"</span>:       F.col(<span class="st">"billed_amount"</span>).cast(DoubleType()) <span class="op">></span> <span class="nm">0</span>,
+        <span class="st">"paid_not_exceed_billed"</span>: F.col(<span class="st">"paid_amount"</span>).cast(DoubleType()) <span class="op">&lt;=</span>
+                                   F.col(<span class="st">"billed_amount"</span>).cast(DoubleType()),
+        <span class="st">"allowed_not_exceed_billed"</span>: F.col(<span class="st">"allowed_amount"</span>).cast(DoubleType()) <span class="op">&lt;=</span>
+                                      F.col(<span class="st">"billed_amount"</span>).cast(DoubleType()),
+
+        <span class="cm"># Clinical validity</span>
+        <span class="st">"service_date_not_future"</span>: F.to_date(<span class="st">"service_date"</span>) <span class="op">&lt;=</span> F.current_date(),
+        <span class="st">"valid_claim_status"</span>:      F.col(<span class="st">"claim_status"</span>).isin(
+                                       [<span class="st">"PAID"</span>,<span class="st">"DENIED"</span>,<span class="st">"PENDING"</span>,<span class="st">"ADJUSTED"</span>]),
+        <span class="st">"icd10_format"</span>:            F.col(<span class="st">"primary_diagnosis"</span>).rlike(<span class="st">"^[A-Z][0-9]"</span>),
+
+        <span class="cm"># HIPAA: denial code required when status is DENIED</span>
+        <span class="st">"denial_code_if_denied"</span>:   <span class="op">~</span>(
+            (F.col(<span class="st">"claim_status"</span>) <span class="op">==</span> <span class="st">"DENIED"</span>) <span class="op">&</span>
+            F.col(<span class="st">"denial_reason_code"</span>).isNull()
+        ),
+    }, <span class="st">"medical_claims"</span>)
+
+    overall <span class="op">=</span> <span class="kw">all</span>(v[<span class="st">"passed"</span>] <span class="kw">for</span> v <span class="kw">in</span> results.values())
+    print(<span class="st">f"\nOverall: {'✅ PASSED' if overall else '❌ FAILED'}"</span>)
+
+    report <span class="op">=</span> {<span class="st">"run_at"</span>: datetime.utcnow().isoformat(), <span class="st">"results"</span>: results, <span class="st">"passed"</span>: overall}
+    <span class="kw">with</span> open(<span class="st">"data/quality_report_healthcare.json"</span>, <span class="st">"w"</span>) <span class="kw">as</span> f:
+        json.dump(report, f, indent<span class="op">=</span><span class="nm">2</span>)</code></pre>
+  </div>
+</div>
+
+<!-- ══ STEP 7 ══ -->
+<div class="section" id="section-step7">
+  <div class="hero">
+    <div class="hero-tag">Step 7 · SQL Queries</div>
+    <h1>Healthcare Analytical SQL</h1>
+    <p>Four complex queries covering claim denial analysis, provider performance, member risk stratification, and plan cost comparison. These match real healthcare analytics use cases.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'sq1')">Denial Analysis</button>
+    <button class="tab-btn" onclick="switchTab(this,'sq2')">Provider Performance</button>
+    <button class="tab-btn" onclick="switchTab(this,'sq3')">Member Risk</button>
+    <button class="tab-btn" onclick="switchTab(this,'sq4')">Plan Cost Compare</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-sq1">
+    <div class="callout c-info"><div class="callout-icon">💡</div>
+      <div>Claim denials cost payers and providers millions in rework. This query identifies which denial reason codes are most frequent and whether certain providers have abnormally high denial rates — a signal of coding issues or fraud.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">SQL — Claim Denial Rate Analysis with Running Total</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="kw">WITH</span> denial_summary <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        p.specialty,
+        f.denial_reason_code,
+        f.claim_type,
+        <span class="fn">COUNT</span>(*)                    <span class="kw">AS</span> total_claims,
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> f.claim_status <span class="op">=</span> <span class="st">'DENIED'</span> <span class="kw">THEN</span> <span class="nm">1</span> <span class="kw">ELSE</span> <span class="nm">0</span> <span class="kw">END</span>) <span class="kw">AS</span> denied_claims,
+        <span class="fn">SUM</span>(f.billed_amount)        <span class="kw">AS</span> total_billed,
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> f.claim_status <span class="op">=</span> <span class="st">'DENIED'</span>
+                 <span class="kw">THEN</span> f.billed_amount <span class="kw">ELSE</span> <span class="nm">0</span> <span class="kw">END</span>) <span class="kw">AS</span> denied_billed_amount
+    <span class="kw">FROM</span> fact_claims f
+    <span class="kw">JOIN</span> dim_provider p <span class="kw">ON</span> f.provider_key <span class="op">=</span> p.provider_key
+    <span class="kw">WHERE</span> f.year <span class="op">=</span> <span class="nm">2024</span>
+    <span class="kw">GROUP BY</span> p.specialty, f.denial_reason_code, f.claim_type
+),
+denial_with_rate <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        specialty, denial_reason_code, claim_type,
+        total_claims, denied_claims, denied_billed_amount,
+        <span class="fn">ROUND</span>(denied_claims * <span class="nm">100.0</span> / <span class="fn">NULLIF</span>(total_claims, <span class="nm">0</span>), <span class="nm">2</span>) <span class="kw">AS</span> denial_rate_pct,
+        <span class="cm">-- Rank specialties by denial rate within each claim type</span>
+        <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> claim_type
+            <span class="kw">ORDER BY</span> denied_claims * <span class="nm">100.0</span> / <span class="fn">NULLIF</span>(total_claims, <span class="nm">0</span>) <span class="kw">DESC</span>
+        ) <span class="kw">AS</span> denial_rank,
+        <span class="cm">-- Running total of denied amount</span>
+        <span class="fn">SUM</span>(denied_billed_amount) <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> claim_type
+            <span class="kw">ORDER BY</span> denied_claims <span class="kw">DESC</span>
+            <span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>
+        ) <span class="kw">AS</span> running_denied_total
+    <span class="kw">FROM</span> denial_summary
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> denial_with_rate
+<span class="kw">WHERE</span> denial_rate_pct <span class="op">></span> <span class="nm">10</span>   <span class="cm">-- Flag specialties with &gt;10% denial rate</span>
+<span class="kw">ORDER BY</span> claim_type, denial_rank;</code></pre>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-sq2">
+    <div class="callout c-info"><div class="callout-icon">💡</div>
+      <div>Provider performance analysis — compare a provider's average cost to their specialty peers. Out-of-network providers and high-cost outliers are the biggest drivers of payer cost increases.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">SQL — Provider Cost vs Specialty Peer Average</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="kw">WITH</span> provider_metrics <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        p.provider_key, p.provider_name, p.specialty,
+        p.network_status,
+        <span class="fn">COUNT</span>(f.claim_key)          <span class="kw">AS</span> claim_count,
+        <span class="fn">SUM</span>(f.paid_amount)          <span class="kw">AS</span> total_paid,
+        <span class="fn">AVG</span>(f.paid_amount)          <span class="kw">AS</span> avg_paid_per_claim,
+        <span class="fn">AVG</span>(f.allowed_amount)       <span class="kw">AS</span> avg_allowed,
+        <span class="fn">SUM</span>(f.member_cost_share)    <span class="kw">AS</span> total_member_burden,
+        <span class="fn">COUNT</span>(<span class="kw">CASE WHEN</span> f.claim_status <span class="op">=</span> <span class="st">'DENIED'</span> <span class="kw">THEN</span> <span class="nm">1</span> <span class="kw">END</span>) <span class="kw">AS</span> denials
+    <span class="kw">FROM</span> fact_claims f
+    <span class="kw">JOIN</span> dim_provider p <span class="kw">ON</span> f.provider_key <span class="op">=</span> p.provider_key
+    <span class="kw">WHERE</span> f.year <span class="op">=</span> <span class="nm">2024</span>
+      <span class="kw">AND</span> f.claim_type <span class="op">=</span> <span class="st">'medical'</span>
+    <span class="kw">GROUP BY</span> p.provider_key, p.provider_name, p.specialty, p.network_status
+),
+specialty_benchmarks <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        specialty,
+        <span class="fn">PERCENTILE_CONT</span>(<span class="nm">0.50</span>) <span class="kw">WITHIN GROUP</span> (<span class="kw">ORDER BY</span> avg_paid_per_claim) <span class="kw">AS</span> p50_cost,
+        <span class="fn">PERCENTILE_CONT</span>(<span class="nm">0.75</span>) <span class="kw">WITHIN GROUP</span> (<span class="kw">ORDER BY</span> avg_paid_per_claim) <span class="kw">AS</span> p75_cost,
+        <span class="fn">PERCENTILE_CONT</span>(<span class="nm">0.90</span>) <span class="kw">WITHIN GROUP</span> (<span class="kw">ORDER BY</span> avg_paid_per_claim) <span class="kw">AS</span> p90_cost
+    <span class="kw">FROM</span> provider_metrics
+    <span class="kw">GROUP BY</span> specialty
+)
+<span class="kw">SELECT</span>
+    pm.provider_name, pm.specialty, pm.network_status,
+    pm.claim_count, pm.avg_paid_per_claim,
+    sb.p50_cost <span class="kw">AS</span> specialty_median_cost,
+    <span class="fn">ROUND</span>((pm.avg_paid_per_claim - sb.p50_cost) / <span class="fn">NULLIF</span>(sb.p50_cost,<span class="nm">0</span>) * <span class="nm">100</span>, <span class="nm">1</span>)
+        <span class="kw">AS</span> pct_above_specialty_median,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> pm.avg_paid_per_claim <span class="op">></span> sb.p90_cost <span class="kw">THEN</span> <span class="st">'High Cost Outlier'</span>
+        <span class="kw">WHEN</span> pm.avg_paid_per_claim <span class="op">></span> sb.p75_cost <span class="kw">THEN</span> <span class="st">'Above Average'</span>
+        <span class="kw">WHEN</span> pm.avg_paid_per_claim <span class="op">&lt;</span> sb.p50_cost <span class="kw">THEN</span> <span class="st">'Below Average'</span>
+        <span class="kw">ELSE</span> <span class="st">'Average'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> cost_tier
+<span class="kw">FROM</span> provider_metrics pm
+<span class="kw">JOIN</span> specialty_benchmarks sb <span class="kw">ON</span> pm.specialty <span class="op">=</span> sb.specialty
+<span class="kw">ORDER BY</span> pct_above_specialty_median <span class="kw">DESC</span>;</code></pre>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-sq3">
+    <div class="callout c-info"><div class="callout-icon">💡</div>
+      <div>Member risk stratification — identify high-cost members with chronic conditions for care management outreach. This is the most important query in healthcare analytics: finding the 5% of members who drive 50% of costs.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">SQL — Member Risk Stratification (80/20 Rule)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="kw">WITH</span> member_utilization <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        f.member_key,
+        m.plan_type,
+        m.state,
+        <span class="fn">COUNT</span>(DISTINCT f.claim_key)          <span class="kw">AS</span> total_claims,
+        <span class="fn">COUNT</span>(DISTINCT f.date_key)            <span class="kw">AS</span> service_days,
+        <span class="fn">SUM</span>(f.paid_amount)                    <span class="kw">AS</span> total_paid,
+        <span class="fn">SUM</span>(f.member_cost_share)              <span class="kw">AS</span> total_member_cost,
+        <span class="fn">COUNT</span>(DISTINCT f.diagnosis_key)       <span class="kw">AS</span> unique_diagnoses,
+        <span class="fn">COUNT</span>(<span class="kw">CASE WHEN</span> f.place_of_service <span class="op">=</span> <span class="st">'ER'</span> <span class="kw">THEN</span> <span class="nm">1</span> <span class="kw">END</span>) <span class="kw">AS</span> er_visits,
+        <span class="fn">COUNT</span>(<span class="kw">CASE WHEN</span> f.place_of_service <span class="op">=</span> <span class="st">'Inpatient'</span> <span class="kw">THEN</span> <span class="nm">1</span> <span class="kw">END</span>) <span class="kw">AS</span> inpatient_admits
+    <span class="kw">FROM</span> fact_claims f
+    <span class="kw">JOIN</span> dim_member m <span class="kw">ON</span> f.member_key <span class="op">=</span> m.member_key
+        <span class="kw">AND</span> m.is_current <span class="op">=</span> <span class="kw">TRUE</span>    <span class="cm">-- Join only to current member record</span>
+    <span class="kw">WHERE</span> f.year <span class="op">=</span> <span class="nm">2024</span>
+      <span class="kw">AND</span> f.claim_status <span class="op">=</span> <span class="st">'PAID'</span>
+    <span class="kw">GROUP BY</span> f.member_key, m.plan_type, m.state
+),
+population_stats <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">SUM</span>(total_paid) <span class="kw">AS</span> pop_total_paid,
+        <span class="fn">COUNT</span>(*)        <span class="kw">AS</span> total_members
+    <span class="kw">FROM</span> member_utilization
+)
+<span class="kw">SELECT</span>
+    mu.member_key, mu.plan_type, mu.state,
+    mu.total_claims, mu.er_visits, mu.inpatient_admits,
+    mu.unique_diagnoses,
+    <span class="fn">ROUND</span>(mu.total_paid, <span class="nm">2</span>) <span class="kw">AS</span> total_paid,
+    <span class="cm">-- What % of total population spend does this member represent?</span>
+    <span class="fn">ROUND</span>(mu.total_paid / ps.pop_total_paid * <span class="nm">100</span>, <span class="nm">3</span>) <span class="kw">AS</span> pct_of_total_spend,
+    <span class="cm">-- Cumulative % to find top 20% who drive 80% of cost</span>
+    <span class="fn">ROUND</span>(<span class="fn">SUM</span>(mu.total_paid) <span class="kw">OVER</span> (
+        <span class="kw">ORDER BY</span> mu.total_paid <span class="kw">DESC</span>
+        <span class="kw">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</span>
+    ) / ps.pop_total_paid * <span class="nm">100</span>, <span class="nm">2</span>) <span class="kw">AS</span> cumulative_spend_pct,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> mu.er_visits <span class="op">>=</span> <span class="nm">3</span> <span class="kw">OR</span> mu.inpatient_admits <span class="op">>=</span> <span class="nm">2</span>  <span class="kw">THEN</span> <span class="st">'Tier 1 - Complex'</span>
+        <span class="kw">WHEN</span> mu.total_paid <span class="op">></span> <span class="nm">10000</span> <span class="kw">OR</span> mu.unique_diagnoses <span class="op">>=</span> <span class="nm">5</span> <span class="kw">THEN</span> <span class="st">'Tier 2 - High Risk'</span>
+        <span class="kw">WHEN</span> mu.total_paid <span class="op">></span> <span class="nm">3000</span>                              <span class="kw">THEN</span> <span class="st">'Tier 3 - Moderate'</span>
+        <span class="kw">ELSE</span>                                                          <span class="st">'Tier 4 - Low Risk'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> risk_tier
+<span class="kw">FROM</span> member_utilization mu, population_stats ps
+<span class="kw">ORDER BY</span> mu.total_paid <span class="kw">DESC</span>;</code></pre>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-sq4">
+    <div class="callout c-info"><div class="callout-icon">💡</div>
+      <div>Plan-level cost comparison — actuaries use this to set premiums and evaluate plan performance. If an HMO plan has 40% higher ER utilization than a PPO, that's a pricing signal.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">SQL — Plan Type Cost and Utilization Comparison</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="kw">WITH</span> plan_monthly <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        m.plan_type,
+        d.year, d.month, d.quarter,
+        <span class="fn">COUNT</span>(DISTINCT f.member_key)        <span class="kw">AS</span> unique_members,
+        <span class="fn">COUNT</span>(f.claim_key)                  <span class="kw">AS</span> total_claims,
+        <span class="fn">SUM</span>(f.paid_amount)                  <span class="kw">AS</span> total_paid,
+        <span class="fn">SUM</span>(f.paid_amount)
+            / <span class="fn">NULLIF</span>(<span class="fn">COUNT</span>(DISTINCT f.member_key),<span class="nm">0</span>)
+                                            <span class="kw">AS</span> pmpm,  <span class="cm">-- Per Member Per Month (key actuarial metric)</span>
+        <span class="fn">AVG</span>(f.paid_amount)                  <span class="kw">AS</span> avg_claim_cost,
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> f.place_of_service <span class="op">=</span> <span class="st">'ER'</span> <span class="kw">THEN</span> <span class="nm">1</span> <span class="kw">ELSE</span> <span class="nm">0</span> <span class="kw">END</span>)
+            * <span class="nm">1000.0</span> / <span class="fn">NULLIF</span>(<span class="fn">COUNT</span>(DISTINCT f.member_key),<span class="nm">0</span>)
+                                            <span class="kw">AS</span> er_visits_per_1000  <span class="cm">-- Standard utilization metric</span>
+    <span class="kw">FROM</span> fact_claims f
+    <span class="kw">JOIN</span> dim_member m <span class="kw">ON</span> f.member_key <span class="op">=</span> m.member_key <span class="kw">AND</span> m.is_current <span class="op">=</span> <span class="kw">TRUE</span>
+    <span class="kw">JOIN</span> dim_date d   <span class="kw">ON</span> f.date_key <span class="op">=</span> d.date_key
+    <span class="kw">WHERE</span> f.claim_status <span class="op">=</span> <span class="st">'PAID'</span> <span class="kw">AND</span> f.year <span class="op">=</span> <span class="nm">2024</span>
+    <span class="kw">GROUP BY</span> m.plan_type, d.year, d.month, d.quarter
+)
+<span class="kw">SELECT</span>
+    plan_type, year, month,
+    unique_members, total_claims,
+    <span class="fn">ROUND</span>(pmpm, <span class="nm">2</span>)              <span class="kw">AS</span> pmpm,
+    <span class="fn">ROUND</span>(avg_claim_cost, <span class="nm">2</span>)   <span class="kw">AS</span> avg_claim_cost,
+    <span class="fn">ROUND</span>(er_visits_per_1000,<span class="nm">1</span>) <span class="kw">AS</span> er_per_1000,
+    <span class="cm">-- Month over month PMPM change per plan</span>
+    <span class="fn">ROUND</span>(pmpm - <span class="fn">LAG</span>(pmpm) <span class="kw">OVER</span> (
+        <span class="kw">PARTITION BY</span> plan_type <span class="kw">ORDER BY</span> year, month
+    ), <span class="nm">2</span>) <span class="kw">AS</span> pmpm_mom_change
+<span class="kw">FROM</span> plan_monthly
+<span class="kw">ORDER BY</span> plan_type, year, month;</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STEP 8 ══ -->
+<div class="section" id="section-step8">
+  <div class="hero">
+    <div class="hero-tag">Step 8 · Redshift</div>
+    <h1>AWS Redshift Setup</h1>
+    <p>Load processed Parquet data into Redshift for fast analytical queries. Redshift free tier: dc2.large single-node, 2-month trial.</p>
+  </div>
+
+  <div class="callout c-warn">
+    <div class="callout-icon">⚠️</div>
+    <div><strong>Free tier note:</strong> Redshift free tier is only available for 2 months on new accounts. After that it charges ~$0.25/hr. For practice, you can skip creating the actual Redshift cluster and just know the commands — interviewers care that you understand the pattern, not that you ran it.</div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num active-s">8a</div>
+      <div><div class="step-title">Create Redshift Cluster (Console)</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body open">
+      <ol style="color:var(--text2);font-size:14px;padding-left:20px;line-height:2.2">
+        <li>AWS Console → Redshift → Create cluster</li>
+        <li>Cluster identifier: <code>healthcare-dw</code></li>
+        <li>Node type: <code>dc2.large</code> (free tier)</li>
+        <li>Number of nodes: <code>1</code></li>
+        <li>Database name: <code>healthcare</code></li>
+        <li>Admin username: <code>admin</code>, set a strong password</li>
+        <li>VPC: default VPC, make publicly accessible for dev</li>
+        <li>Click Create → takes ~5 minutes</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">8b</div>
+      <div><div class="step-title">Create Schema + Tables</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">SQL — Redshift DDL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="kw">CREATE SCHEMA IF NOT EXISTS</span> healthcare;
+
+<span class="cm">-- Fact table with distribution key on member_key</span>
+<span class="cm">-- DISTKEY = how rows are distributed across nodes</span>
+<span class="cm">-- SORTKEY = how rows are sorted on disk for fast range scans</span>
+<span class="kw">CREATE TABLE</span> healthcare.fact_claims (
+    claim_key          VARCHAR(64)   NOT NULL,
+    claim_id           VARCHAR(50),
+    member_key         VARCHAR(64),
+    provider_key       VARCHAR(64),
+    date_key           INTEGER,
+    claim_type         VARCHAR(20),
+    service_date       DATE,
+    billed_amount      DECIMAL(12,2),
+    allowed_amount     DECIMAL(12,2),
+    paid_amount        DECIMAL(12,2),
+    member_cost_share  DECIMAL(12,2),
+    claim_status       VARCHAR(20),
+    denial_reason_code VARCHAR(10),
+    place_of_service   VARCHAR(30),
+    year               INTEGER,
+    month              INTEGER,
+    etl_inserted_at    TIMESTAMP
+)
+DISTKEY(member_key)    <span class="cm">-- Distribute by member for member-centric queries</span>
+SORTKEY(service_date, claim_type);  <span class="cm">-- Sort for date range queries</span>
+
+<span class="kw">CREATE TABLE</span> healthcare.dim_member (
+    member_key           VARCHAR(64) NOT NULL,
+    member_id_hash       VARCHAR(64),
+    member_name_masked   VARCHAR(10),
+    birth_year           INTEGER,
+    gender               CHAR(1),
+    state                CHAR(2),
+    plan_id              VARCHAR(20),
+    plan_type            VARCHAR(10),
+    group_id             VARCHAR(20),
+    effective_start_date DATE,
+    effective_end_date   DATE,
+    is_current           BOOLEAN,
+    version              INTEGER
+)
+DISTKEY(member_key)
+SORTKEY(effective_start_date);</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">8c</div>
+      <div><div class="step-title">Load from S3 with COPY</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">scripts/redshift_loader.py</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="cm">"""Load processed Parquet from S3 into Redshift using COPY command."""</span>
+<span class="kw">import</span> psycopg2
+<span class="kw">import</span> os
+
+<span class="cm"># Store credentials in environment variables — never hardcode</span>
+REDSHIFT_CONFIG <span class="op">=</span> {
+    <span class="st">"host"</span>:     os.environ.get(<span class="st">"REDSHIFT_HOST"</span>),
+    <span class="st">"port"</span>:     <span class="nm">5439</span>,
+    <span class="st">"database"</span>: <span class="st">"healthcare"</span>,
+    <span class="st">"user"</span>:     os.environ.get(<span class="st">"REDSHIFT_USER"</span>),
+    <span class="st">"password"</span>: os.environ.get(<span class="st">"REDSHIFT_PASSWORD"</span>),
+}
+
+IAM_ROLE       <span class="op">=</span> <span class="st">"arn:aws:iam::YOUR_ACCOUNT:role/RedshiftS3ReadRole"</span>
+PROC_BUCKET    <span class="op">=</span> <span class="st">"healthcare-processed-yourname"</span>
+
+<span class="kw">def</span> <span class="fn">load_table</span>(cursor, table_name, s3_prefix):
+    <span class="st">"""Truncate and reload a table from S3 Parquet files."""</span>
+    print(<span class="st">f"Loading {table_name}..."</span>)
+    cursor.execute(<span class="st">f"TRUNCATE healthcare.{table_name};"</span>)
+    cursor.execute(<span class="st">f"""
+        COPY healthcare.{table_name}
+        FROM 's3://{PROC_BUCKET}/{s3_prefix}/'
+        IAM_ROLE '{IAM_ROLE}'
+        FORMAT AS PARQUET;
+    """</span>)
+    print(<span class="st">f"  ✓ {table_name} loaded"</span>)
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    conn <span class="op">=</span> psycopg2.connect(<span class="op">**</span>REDSHIFT_CONFIG)
+    conn.autocommit <span class="op">=</span> <span class="kw">False</span>
+    cursor <span class="op">=</span> conn.cursor()
+    <span class="kw">try</span>:
+        load_table(cursor, <span class="st">"dim_member"</span>,   <span class="st">"dim_member"</span>)
+        load_table(cursor, <span class="st">"dim_provider"</span>, <span class="st">"dim_provider"</span>)
+        load_table(cursor, <span class="st">"dim_date"</span>,     <span class="st">"dim_date"</span>)
+        load_table(cursor, <span class="st">"fact_claims"</span>,  <span class="st">"fact_claims"</span>)
+        conn.commit()
+        print(<span class="st">"✅ All tables loaded successfully"</span>)
+    <span class="kw">except Exception as</span> e:
+        conn.rollback()
+        print(<span class="st">f"❌ Load failed: {e}"</span>)
+        <span class="kw">raise</span>
+    <span class="kw">finally</span>:
+        cursor.close(); conn.close()
+
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    main()</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STEP 9 ══ -->
+<div class="section" id="section-step9">
+  <div class="hero">
+    <div class="hero-tag">Step 9 · GitHub</div>
+    <h1>Push to GitHub</h1>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">README.md</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code># Healthcare Claims Processing Pipeline
+
+**Industry:** Health Insurance / Payer | **Level:** Intermediate → Advanced
+**Stack:** Python 3.11 · PySpark 3.5 · AWS S3 · Glue · Redshift · Parquet · HIPAA
+
+## Business Problem
+A regional health insurance payer processes 50,000+ claims/day across medical,
+pharmacy, and dental. Nightly batch jobs took 8+ hours. Actuaries had no real-time
+claim denial visibility. Compliance had no automated PHI audit trail.
+
+This pipeline reduces processing time to under 2 hours, implements HIPAA-compliant
+PHI masking, and delivers a snowflake schema data warehouse for actuarial analysis.
+
+## Architecture
+```
+[5 Source Files (CSV/JSON with PHI)]
+        ↓
+S3 Zone 1 (Raw PHI — KMS encrypted, restricted IAM)
+        ↓
+AWS Glue PySpark ETL:
+  - PHI masking (SHA-256 salted hash + field dropping)
+  - SCD Type 2 for member plan changes
+  - Incremental load with watermark pattern
+  - Audit logging (HIPAA requirement)
+        ↓
+S3 Zone 2 (Processed — de-identified Parquet)
+        ↓
+Redshift (DISTKEY + SORTKEY optimized tables)
+        ↓
+Actuaries / BI Tools
+```
+
+## Key Design Decisions
+- **Snowflake schema** for ICD-10/CPT code hierarchies (70K+ codes)
+- **SCD Type 2** on dim_member — tracks plan changes for accurate historical claims
+- **Incremental loads** with watermark — 87% faster than full reload
+- **HIPAA PHI masking** — SHA-256 salted hash for member IDs, initials for names, year-only for DOB
+- **Redshift DISTKEY** on member_key — co-locates member and claim data on same node
+- **Three-zone S3** — PHI raw / de-identified processed / audit logs (separate buckets)
+
+## Running Locally
+```bash
+pip install pyspark faker boto3 psycopg2-binary
+python3 scripts/generate_data.py
+python3 scripts/etl_claims.py --env local
+python3 scripts/data_quality.py
+python3 scripts/incremental_load.py
+```
+
+## Business Impact
+- Processing time: 8+ hours → under 2 hours (75% reduction)
+- Full HIPAA audit trail for every ETL run
+- Actuaries can now run denial rate queries in seconds vs. days
+- SCD Type 2 enables 100% accurate historical plan attribution</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — commit and push</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code>cd ~/de-portfolio/project-02-healthcare
+
+git init
+git add .gitignore README.md scripts/ config/ docs/
+git commit -m "feat: healthcare claims pipeline with HIPAA compliance
+
+- HIPAA-aware 3-zone S3 architecture (PHI / processed / audit)
+- SCD Type 2 dim_member for insurance plan change tracking
+- Incremental load with watermark for 75% faster processing
+- PHI masking: SHA-256 salted hash, initials, birth year only
+- Complex SQL: PMPM, denial rate analysis, risk stratification"
+
+git branch -M main
+git remote add origin https://github.com/YOURUSERNAME/de-project-02-healthcare.git
+git push -u origin main</code></pre>
+  </div>
+
+  <h3>✅ Project 2 Final Checklist</h3>
+  <ul class="checklist">
+    <li><input type="checkbox" id="h1" onchange="updateProgress()"><label for="h1">All 5 data files generated (members, providers, medical, pharmacy, dental)</label></li>
+    <li><input type="checkbox" id="h2" onchange="updateProgress()"><label for="h2">Two S3 buckets created (PHI raw + processed)</label></li>
+    <li><input type="checkbox" id="h3" onchange="updateProgress()"><label for="h3">ETL runs successfully — PHI masked in output</label></li>
+    <li><input type="checkbox" id="h4" onchange="updateProgress()"><label for="h4">Audit log files written to data/audit_logs/</label></li>
+    <li><input type="checkbox" id="h5" onchange="updateProgress()"><label for="h5">Incremental load watermark saves and loads correctly</label></li>
+    <li><input type="checkbox" id="h6" onchange="updateProgress()"><label for="h6">Data quality checks pass with healthcare-specific rules</label></li>
+    <li><input type="checkbox" id="h7" onchange="updateProgress()"><label for="h7">Can explain SCD Type 2 with the member plan change example</label></li>
+    <li><input type="checkbox" id="h8" onchange="updateProgress()"><label for="h8">Can explain what PHI is and how you masked it</label></li>
+    <li><input type="checkbox" id="h9" onchange="updateProgress()"><label for="h9">Can explain why snowflake (not star) schema here</label></li>
+    <li><input type="checkbox" id="h10" onchange="updateProgress()"><label for="h10">GitHub repo pushed with professional README</label></li>
+    <li><input type="checkbox" id="h11" onchange="updateProgress()"><label for="h11">All 15 interview questions answered out loud</label></li>
+    <li><input type="checkbox" id="h12" onchange="updateProgress()"><label for="h12">Can explain PMPM metric to a non-technical person</label></li>
+  </ul>
+</div>
+
+<!-- ══ INTERVIEW ══ -->
+<div class="section" id="section-interview">
+  <div class="hero">
+    <div class="hero-tag">Interview Prep · 15 Questions</div>
+    <h1>Healthcare Pipeline Interview Questions</h1>
+    <p>Heavier focus on HIPAA, SCD Type 2, incremental loading, and Redshift. Click to reveal answers.</p>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q1</span><span class="q-cat cat-hipaa">HIPAA</span>
+      <span class="q-text">What is PHI and how did you handle it in your pipeline?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>PHI — Protected Health Information — is any data that can identify a patient and relates to their health condition, treatment, or payment. The 18 HIPAA identifiers include names, dates, SSNs, and member IDs. In my pipeline I applied a three-layer strategy: First, the raw bucket is KMS-encrypted and access-restricted — only the ETL role can read it. Second, during transformation I apply SHA-256 salted hashing to member IDs so analysts can join data without seeing the raw ID, replace names with initials, convert full DOBs to birth year only, and drop SSNs entirely. Third, I write an audit log for every ETL run recording which tables were accessed, how many rows, and when — which is a HIPAA audit trail requirement. The processed bucket contains zero raw PHI — it's safe for analysts to query.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q2</span><span class="q-cat cat-arch">Architecture</span>
+      <span class="q-text">Why did you use snowflake schema instead of star schema for this project?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Healthcare has deep, standardized code hierarchies that make star schema impractical. ICD-10 diagnosis codes have 70,000+ individual codes organized into chapters, blocks, and categories. If I stored all hierarchy attributes in one dim_diagnosis table, I'd repeat the chapter name and category description 70,000 times. Snowflake schema normalizes these into a dim_diagnosis_category sub-dimension, which is more storage-efficient and makes hierarchy-level queries cleaner. The tradeoff is more JOINs in queries — but healthcare analysts are used to this, and the schema matches how the medical coding systems are actually structured. I'd use star schema if the dimensions were flat, like in the e-commerce project where product attributes don't have meaningful hierarchies.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q3</span><span class="q-cat cat-arch">Architecture</span>
+      <span class="q-text">Explain SCD Type 1 vs Type 2. Why did you choose Type 2 for dim_member?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>SCD stands for Slowly Changing Dimension — a dimension whose attributes change over time. Type 1 overwrites the old value — no history is kept. If a member switches from PPO to HMO, the record just shows HMO. The problem: historical claims that were filed under the PPO plan now incorrectly appear as HMO claims. Type 2 inserts a new row and closes the old one using effective_start_date, effective_end_date, and an is_current flag. The PPO row gets effective_end_date = day before the change. The new HMO row gets effective_start_date = change date and effective_end_date = 9999-12-31. This means a March 2024 claim — filed under PPO — still correctly joins to the PPO member record. I chose Type 2 because insurance plan attribution is critical for actuarial analysis — the plan type directly affects payment rates, deductibles, and network restrictions. Getting historical plan wrong corrupts every financial calculation.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q4</span><span class="q-cat cat-incr">Incremental</span>
+      <span class="q-text">Walk me through your incremental load design. What happens if the pipeline fails?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>My incremental load uses a watermark pattern. After each successful run, I save the maximum service_date (or claim_received_date) of the processed batch to a watermark file. The next run reads that watermark and only processes records newer than that timestamp. If the pipeline fails mid-run, I don't update the watermark — the failure short-circuits before the save step. So the next run reprocesses the same window from the same watermark. This makes it safe to re-run without creating duplicates, as long as the write uses partition overwrite or a MERGE/upsert pattern — which mine does. The key insight is that watermark advancement is the very last step, after all processing and writing succeeds. This is the same principle as a two-phase commit in distributed systems — don't mark something as done until it's actually done.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q5</span><span class="q-cat cat-incr">Incremental</span>
+      <span class="q-text">What is idempotency and why does it matter for data pipelines?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>An idempotent operation produces the same result no matter how many times you run it. For data pipelines this means: running the pipeline twice for the same input data produces the same output — no duplicates, no data corruption. It matters because pipelines fail and need to be retried. If re-running creates duplicate records, you've corrupted your data warehouse. I achieve idempotency in three ways: First, watermark-based incremental loads with partition overwrite — re-processing the same date partition writes the same data over itself. Second, using SHA-256 hashes as surrogate keys — the same source record always generates the same key, so you can safely upsert. Third, the audit log allows detecting and skipping already-processed files. Without idempotency, every failure becomes a crisis because you have to manually figure out what got written and what didn't.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q6</span><span class="q-cat cat-spark">PySpark</span>
+      <span class="q-text">You joined three different claim types with different schemas. How did you handle that?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Each claim type has a slightly different schema — pharmacy claims have a fill_date instead of service_date, drug_cost instead of billed_amount, and no CPT code (they use NDC codes instead). I built a normalization function for each claim type that maps these source-specific columns to a common schema. For example, pharmacy's fill_date becomes service_date, drug_cost becomes billed_amount, and NDC code is stored in the CPT code column with a note that it's a different coding system. After normalization, all three claim types have identical schemas and can be safely unioned with Spark's unionByName. In production I'd document this mapping clearly and add a source_claim_type column so downstream users know that the cpt_code column has different semantics for pharmacy vs medical claims. This is a common data engineering challenge — harmonizing heterogeneous sources into a single analytical schema.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q7</span><span class="q-cat cat-spark">PySpark</span>
+      <span class="q-text">Explain your SCD Type 2 join in PySpark. Why is it different from a normal join?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>A normal dimension join matches on a single key: fact.member_key = dim_member.member_key. But SCD Type 2 has multiple rows per member — one for each plan version. If I joined just on member_key, a claim could match multiple member records. The SCD2 join adds a date range condition: claim's service_date must fall between the dim record's effective_start_date and effective_end_date. In PySpark, this means three join conditions: member_id_hash equality, service_date >= effective_start_date, and service_date <= effective_end_date. This is more expensive than a simple equi-join because it can't use hash join — Spark typically falls back to sort-merge join or a broadcast join if one side is small. I broadcast the dim_member table since it's much smaller than fact_claims, which avoids a full shuffle on the large claim table.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q8</span><span class="q-cat cat-arch">Architecture</span>
+      <span class="q-text">Why did you use Redshift instead of Athena for the serving layer?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Athena is serverless and great for ad-hoc queries, but it has limitations for a high-traffic healthcare analytics environment. Each Athena query scans S3 and incurs variable latency — sometimes 5 seconds, sometimes 30 depending on data volume. Redshift provides consistent, sub-second query performance because data is stored locally in columnar format on the cluster's SSDs, not read from S3 each time. For actuaries running the same PMPM and denial rate queries daily with slight filter variations, the predictable performance matters. Redshift also supports DISTKEY and SORTKEY — I distributed fact_claims on member_key so member-centric queries can be processed node-locally without network shuffles, and sorted on service_date for fast range scans. The tradeoff is cost — Redshift charges for the cluster even when idle — while Athena charges only for data scanned. For workloads with predictable, frequent queries, Redshift wins on total cost. For truly ad-hoc one-off analysis, Athena wins.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q9</span><span class="q-cat cat-sql">SQL</span>
+      <span class="q-text">What is PMPM and how did you calculate it?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>PMPM stands for Per Member Per Month — the standard unit of cost measurement in health insurance actuarial work. It answers: "How much does the payer spend per enrolled member per month?" It's calculated as total paid claims divided by the number of unique enrolled members for that month. It normalizes for membership size changes — a plan with 10,000 members spending $2M and one with 5,000 members spending $1M both have the same $200 PMPM. In my query I calculated it as SUM(paid_amount) / COUNT(DISTINCT member_key) grouped by plan_type, year, and month. I also added month-over-month PMPM change using the LAG window function, which lets actuaries quickly see cost trends. PMPM is the single most important metric for setting insurance premiums and evaluating plan performance — if your PMPM is rising faster than you built into your premium rates, the plan loses money.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q10</span><span class="q-cat cat-hipaa">HIPAA</span>
+      <span class="q-text">Why did you use SHA-256 salted hashing for member IDs instead of just MD5?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Two reasons. First, SHA-256 is more collision-resistant than MD5 — MD5 has known collision vulnerabilities that make it unsuitable for security-sensitive applications. For PHI, you need a cryptographically secure hash. Second, the salt — a secret string appended before hashing — prevents rainbow table attacks. A rainbow table is a pre-computed lookup of common values and their hashes. Without a salt, someone with access to your hashed member IDs could compare them against a rainbow table and reverse-engineer the original IDs. The salt makes every hash in your dataset unique to your pipeline, so even if someone has common member IDs to try, they'd need your specific salt to match them. The salt is stored in AWS Secrets Manager, not in code. The benefit is that analysts can still JOIN across tables using the hashed ID — the hash is deterministic, so the same member_id always generates the same hash — but they can't see or reverse the original PHI.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q11</span><span class="q-cat cat-arch">Architecture</span>
+      <span class="q-text">How does your Redshift DISTKEY improve query performance?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Redshift distributes data across nodes. Without a DISTKEY, Redshift uses round-robin distribution — rows go to nodes randomly. When a query joins fact_claims to dim_member on member_key, Redshift has to redistribute data across the network to bring matching rows together — this is expensive. With DISTKEY(member_key) on both fact_claims and dim_member, Redshift ensures rows with the same member_key always land on the same node. The join can now happen locally on each node with no network I/O. This is called a co-located join. For healthcare analytics where almost every query joins claims to member demographics, this DISTKEY choice can reduce join time by 5-10x on large datasets. The SORTKEY(service_date) means rows are physically sorted by date on each node's storage blocks — when you filter WHERE service_date BETWEEN X AND Y, Redshift can skip entire blocks that fall outside the range, using zone maps.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q12</span><span class="q-cat cat-incr">Incremental</span>
+      <span class="q-text">How would you handle late-arriving claims? (Claims filed 60 days after service date)</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Late-arriving data is a critical problem in healthcare — claims can be filed 60-90+ days after the service date. If my watermark is based on service_date, I might miss claims that arrive today for services from 90 days ago. I'd handle this with a two-date strategy: filter on claim_received_date for the watermark (what's new in the system today), but partition on service_date (when the service happened). This means late-arriving claims for old service dates would re-trigger a re-load of those older service_date partitions. To make this idempotent, I'd use partition overwrite — not append — so re-running a service_date partition replaces the data rather than duplicating it. I'd also add a reconciliation job that runs monthly to catch any claims that slipped through by comparing claim totals in the source system against the warehouse. In production, I'd also use an event-driven trigger via S3 notifications + Lambda rather than polling, so I process new files as soon as they land.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q13</span><span class="q-cat cat-sql">SQL</span>
+      <span class="q-text">Explain PERCENTILE_CONT in your provider performance query.</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>PERCENTILE_CONT is an ordered-set aggregate function that calculates the value at a specific percentile of a distribution, interpolating if needed. PERCENTILE_CONT(0.50) gives the median — the midpoint value. PERCENTILE_CONT(0.75) gives the 75th percentile — 75% of values are below this. I used it to benchmark each provider's average claim cost against their specialty's distribution. A provider at the 90th percentile is a high-cost outlier — they're more expensive than 90% of similar providers. This is more meaningful than comparing to the mean, which gets distorted by extreme outliers. For example, if one hospital does $500K surgeries, it pulls the mean up and makes all other providers look cheap. Median is robust to these outliers. PERCENTILE_DISC is the discrete version — it returns an actual value from the dataset. PERCENTILE_CONT interpolates, which gives a smoother curve. For cost analysis, PERCENTILE_CONT is typically preferred.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q14</span><span class="q-cat cat-prod">Production</span>
+      <span class="q-text">How would you set up monitoring and alerting for this pipeline?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Four layers of monitoring. First, pipeline health metrics in CloudWatch: job run duration, row counts per table, quarantine rate percentage. I'd alert if the quarantine rate exceeds 2% — that signals an upstream data quality problem. Second, data freshness checks — an Athena or Redshift query that checks MAX(etl_inserted_at) and alerts if data is more than 2 hours old. Third, business metric anomaly detection — if total daily claims drops by more than 30% compared to the 7-day average, something's wrong with the source system. Fourth, HIPAA-specific monitoring: CloudTrail alerts for any access to the PHI raw bucket from non-authorized roles, and daily audit log completeness checks to verify every ETL run has a corresponding audit entry. I'd implement these as CloudWatch alarms → SNS topics → email/Slack notifications. In production I'd also use AWS Glue's built-in job metrics, which track data movement and DPU consumption automatically.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q15</span><span class="q-card cat-prod">Production</span>
+      <span class="q-text">How does your background in customer support help you as a healthcare data engineer?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Healthcare data ultimately exists to serve patients and the people who care for them. In customer support, I learned that data failures have human consequences — a wrong answer to a customer, a missed SLA, a billing error that takes 20 minutes to resolve. In healthcare, those stakes are higher. A claim denial analysis that's wrong by 10% could mean patients being incorrectly flagged, or a provider getting unfairly targeted. That context makes me design pipelines with more care around data quality and auditability than an engineer who's never been on the receiving end of bad data. I also understand why the PMPM metric matters — I've seen operations teams making decisions based on summary metrics, so I know what it means when a metric is trustworthy vs. when it's not. And my experience in cross-functional communication means I can explain what the ETL does to both a compliance officer asking about PHI controls and an actuary asking about the PMPM calculation — without oversimplifying for either audience.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RESUME ══ -->
+<div class="section" id="section-resume">
+  <div class="hero">
+    <div class="hero-tag">Resume + Interview Story</div>
+    <h1>How to Present Project 2</h1>
+  </div>
+
+  <h3>Resume Bullet Points</h3>
+  <div class="resume-box">
+    <h4>Add these under Projects</h4>
+    <p>• Architected HIPAA-compliant healthcare claims ETL pipeline processing 50,000+ daily claims across medical, pharmacy, and dental sources using PySpark and AWS Glue, reducing nightly batch runtime from 8+ hours to under 2 hours<br><br>
+    • Implemented SCD Type 2 dimension management for member insurance plan changes, enabling accurate historical claim-to-plan attribution for actuarial analysis across 50,000+ member records<br><br>
+    • Designed three-zone S3 architecture (PHI raw / de-identified processed / audit logs) with KMS encryption, IAM least-privilege access, and automated audit logging meeting HIPAA data security requirements<br><br>
+    • Built incremental load framework with watermark pattern, processing only new/changed records and achieving 87% reduction in daily processing volume vs. full reload strategy<br><br>
+    • Wrote complex analytical SQL in AWS Redshift including PMPM (Per Member Per Month) actuarial metrics, provider cost percentile benchmarking, and member risk stratification using window functions and CTEs</p>
+  </div>
+
+  <h3>Verbal Story (60–75 seconds)</h3>
+  <div class="resume-box">
+    <h4>For healthcare company interviews</h4>
+    <p>"I built a HIPAA-aware claims processing pipeline for a health insurance payer use case. The business problems were: nightly batch jobs taking 8+ hours, no real-time claim denial visibility, and no automated PHI audit trail for compliance.<br><br>
+    The architecture uses a three-zone S3 design — PHI raw zone with KMS encryption and restricted IAM, a de-identified processed zone where analysts work, and a separate audit bucket. During transformation I apply PHI masking using SHA-256 salted hashing for member IDs, replace names with initials, and convert dates of birth to birth year only — so zero raw PHI ever reaches the analytics layer.<br><br>
+    I used snowflake schema because ICD-10 and CPT codes have deep hierarchies with 70,000+ codes — normalizing the hierarchy into sub-dimensions saves significant storage and makes hierarchy queries cleaner. I implemented SCD Type 2 for the member dimension, because members change insurance plans and we need historical claims to accurately reflect the plan that was active when the claim was filed.<br><br>
+    The incremental load cut daily processing from 8 hours to under 2 by using a watermark to process only new claims. The pipeline serves Redshift with DISTKEY on member_key for co-located joins and actuaries can now run PMPM and denial rate queries in seconds."</p>
+  </div>
+</div>
+
+<!-- ══ CONCEPTS ══ -->
+<div class="section" id="section-concepts">
+  <div class="hero">
+    <div class="hero-tag">Key Concepts</div>
+    <h1>Deep Dive Concepts</h1>
+    <p>Master these before your next interview. One concept per day in Week 4.</p>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">❄️</div>
+      <div><div class="step-title">Star vs Snowflake Schema — Full Comparison</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>Star:</strong> Fact table + denormalized dimensions. 1 JOIN per dimension. Faster queries, simpler SQL, uses more storage. Use when: dimensions are relatively flat, BI tool performance matters, analyst ease of use is priority.</p>
+      <p><strong>Snowflake:</strong> Fact table + normalized dimensions + sub-dimensions. Multiple JOINs. Slower queries, more complex SQL, less storage. Use when: dimensions have deep hierarchies (ICD codes, org charts), dimension tables are very large, storage cost matters more than query speed.</p>
+      <p><strong>Real world:</strong> Most production warehouses are a hybrid — some dimensions are star-like, others snowflake-like. The key is to make the decision consciously based on query patterns and dimension structure, not default to one approach.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">🔄</div>
+      <div><div class="step-title">SCD Types 1, 2, and 3</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>Type 1 — Overwrite:</strong> Simple, no history. Use when: the old value was wrong (data correction), history doesn't matter for analysis, dimension table is huge and history would multiply storage.</p>
+      <p><strong>Type 2 — New row:</strong> Full history with effective dates. Use when: the change itself is analytically important (member plan change, customer address change), you need point-in-time reporting, regulatory requirements need full history.</p>
+      <p><strong>Type 3 — Add column:</strong> Add a "previous_value" column. e.g., plan_type + previous_plan_type. Limited history (only 1 change back). Use when: you only need to compare current vs previous, not full history. Rare in practice.</p>
+      <p><strong>Type 4 — History table:</strong> Main dim has current values. Separate history table has all changes. A variant of Type 2, used when the main dim needs to stay clean for operational queries.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">📈</div>
+      <div><div class="step-title">Incremental vs Full Load Patterns</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>Full load:</strong> Read everything, write everything. Simple. Slow. Use for: small dimensions, initial loads, when you can't trust the source to properly mark new records.</p>
+      <p><strong>Incremental — Timestamp watermark:</strong> Track last processed timestamp, filter on it. Works when source has a reliable updated_at column. Most common pattern.</p>
+      <p><strong>Incremental — CDC (Change Data Capture):</strong> Capture every INSERT/UPDATE/DELETE from the source database's transaction log (MySQL binlog, Postgres WAL). Most reliable, requires DB access. Tools: Debezium, AWS DMS.</p>
+      <p><strong>Incremental — File-based:</strong> Track which files have been processed. Works for file-based sources like our healthcare CSV drops. Store processed filenames in a manifest file.</p>
+      <p><strong>Critical rule:</strong> Whatever pattern you use, always have a backfill mechanism for when you need to reprocess historical data.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">🏗</div>
+      <div><div class="step-title">Redshift Architecture Essentials</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>Columnar storage:</strong> Like Parquet — stores data by column, not row. Dramatically reduces I/O for analytical queries that only need a few columns from wide tables.</p>
+      <p><strong>DISTKEY:</strong> How rows are distributed across compute nodes. Rule: set DISTKEY to the column most commonly used in JOINs. Tables joined on the same DISTKEY will have matching rows on the same node (co-located join) — no network shuffle needed.</p>
+      <p><strong>SORTKEY:</strong> How rows are physically sorted on each node's storage. Rule: set SORTKEY to columns used in WHERE clauses (especially date ranges). Redshift uses zone maps to skip entire 1MB blocks that don't match the filter.</p>
+      <p><strong>COPY command:</strong> The only efficient way to bulk-load data into Redshift. Never INSERT row-by-row. COPY reads from S3 in parallel across all compute nodes simultaneously.</p>
+      <p><strong>VACUUM + ANALYZE:</strong> After large loads, run VACUUM to reclaim space from deleted rows and re-sort data, then ANALYZE to update table statistics for the query planner.</p>
+    </div>
+  </div>
+</div>
+
+  </div><!-- content -->
+</div><!-- main -->
+
+<script>
+const secs=['overview','vs-proj1','hipaa','arch','schema',
+  'step1','step2','step3','step4','step5','step6','step7','step8','step9',
+  'interview','resume','concepts'];
+const bmap={
+  'overview':'Overview','vs-proj1':'Overview','hipaa':'HIPAA',
+  'arch':'Architecture','schema':'Data Model',
+  'step1':'Setup','step2':'Setup','step3':'Setup',
+  'step4':'Code','step5':'Code','step6':'Code','step7':'SQL',
+  'step8':'Setup','step9':'Setup',
+  'interview':'Interview','resume':'Resume','concepts':'Concepts'
+};
+const bcls={
+  Setup:'b-setup',Code:'b-code',SQL:'b-sql',
+  Interview:'b-interview',HIPAA:'b-hipaa',
+  Architecture:'b-setup',Overview:'b-setup',
+  'Data Model':'b-setup',Resume:'b-interview',Concepts:'b-sql'
+};
+function show(id){
+  secs.forEach(s=>{const e=document.getElementById('section-'+s);if(e)e.classList.remove('active')});
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const t=document.getElementById('section-'+id);if(t)t.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');
+  });
+  const b=bmap[id]||'Section';
+  document.getElementById('curr-badge').textContent=b;
+  document.getElementById('curr-badge').className='badge '+(bcls[b]||'b-setup');
+  closeSidebar();window.scrollTo(0,0);
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show')}
+function toggleStep(h){const b=h.nextElementSibling,c=h.querySelector('.step-chev'),o=b.classList.contains('open');b.classList.toggle('open',!o);if(c)c.style.transform=o?'':'rotate(180deg)'}
+function toggleQ(h){h.nextElementSibling.classList.toggle('open')}
+function switchTab(btn,pid){
+  btn.closest('.tabs').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  let el=btn.closest('.tabs').nextElementSibling;
+  while(el&&el.classList.contains('tab-panel')){el.classList.remove('active');el=el.nextElementSibling}
+  const t=document.getElementById('tab-'+pid);if(t)t.classList.add('active');
+}
+function copyCode(btn){
+  const text=btn.closest('.code-block').querySelector('pre').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied')},2000);
+  });
+}
+function updateProgress(){
+  const all=document.querySelectorAll('.checklist input[type=checkbox]');
+  const done=document.querySelectorAll('.checklist input[type=checkbox]:checked');
+  const pct=Math.round(done.length/all.length*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done.length+' of '+all.length+' tasks done';
+  try{const s={};all.forEach(c=>{s[c.id]=c.checked});localStorage.setItem('de-proj2',JSON.stringify(s))}catch(e){}
+}
+(function loadProgress(){
+  try{const s=JSON.parse(localStorage.getItem('de-proj2')||'{}');
+    Object.entries(s).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.checked=v});}catch(e){}
+  updateProgress();
+})();
+</script>
+</body>
+</html>

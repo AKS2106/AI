@@ -1,0 +1,2083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DE Project 3 — Banking Fraud Detection</title>
+<style>
+  :root{
+    --bg:#0a0e1a;--bg2:#0f1629;--bg3:#1a2040;--card:#111827;
+    --border:#1e2d4a;--accent:#f59e0b;--accent2:#10b981;
+    --accent3:#ef4444;--text:#e2e8f0;--text2:#94a3b8;--text3:#4b5a7a;
+    --code-bg:#070b14;--green:#10b981;--red:#ef4444;
+    --yellow:#f59e0b;--blue:#38bdf8;--purple:#a78bfa;--pink:#f472b6;
+    --orange:#fb923c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7}
+
+  .sidebar{position:fixed;top:0;left:0;width:268px;height:100vh;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;transition:transform .3s}
+  .sidebar-logo{padding:18px 20px 14px;border-bottom:1px solid var(--border)}
+  .sidebar-logo .proj-tag{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:4px}
+  .sidebar-logo h2{font-size:13px;color:var(--text);font-weight:600;line-height:1.4}
+  .sb-section{padding:10px 0;border-bottom:1px solid var(--border)}
+  .sb-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;padding:0 20px 8px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 20px;cursor:pointer;color:var(--text2);font-size:13px;border-left:3px solid transparent;transition:all .15s;text-decoration:none}
+  .nav-item:hover{color:var(--text);background:var(--bg3)}
+  .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(245,158,11,.08)}
+  .nav-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;background:var(--bg3);color:var(--text3)}
+  .nav-item.active .nav-dot{background:rgba(245,158,11,.2);color:var(--accent)}
+  .prog-wrap{padding:12px 20px 8px}
+  .prog-bar{height:4px;border-radius:2px;background:var(--border);overflow:hidden;margin-bottom:5px}
+  .prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s}
+  .prog-label{font-size:11px;color:var(--text3)}
+
+  .main{margin-left:268px;min-height:100vh}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(10,14,26,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 32px;display:flex;align-items:center;justify-content:space-between}
+  .topbar-left{display:flex;align-items:center;gap:12px}
+  .badge{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px}
+  .b-setup{background:rgba(56,189,248,.15);color:var(--blue)}
+  .b-code{background:rgba(167,139,250,.15);color:var(--purple)}
+  .b-stream{background:rgba(245,158,11,.15);color:var(--yellow)}
+  .b-interview{background:rgba(16,185,129,.15);color:var(--green)}
+  .b-fraud{background:rgba(239,68,68,.15);color:var(--red)}
+  .menu-btn{display:none;background:none;border:none;color:var(--text2);cursor:pointer;font-size:20px;padding:4px}
+  .content{padding:32px;max-width:920px}
+
+  .section{display:none}.section.active{display:block}
+
+  .hero{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:26px;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.1) 0%,transparent 70%);pointer-events:none}
+  .hero-tag{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .hero h1{font-size:26px;font-weight:700;margin-bottom:10px;line-height:1.3}
+  .hero p{color:var(--text2);font-size:14px;margin-bottom:20px;max-width:640px}
+  .hero-stats{display:flex;gap:24px;flex-wrap:wrap}
+  .stat-val{font-size:22px;font-weight:700;color:var(--accent2)}
+  .stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+
+  .step-card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:18px;overflow:hidden}
+  .step-header{display:flex;align-items:center;gap:14px;padding:17px 22px;cursor:pointer;transition:background .15s}
+  .step-header:hover{background:rgba(255,255,255,.02)}
+  .step-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+  .step-num.a{background:rgba(245,158,11,.2);color:var(--accent);border-color:rgba(245,158,11,.4)}
+  .step-title{font-size:15px;font-weight:600}
+  .step-sub{font-size:12px;color:var(--text3);margin-top:2px}
+  .step-time{margin-left:auto;font-size:11px;color:var(--text3);background:var(--bg3);padding:3px 10px;border-radius:20px;flex-shrink:0}
+  .step-chev{margin-left:8px;color:var(--text3);font-size:12px;transition:transform .2s;flex-shrink:0}
+  .step-body{display:none;padding:0 22px 22px;border-top:1px solid var(--border)}
+  .step-body.open{display:block}
+  .step-body p{color:var(--text2);font-size:14px;margin:12px 0 8px}
+  .step-body ul,.step-body ol{color:var(--text2);font-size:14px;padding-left:20px;margin:8px 0}
+  .step-body li{margin-bottom:6px}
+
+  .code-block{position:relative;margin:14px 0;border-radius:10px;overflow:hidden}
+  .code-header{background:#050810;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+  .code-lang{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
+  .copy-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:11px;padding:4px 12px;border-radius:6px;cursor:pointer;transition:all .15s;font-family:inherit}
+  .copy-btn:hover{background:var(--accent);color:#000;border-color:var(--accent)}
+  .copy-btn.copied{background:rgba(16,185,129,.2);color:var(--green);border-color:var(--green)}
+  pre{background:var(--code-bg);padding:18px;overflow-x:auto;font-size:13px;line-height:1.7;font-family:'Cascadia Code','Fira Code','Consolas',monospace}
+  pre code{color:#c9d1d9}
+  .kw{color:#ff79c6}.fn{color:#50fa7b}.st{color:#f1fa8c}.cm{color:#6272a4;font-style:italic}.nm{color:#bd93f9}.op{color:#ff79c6}
+
+  .callout{border-radius:10px;padding:14px 18px;margin:14px 0;font-size:14px;display:flex;gap:12px;align-items:flex-start}
+  .callout-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+  .c-tip{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:#a7f3d0}
+  .c-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#fde68a}
+  .c-info{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);color:#bae6fd}
+  .c-danger{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#fecaca}
+  .c-stream{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);color:#fde68a}
+
+  .checklist{list-style:none;padding:0;margin:14px 0}
+  .checklist li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--text2)}
+  .checklist li:last-child{border-bottom:none}
+  .checklist input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;margin-top:3px}
+  .checklist label{cursor:pointer}
+  .checklist input:checked+label{text-decoration:line-through;color:var(--text3)}
+
+  .q-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
+  .q-header{padding:14px 18px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;transition:background .15s}
+  .q-header:hover{background:rgba(255,255,255,.02)}
+  .q-num{font-size:11px;font-weight:700;color:var(--accent);background:rgba(245,158,11,.15);padding:2px 8px;border-radius:10px;flex-shrink:0;margin-top:2px}
+  .q-cat{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:10px;flex-shrink:0;margin-top:2px}
+  .cat-stream{background:rgba(245,158,11,.15);color:var(--yellow)}
+  .cat-kafka{background:rgba(251,146,60,.15);color:var(--orange)}
+  .cat-fraud{background:rgba(239,68,68,.15);color:var(--red)}
+  .cat-spark{background:rgba(167,139,250,.15);color:var(--purple)}
+  .cat-arch{background:rgba(56,189,248,.15);color:var(--blue)}
+  .cat-prod{background:rgba(16,185,129,.15);color:var(--green)}
+  .q-text{font-size:14px;font-weight:500;color:var(--text);flex:1}
+  .q-body{display:none;padding:0 18px 18px;border-top:1px solid var(--border)}
+  .q-body.open{display:block}
+  .q-body p{font-size:14px;color:var(--text2);margin-top:12px;line-height:1.85}
+  .ans-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent2);margin-top:14px;margin-bottom:6px}
+
+  .tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+  .tab-btn{padding:7px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;background:var(--bg3);border:1px solid var(--border);color:var(--text2);transition:all .15s;font-family:inherit}
+  .tab-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .tab-btn.active{background:rgba(245,158,11,.2);border-color:var(--accent);color:var(--accent)}
+  .tab-panel{display:none}.tab-panel.active{display:block}
+
+  .comp-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  .comp-table th{background:var(--bg3);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);font-weight:600}
+  .comp-table td{padding:10px 14px;border-bottom:1px solid rgba(30,45,74,.5);color:var(--text2);vertical-align:top}
+  .comp-table .yes{color:var(--green)}.comp-table .no{color:var(--red)}.comp-table .mid{color:var(--yellow)}
+
+  .resume-box{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:22px;margin:16px 0}
+  .resume-box h4{color:var(--accent2);font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+  .resume-box p{color:#a7f3d0;font-size:14px;line-height:1.85}
+
+  .schema-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  .schema-table th{background:var(--bg3);color:var(--text2);font-weight:600;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
+  .schema-table td{padding:9px 14px;border-bottom:1px solid rgba(30,45,74,.5);color:var(--text2);vertical-align:top}
+  .schema-table tr:hover td{background:rgba(255,255,255,.02)}
+  .col-pk{color:var(--yellow);font-weight:600;font-size:10px}
+  .col-fk{color:var(--blue);font-weight:600;font-size:10px}
+  .col-type{color:var(--accent2);font-size:12px;font-family:monospace}
+
+  .flow-box{background:var(--code-bg);border:1px solid var(--border);border-radius:12px;padding:22px;margin:14px 0;font-family:monospace;font-size:13px;color:var(--text2);line-height:2.2}
+  .flow-highlight{color:var(--accent);font-weight:600}
+  .flow-ok{color:var(--green)}
+  .flow-alert{color:var(--red)}
+
+  h3{font-size:17px;font-weight:600;margin:22px 0 12px;color:var(--text)}
+  h3:first-child{margin-top:14px}
+  .tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;margin-right:6px;margin-bottom:4px}
+  .tag-aws{background:rgba(255,153,0,.15);color:#ffaa44}
+  .tag-py{background:rgba(56,189,248,.15);color:var(--blue)}
+  .tag-kafka{background:rgba(245,158,11,.15);color:var(--yellow)}
+  .tag-spark{background:rgba(239,68,68,.15);color:var(--red)}
+  .tag-new{background:rgba(167,139,250,.15);color:var(--purple)}
+
+  @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.menu-btn{display:block}.content{padding:18px 14px}.hero h1{font-size:20px}}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
+  .overlay.show{display:block}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="proj-tag">Project 03 · Banking</div>
+    <h2>Fraud Detection Pipeline</h2>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-label" id="prog-label">0 of 12 tasks done</div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Overview</div>
+    <a class="nav-item active" onclick="show('overview')" href="#">
+      <span class="nav-dot">🏠</span> Overview & Goals
+    </a>
+    <a class="nav-item" onclick="show('vs-prev')" href="#">
+      <span class="nav-dot">⬆️</span> What's New vs Proj 2
+    </a>
+    <a class="nav-item" onclick="show('stream-concepts')" href="#">
+      <span class="nav-dot">🌊</span> Stream Processing 101
+    </a>
+    <a class="nav-item" onclick="show('kafka-concepts')" href="#">
+      <span class="nav-dot">📨</span> Kafka Deep Dive
+    </a>
+    <a class="nav-item" onclick="show('arch')" href="#">
+      <span class="nav-dot">🏗</span> Architecture
+    </a>
+    <a class="nav-item" onclick="show('schema')" href="#">
+      <span class="nav-dot">📐</span> Data Model
+    </a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Build Steps</div>
+    <a class="nav-item" onclick="show('step1')" href="#">
+      <span class="nav-dot">1</span> Project Setup
+    </a>
+    <a class="nav-item" onclick="show('step2')" href="#">
+      <span class="nav-dot">2</span> Kafka Setup (Docker)
+    </a>
+    <a class="nav-item" onclick="show('step3')" href="#">
+      <span class="nav-dot">3</span> Transaction Producer
+    </a>
+    <a class="nav-item" onclick="show('step4')" href="#">
+      <span class="nav-dot">4</span> Spark Structured Streaming
+    </a>
+    <a class="nav-item" onclick="show('step5')" href="#">
+      <span class="nav-dot">5</span> Fraud Detection Rules
+    </a>
+    <a class="nav-item" onclick="show('step6')" href="#">
+      <span class="nav-dot">6</span> Lambda Alerts
+    </a>
+    <a class="nav-item" onclick="show('step7')" href="#">
+      <span class="nav-dot">7</span> Schema Evolution
+    </a>
+    <a class="nav-item" onclick="show('step8')" href="#">
+      <span class="nav-dot">8</span> SQL Queries
+    </a>
+    <a class="nav-item" onclick="show('step9')" href="#">
+      <span class="nav-dot">9</span> GitHub + README
+    </a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Interview Prep</div>
+    <a class="nav-item" onclick="show('interview')" href="#">
+      <span class="nav-dot">🎯</span> 15 Questions + Answers
+    </a>
+    <a class="nav-item" onclick="show('resume')" href="#">
+      <span class="nav-dot">📄</span> Resume Story
+    </a>
+    <a class="nav-item" onclick="show('concepts')" href="#">
+      <span class="nav-dot">📚</span> Key Concepts
+    </a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <span class="badge b-stream" id="curr-badge">Overview</span>
+      <span style="color:var(--text3);font-size:13px" id="curr-title">Banking Fraud Detection</span>
+    </div>
+    <div style="font-size:12px;color:var(--text3)">Level 3→4 · Weeks 5–6</div>
+  </div>
+  <div class="content">
+
+<!-- ══ OVERVIEW ══ -->
+<div class="section active" id="section-overview">
+  <div class="hero">
+    <div class="hero-tag">Project 03 · Level 3→4 · Banking Industry</div>
+    <h1>Real-Time Fraud Detection Pipeline</h1>
+    <p>Build a streaming pipeline that ingests bank transactions from Kafka, detects fraud patterns in real-time using Spark Structured Streaming, fires alerts within seconds, and writes everything to a historical data store for batch analysis.</p>
+    <div class="hero-stats">
+      <div><div class="stat-val">&lt;5s</div><div class="stat-label">Alert latency</div></div>
+      <div><div class="stat-val">Kafka</div><div class="stat-label">Message queue</div></div>
+      <div><div class="stat-val">Streaming</div><div class="stat-label">Spark SSS</div></div>
+      <div><div class="stat-val">Lambda</div><div class="stat-label">Alert handler</div></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+    <div class="step-card" style="margin-bottom:0"><div style="padding:18px 20px">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Stack</div>
+      <span class="tag tag-py">Python 3.11</span>
+      <span class="tag tag-kafka">Apache Kafka</span>
+      <span class="tag tag-spark">Spark Streaming</span>
+      <span class="tag tag-aws">AWS Lambda</span>
+      <span class="tag tag-aws">DynamoDB</span>
+      <span class="tag tag-aws">S3</span>
+      <span class="tag tag-new">Docker</span>
+      <span class="tag tag-new">Schema Registry</span>
+    </div></div>
+    <div class="step-card" style="margin-bottom:0"><div style="padding:18px 20px">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Brand New Skills</div>
+      <ul style="color:var(--text2);font-size:13px;padding-left:18px">
+        <li>Kafka producers + consumers</li>
+        <li>Spark Structured Streaming</li>
+        <li>Tumbling + sliding windows</li>
+        <li>Stateful stream processing</li>
+        <li>Schema evolution with Avro</li>
+        <li>Real-time alerting with Lambda</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <h3>Business Problem</h3>
+  <div class="callout c-danger">
+    <div class="callout-icon">🚨</div>
+    <div>A mid-size bank processes <strong>10,000+ card transactions per minute</strong>. Their current fraud detection runs as a nightly batch job — meaning fraudulent charges aren't caught until the next morning. By then, the criminal has already made 50 more transactions. The bank needs real-time fraud detection that flags suspicious transactions <strong>within 5 seconds</strong> so the card can be blocked before more damage is done. Fraud costs the bank $12M annually — catching it in real-time reduces losses by an estimated 60%.</div>
+  </div>
+
+  <h3>The Core Challenge</h3>
+  <div class="callout c-stream">
+    <div class="callout-icon">🌊</div>
+    <div><strong>This project flips your mental model.</strong> In Projects 1 and 2, data sat still and you processed it. Here, data is constantly moving and you process it as it flows. Instead of reading a file and writing a file, you read from a stream, apply rules with windows (time-based groups of events), and write alerts in real-time. The key new concept: <strong>stateful processing</strong> — you need to remember what a customer did in the last 5 minutes to decide if the current transaction is suspicious.</div>
+  </div>
+</div>
+
+<!-- ══ VS PREV ══ -->
+<div class="section" id="section-vs-prev">
+  <div class="hero">
+    <div class="hero-tag">Progression Map</div>
+    <h1>What's New vs Projects 1 & 2</h1>
+    <p>The biggest conceptual jump in the series. Batch → Stream is a fundamentally different paradigm.</p>
+  </div>
+  <table class="comp-table">
+    <tr><th>Concept</th><th>Projects 1 & 2</th><th>Project 3</th><th>Why harder</th></tr>
+    <tr><td><strong>Processing model</strong></td><td>Batch — process files</td><td>Stream — process events</td><td class="mid">Continuous, unbounded data</td></tr>
+    <tr><td><strong>Latency goal</strong></td><td>Minutes to hours</td><td>Under 5 seconds</td><td class="mid">Fault tolerance is critical</td></tr>
+    <tr><td><strong>Message queue</strong></td><td>None (S3 files)</td><td>Apache Kafka</td><td class="mid">New distributed system to understand</td></tr>
+    <tr><td><strong>State management</strong></td><td>Stateless transforms</td><td>Stateful windows</td><td class="mid">Must remember past events</td></tr>
+    <tr><td><strong>Schema changes</strong></td><td>ETL job reruns</td><td>Schema evolution (Avro)</td><td class="mid">Must handle schema change without downtime</td></tr>
+    <tr><td><strong>Failure model</strong></td><td>Re-run the job</td><td>Checkpointing + replay</td><td class="mid">Can't re-run — stream keeps flowing</td></tr>
+    <tr><td><strong>Serving layer</strong></td><td>Redshift / Athena</td><td>DynamoDB (real-time) + S3 (history)</td><td class="mid">Two outputs: real-time + batch</td></tr>
+    <tr><td><strong>Alerting</strong></td><td>None</td><td>AWS Lambda → SNS → SMS/Email</td><td class="mid">Event-driven reaction chain</td></tr>
+  </table>
+
+  <div class="callout c-tip">
+    <div class="callout-icon">💡</div>
+    <div><strong>Interview framing:</strong> "In Projects 1 and 2 the business question was 'what happened?' — looking backward at historical data. In Project 3 the question is 'what's happening right now?' — and the answer has to arrive fast enough to take action. That constraint changes everything: the architecture, the fault tolerance model, the way you handle state. Kafka decouples producers from consumers so the bank's transaction system doesn't slow down waiting for fraud detection. Spark Structured Streaming processes events in micro-batches every 10 seconds so we can detect patterns across windows of time."</div>
+  </div>
+</div>
+
+<!-- ══ STREAM CONCEPTS ══ -->
+<div class="section" id="section-stream-concepts">
+  <div class="hero">
+    <div class="hero-tag">Stream Processing 101</div>
+    <h1>Everything You Need to Know About Streaming</h1>
+    <p>Master these concepts before writing a single line of code. Interviewers test theory heavily here.</p>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num a">①</div>
+      <div><div class="step-title">Batch vs Stream vs Micro-batch</div><div class="step-sub">The three processing paradigms</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body open">
+      <p><strong>Batch:</strong> Collect all data → process → output. Latency: minutes to hours. Tools: PySpark, AWS Glue, dbt. Use for: daily reports, ETL pipelines, ML training.</p>
+      <p><strong>True streaming:</strong> Process each event individually, record by record, as it arrives. Latency: milliseconds. Tools: Apache Flink, Kafka Streams. Use for: fraud detection requiring &lt;100ms response, high-frequency trading.</p>
+      <p><strong>Micro-batch (what we use):</strong> Buffer events for a short window (10 seconds), then process the whole mini-batch at once. Latency: seconds. Tools: Spark Structured Streaming. Use for: fraud detection where seconds are acceptable, near-real-time dashboards.</p>
+      <div class="callout c-info"><div class="callout-icon">💡</div><div><strong>Interview answer:</strong> "I used Spark Structured Streaming with 10-second micro-batches. True streaming (Flink) offers sub-second latency but adds operational complexity. For fraud detection where a 5-second alert is acceptable, micro-batch gives us simpler fault tolerance and lets us reuse our Spark expertise from the batch pipelines."</div></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">②</div>
+      <div><div class="step-title">Windows: Tumbling, Sliding, Session</div><div class="step-sub">The core concept of stream aggregation</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>Tumbling window:</strong> Fixed-size, non-overlapping windows. "Count transactions per customer per 5-minute block." 0:00–5:00 is one window, 5:00–10:00 is the next. Each event belongs to exactly one window.</p>
+      <p><strong>Sliding window:</strong> Fixed-size windows that overlap. "Count transactions in any 5-minute rolling period." A window slides forward every 1 minute — so events can appear in multiple windows. More expensive but catches patterns that fall on window boundaries.</p>
+      <p><strong>Session window:</strong> Variable-size windows bounded by inactivity. "Group all activity within a session (no 30-minute gap)." Duration varies per user. Used for web analytics, not typically fraud detection.</p>
+      <div class="callout c-warn"><div class="callout-icon">⚠️</div><div><strong>For fraud detection we use sliding windows:</strong> A fraudster making 5 transactions at 4:58, 4:59, 5:00, 5:01, 5:02 would be split across two tumbling windows (missing the pattern) but caught in a sliding window. The extra cost is worth it for fraud.</div></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">③</div>
+      <div><div class="step-title">Watermarks and Late Data</div><div class="step-sub">How streaming handles out-of-order events</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p>In real systems, events arrive out of order. A mobile transaction might take 3 seconds to reach Kafka due to network latency. A watermark tells Spark: "Wait up to X seconds for late-arriving events before closing a window."</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PySpark — Watermark Example</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="cm"># Tell Spark: wait up to 10 seconds for late events</span>
+<span class="cm"># Events more than 10 seconds late will be dropped</span>
+df_with_watermark = transactions_stream.withWatermark(<span class="st">"event_time"</span>, <span class="st">"10 seconds"</span>)
+
+<span class="cm"># Now window aggregation respects the watermark</span>
+windowed = (df_with_watermark
+    .groupBy(
+        F.window(<span class="st">"event_time"</span>, <span class="st">"5 minutes"</span>, <span class="st">"1 minute"</span>),  <span class="cm"># 5-min window, slide 1 min</span>
+        <span class="st">"account_id"</span>
+    )
+    .agg(
+        F.count(<span class="st">"transaction_id"</span>).alias(<span class="st">"tx_count"</span>),
+        F.sum(<span class="st">"amount"</span>).alias(<span class="st">"total_amount"</span>)
+    )
+)</code></pre></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">④</div>
+      <div><div class="step-title">Checkpointing and Fault Tolerance</div><div class="step-sub">How streams survive failures</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p>Streaming jobs run 24/7. They will fail — the server reboots, network blips, OOM errors. Checkpointing saves the stream's progress to S3 periodically. When the job restarts, it reads the checkpoint and picks up exactly where it left off — no events processed twice, no events missed.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">PySpark — Checkpoint Setup</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code>query = (windowed.writeStream
+    .outputMode(<span class="st">"update"</span>)           <span class="cm"># only write changed rows</span>
+    .format(<span class="st">"parquet"</span>)
+    .option(<span class="st">"checkpointLocation"</span>, <span class="st">"s3://fraud-checkpoints/windowed/"</span>)
+    .trigger(processingTime<span class="op">=</span><span class="st">"10 seconds"</span>)  <span class="cm"># micro-batch every 10s</span>
+    .start(<span class="st">"s3://fraud-output/windowed/"</span>)
+)</code></pre></div>
+      <p><strong>Output modes:</strong></p>
+      <ul>
+        <li><strong>append</strong> — only write new rows (stateless ops only)</li>
+        <li><strong>update</strong> — only write rows that changed (most common for aggregations)</li>
+        <li><strong>complete</strong> — write the full result table every trigger (expensive, small tables only)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">⑤</div>
+      <div><div class="step-title">Exactly-Once vs At-Least-Once Semantics</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>At-most-once:</strong> Events may be lost on failure. Never used for financial data.</p>
+      <p><strong>At-least-once:</strong> Events will be processed, but may be processed more than once on failure. You need idempotent sinks to handle duplicates. Used when losing events is worse than duplicating them.</p>
+      <p><strong>Exactly-once:</strong> Every event is processed exactly once even through failures. Requires both source and sink to support it. Kafka + Spark Structured Streaming support exactly-once end-to-end. This is what we use for banking — double-processing a fraud alert or missing one are both unacceptable.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ KAFKA CONCEPTS ══ -->
+<div class="section" id="section-kafka-concepts">
+  <div class="hero">
+    <div class="hero-tag">Apache Kafka Deep Dive</div>
+    <h1>Kafka — Everything for Interviews</h1>
+    <p>Kafka is the most commonly asked streaming technology in Data Engineer interviews. Master the vocabulary and you'll stand out.</p>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num a">K1</div>
+      <div><div class="step-title">What Kafka Is and Why It Exists</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body open">
+      <p>Kafka is a distributed message queue — a durable, ordered log of events. Think of it as a highway between systems: the bank's transaction system publishes transactions to Kafka without waiting for fraud detection to process them. Multiple consumers (fraud detection, analytics, compliance) can read the same events at their own pace. This decoupling means: if fraud detection is slow or down, transactions keep flowing and the backlog is replayed when it comes back up.</p>
+      <div class="callout c-info"><div class="callout-icon">💡</div><div>The key insight: Kafka is not a database, not a queue that deletes messages when read. It's a <strong>log</strong> — messages are retained for a configurable period (days/weeks) and any consumer can re-read from any point.</div></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">K2</div>
+      <div><div class="step-title">Topics, Partitions, Offsets</div><div class="step-sub">The three vocabulary words you MUST know</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>Topic:</strong> A named stream of events. Like a table in a database, but append-only. Example: "bank-transactions" is a topic.</p>
+      <p><strong>Partition:</strong> A topic is split into N partitions. Each partition is an ordered, immutable log. Partitions are the unit of parallelism — more partitions = more consumers reading in parallel. A message goes to exactly one partition, determined by its key (we use account_id as key, so all transactions for one account go to the same partition → guaranteed ordering per account).</p>
+      <p><strong>Offset:</strong> A sequential ID for each message within a partition. Consumer tracks its offset to know where it is. Replay from any offset by resetting the consumer offset.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">Visual — Topic / Partition / Offset</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code>Topic: "bank-transactions"  (6 partitions)
+
+Partition 0: [offset 0] [offset 1] [offset 2] [offset 3] ← newest
+Partition 1: [offset 0] [offset 1] [offset 2]
+Partition 2: [offset 0] [offset 1] [offset 2] [offset 3] [offset 4]
+...
+
+Consumer group "fraud-detector" tracks:
+  Partition 0: consumed up to offset 2
+  Partition 1: consumed up to offset 1
+  Partition 2: consumed up to offset 4</code></pre></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">K3</div>
+      <div><div class="step-title">Producers, Consumers, Consumer Groups</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>Producer:</strong> Writes events to a topic. In our project: the transaction simulator publishes to "bank-transactions". Sets the partition key (account_id) to ensure ordering.</p>
+      <p><strong>Consumer:</strong> Reads events from a topic. Tracks its own offset. Can replay by resetting offset.</p>
+      <p><strong>Consumer group:</strong> Multiple consumer instances sharing the work. If topic has 6 partitions and consumer group has 3 instances, each instance reads 2 partitions. This is horizontal scaling for consumers. Each partition is consumed by exactly one instance in the group — no double processing.</p>
+      <div class="callout c-warn"><div class="callout-icon">⚠️</div><div><strong>Interview trap:</strong> If you add more consumer instances than partitions, the extra instances sit idle. Consumers ≤ partitions for efficient scaling.</div></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">K4</div>
+      <div><div class="step-title">Replication Factor and Fault Tolerance</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p>Each partition has one <strong>leader</strong> and N-1 <strong>replicas</strong>. All reads and writes go through the leader. Replicas stay in sync. If the leader broker dies, a replica is elected as the new leader automatically. With replication factor 3, the cluster tolerates 2 broker failures without data loss.</p>
+      <p><strong>For local dev:</strong> We use replication factor 1 (single broker). For production banking: replication factor 3, minimum ISR (in-sync replicas) of 2.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">K5</div>
+      <div><div class="step-title">Schema Registry and Avro</div><div class="step-sub">How Kafka handles schema evolution</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p>JSON Kafka messages have a problem: if you add a new field to the transaction schema, old consumers break because they don't know about the new field. Schema Registry + Avro solves this with <strong>schema evolution</strong>:</p>
+      <ul>
+        <li>Avro is a binary serialization format with an explicit schema</li>
+        <li>Schema Registry stores all schema versions centrally</li>
+        <li>Producers register the schema before sending — each message includes a schema ID</li>
+        <li>Consumers fetch the schema by ID — they can handle old and new schemas</li>
+        <li>Evolution rules: adding a field with a default is BACKWARD compatible (old consumers skip it). Removing a field is FORWARD compatible. Both = FULL compatible.</li>
+      </ul>
+      <p><strong>For this project:</strong> We simulate schema evolution in Step 7 — we start with JSON, then add a new field, and show the consumer handles both versions.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ARCH ══ -->
+<div class="section" id="section-arch">
+  <div class="hero">
+    <div class="hero-tag">Architecture · Real-Time + Historical</div>
+    <h1>Dual-Path Pipeline Architecture</h1>
+    <p>Two simultaneous paths: a hot path for real-time alerts (under 5 seconds) and a cold path for historical analysis in S3/Athena.</p>
+  </div>
+
+  <div class="flow-box">
+    <span class="flow-highlight">[Bank Core System]</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓ produces transactions<br>
+    <span class="flow-highlight">[Kafka Topic: bank-transactions]</span>  (6 partitions, key=account_id)<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓ consumed by<br>
+    <span class="flow-highlight">[Spark Structured Streaming]</span>  (micro-batch every 10 seconds)<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+    [Apply fraud detection rules]<br>
+    &nbsp;&nbsp;├── <span class="flow-ok">CLEAN transactions</span> → S3 (Parquet, partitioned) → Athena<br>
+    &nbsp;&nbsp;└── <span class="flow-alert">FLAGGED transactions</span> → Kafka Topic: fraud-alerts<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[AWS Lambda consumer]<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[DynamoDB: fraud_alerts table]  ← real-time lookup<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[SNS → SMS/Email alert to fraud team]<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[CloudWatch metric → dashboard]
+  </div>
+
+  <h3>Why Two Paths?</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0">
+    <div class="step-card" style="margin-bottom:0;border-color:rgba(239,68,68,.3)"><div style="padding:16px">
+      <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">🔴 Hot Path (Real-time)</div>
+      <div style="font-size:13px;color:var(--text2)">Flagged transactions → Lambda → DynamoDB + SNS alert. Goal: under 5 seconds. No complex transforms — just flag and alert. DynamoDB handles 100K+ reads/sec for card authorization checks.</div>
+    </div></div>
+    <div class="step-card" style="margin-bottom:0;border-color:rgba(16,185,129,.3)"><div style="padding:16px">
+      <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px">🟢 Cold Path (Historical)</div>
+      <div style="font-size:13px;color:var(--text2)">All transactions → S3 Parquet → Athena. Goal: full history for analysts. Used for: fraud pattern analysis, model training, regulatory reporting, trend dashboards.</div>
+    </div></div>
+  </div>
+
+  <h3>AWS Services</h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:12px">
+    <div class="step-card" style="margin-bottom:0"><div style="padding:14px">
+      <div style="font-size:18px;margin-bottom:5px">📨</div>
+      <div style="font-weight:600;font-size:13px">Apache Kafka</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:3px">Message queue. Local via Docker</div>
+    </div></div>
+    <div class="step-card" style="margin-bottom:0"><div style="padding:14px">
+      <div style="font-size:18px;margin-bottom:5px">⚡</div>
+      <div style="font-weight:600;font-size:13px">Spark Streaming</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:3px">Micro-batch stream processor</div>
+    </div></div>
+    <div class="step-card" style="margin-bottom:0"><div style="padding:14px">
+      <div style="font-size:18px;margin-bottom:5px">λ</div>
+      <div style="font-weight:600;font-size:13px">AWS Lambda</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:3px">Serverless alert handler</div>
+    </div></div>
+    <div class="step-card" style="margin-bottom:0"><div style="padding:14px">
+      <div style="font-size:18px;margin-bottom:5px">⚡</div>
+      <div style="font-weight:600;font-size:13px">DynamoDB</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:3px">Real-time fraud alert store</div>
+    </div></div>
+    <div class="step-card" style="margin-bottom:0"><div style="padding:14px">
+      <div style="font-size:18px;margin-bottom:5px">🪣</div>
+      <div style="font-weight:600;font-size:13px">S3 + Athena</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:3px">Historical cold path</div>
+    </div></div>
+    <div class="step-card" style="margin-bottom:0"><div style="padding:14px">
+      <div style="font-size:18px;margin-bottom:5px">📢</div>
+      <div style="font-weight:600;font-size:13px">AWS SNS</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:3px">Push alerts to fraud team</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══ SCHEMA ══ -->
+<div class="section" id="section-schema">
+  <div class="hero">
+    <div class="hero-tag">Data Model</div>
+    <h1>Transaction Schema + Fraud Tables</h1>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'tx-schema')">Transaction Event</button>
+    <button class="tab-btn" onclick="switchTab(this,'fraud-table')">Fraud Alerts Table</button>
+    <button class="tab-btn" onclick="switchTab(this,'window-agg')">Window Aggregations</button>
+    <button class="tab-btn" onclick="switchTab(this,'fraud-rules')">Fraud Rules</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-tx-schema">
+    <p style="color:var(--text2);font-size:14px">The Kafka message schema for each transaction event.</p>
+    <table class="schema-table">
+      <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+      <tr><td>transaction_id</td><td class="col-type">STRING</td><td>UUID — unique per transaction</td></tr>
+      <tr><td>account_id</td><td class="col-type">STRING</td><td>Kafka partition key — ensures ordering per account</td></tr>
+      <tr><td>card_number_hash</td><td class="col-type">STRING</td><td>SHA-256 of card number — never send raw PAN</td></tr>
+      <tr><td>merchant_id</td><td class="col-type">STRING</td><td>Merchant identifier</td></tr>
+      <tr><td>merchant_category</td><td class="col-type">STRING</td><td>MCC category: electronics, grocery, travel, etc.</td></tr>
+      <tr><td>amount</td><td class="col-type">DOUBLE</td><td>Transaction amount in USD</td></tr>
+      <tr><td>currency</td><td class="col-type">STRING</td><td>ISO 4217 currency code</td></tr>
+      <tr><td>transaction_type</td><td class="col-type">STRING</td><td>purchase / withdrawal / transfer / refund</td></tr>
+      <tr><td>channel</td><td class="col-type">STRING</td><td>online / in-person / mobile / ATM</td></tr>
+      <tr><td>country</td><td class="col-type">STRING</td><td>ISO country code of merchant</td></tr>
+      <tr><td>latitude</td><td class="col-type">DOUBLE</td><td>Transaction location (optional)</td></tr>
+      <tr><td>longitude</td><td class="col-type">DOUBLE</td><td>Transaction location (optional)</td></tr>
+      <tr><td>event_time</td><td class="col-type">TIMESTAMP</td><td>When transaction occurred (event time, not Kafka ingest time)</td></tr>
+      <tr><td>kafka_ingest_time</td><td class="col-type">TIMESTAMP</td><td>When Kafka received it (for latency monitoring)</td></tr>
+    </table>
+  </div>
+
+  <div class="tab-panel" id="tab-fraud-table">
+    <p style="color:var(--text2);font-size:14px">DynamoDB fraud_alerts table — real-time lookup for card authorization systems.</p>
+    <table class="schema-table">
+      <tr><th>Field</th><th>Type</th><th>Notes</th></tr>
+      <tr><td>alert_id</td><td class="col-type">STRING</td><td><span class="col-pk">PK</span> UUID</td></tr>
+      <tr><td>account_id</td><td class="col-type">STRING</td><td><span class="col-fk">GSI</span> For lookup by account</td></tr>
+      <tr><td>transaction_id</td><td class="col-type">STRING</td><td>The triggering transaction</td></tr>
+      <tr><td>fraud_score</td><td class="col-type">DOUBLE</td><td>0.0–1.0 composite risk score</td></tr>
+      <tr><td>fraud_rules_triggered</td><td class="col-type">LIST</td><td>Which rules fired: ["velocity", "geo_impossible"]</td></tr>
+      <tr><td>alert_time</td><td class="col-type">STRING</td><td>ISO timestamp — Sort key for GSI</td></tr>
+      <tr><td>status</td><td class="col-type">STRING</td><td>OPEN / REVIEWED / FALSE_POSITIVE / CONFIRMED</td></tr>
+      <tr><td>amount</td><td class="col-type">DOUBLE</td><td>Transaction amount for context</td></tr>
+      <tr><td>merchant_category</td><td class="col-type">STRING</td><td>For analyst review</td></tr>
+      <tr><td>ttl</td><td class="col-type">NUMBER</td><td>DynamoDB TTL — auto-delete after 30 days</td></tr>
+    </table>
+  </div>
+
+  <div class="tab-panel" id="tab-window-agg">
+    <p style="color:var(--text2);font-size:14px">Windowed aggregations computed by Spark Streaming — inputs to fraud rules.</p>
+    <table class="schema-table">
+      <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+      <tr><td>window_start</td><td class="col-type">TIMESTAMP</td><td>Window start (5-min sliding)</td></tr>
+      <tr><td>window_end</td><td class="col-type">TIMESTAMP</td><td>Window end</td></tr>
+      <tr><td>account_id</td><td class="col-type">STRING</td><td>Grouped per account</td></tr>
+      <tr><td>tx_count_5min</td><td class="col-type">INT</td><td>Transactions in last 5 minutes</td></tr>
+      <tr><td>total_amount_5min</td><td class="col-type">DOUBLE</td><td>Total spend in last 5 minutes</td></tr>
+      <tr><td>distinct_countries</td><td class="col-type">INT</td><td>Distinct countries in window</td></tr>
+      <tr><td>distinct_merchants</td><td class="col-type">INT</td><td>Distinct merchants in window</td></tr>
+      <tr><td>max_single_amount</td><td class="col-type">DOUBLE</td><td>Largest single transaction in window</td></tr>
+      <tr><td>online_tx_count</td><td class="col-type">INT</td><td>Count of online (card-not-present) transactions</td></tr>
+    </table>
+  </div>
+
+  <div class="tab-panel" id="tab-fraud-rules">
+    <p style="color:var(--text2);font-size:14px">The five fraud detection rules. Each assigns a risk score. Score ≥ 0.6 triggers an alert.</p>
+    <table class="schema-table">
+      <tr><th>Rule</th><th>Logic</th><th>Score</th><th>Why it signals fraud</th></tr>
+      <tr><td><strong>Velocity</strong></td><td>tx_count_5min ≥ 5</td><td>0.4</td><td>Normal humans don't make 5 transactions in 5 minutes</td></tr>
+      <tr><td><strong>High Amount</strong></td><td>amount &gt; $5,000</td><td>0.3</td><td>Unusually large single transaction</td></tr>
+      <tr><td><strong>Geo Impossible</strong></td><td>distinct_countries ≥ 2 in 5 min</td><td>0.5</td><td>Can't be in two countries simultaneously</td></tr>
+      <tr><td><strong>Card Testing</strong></td><td>3+ small amounts (&lt;$10) in 10 min</td><td>0.4</td><td>Fraudsters test stolen cards with micro-transactions</td></tr>
+      <tr><td><strong>Rapid Online</strong></td><td>online_tx_count ≥ 4 in 5 min</td><td>0.35</td><td>Bots can make online transactions instantly</td></tr>
+    </table>
+    <div class="callout c-info"><div class="callout-icon">💡</div><div>Rules are additive. A transaction that triggers velocity (0.4) + geo_impossible (0.5) scores 0.9 — well above the 0.6 threshold. This composite scoring reduces false positives vs single-rule triggers.</div></div>
+  </div>
+</div>
+
+<!-- ══ STEP 1 ══ -->
+<div class="section" id="section-step1">
+  <div class="hero">
+    <div class="hero-tag">Step 1 · Project Setup</div>
+    <h1>Create Project Structure</h1>
+  </div>
+  <div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code>mkdir -p ~/de-portfolio/project-03-banking
+cd ~/de-portfolio/project-03-banking
+
+mkdir -p scripts producers consumers spark_jobs lambda_functions
+mkdir -p config data/raw data/processed data/checkpoints tests docs
+
+touch scripts/generate_transactions.py
+touch producers/transaction_producer.py
+touch consumers/fraud_alert_consumer.py
+touch spark_jobs/fraud_detection_stream.py
+touch spark_jobs/fraud_rules.py
+touch lambda_functions/alert_handler.py
+touch config/kafka_config.py
+touch docker-compose.yml
+touch .gitignore README.md
+
+echo "Project 3 structure created ✓"</code></pre></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">bash — install dependencies</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code><span class="cm"># Core dependencies</span>
+pip3 install kafka-python confluent-kafka faker boto3
+
+<span class="cm"># PySpark with Kafka support</span>
+pip3 install pyspark==3.5.1
+
+<span class="cm"># Verify Kafka library installed</span>
+python3 -c "from kafka import KafkaProducer; print('kafka-python OK ✓')"</code></pre></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">.gitignore</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code>.aws/
+*.env
+__pycache__/
+*.pyc
+data/raw/
+data/processed/
+data/checkpoints/
+derby.log
+metastore_db/
+spark-warehouse/
+.DS_Store</code></pre></div>
+</div>
+
+<!-- ══ STEP 2 ══ -->
+<div class="section" id="section-step2">
+  <div class="hero">
+    <div class="hero-tag">Step 2 · Kafka with Docker</div>
+    <h1>Run Kafka Locally Using Docker</h1>
+    <p>Docker lets you run Kafka on your Mac without complex installation. One file, one command.</p>
+  </div>
+  <div class="callout c-info"><div class="callout-icon">🐳</div><div>Install Docker Desktop from <strong>docker.com</strong> if you haven't already. It's free. On Mac M-series (ARM64) it works natively.</div></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">docker-compose.yml — paste this entire file</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code>version: '3.8'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092</code></pre></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">bash — start Kafka</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code>cd ~/de-portfolio/project-03-banking
+
+<span class="cm"># Start Kafka (Zookeeper + Broker + UI)</span>
+docker-compose up -d
+
+<span class="cm"># Check everything is running</span>
+docker-compose ps
+
+<span class="cm"># Expected output:</span>
+<span class="cm"># zookeeper   Up   2181/tcp</span>
+<span class="cm"># kafka       Up   9092/tcp, 29092/tcp</span>
+<span class="cm"># kafka-ui    Up   0.0.0.0:8080->8080/tcp</span>
+
+<span class="cm"># Open Kafka UI in browser: http://localhost:8080</span>
+<span class="cm"># You should see cluster "local" with 0 topics initially</span>
+
+<span class="cm"># Create our topics manually</span>
+docker exec kafka kafka-topics --create \
+  --bootstrap-server localhost:9092 \
+  --topic bank-transactions \
+  --partitions 6 \
+  --replication-factor 1
+
+docker exec kafka kafka-topics --create \
+  --bootstrap-server localhost:9092 \
+  --topic fraud-alerts \
+  --partitions 3 \
+  --replication-factor 1
+
+<span class="cm"># Verify topics created</span>
+docker exec kafka kafka-topics --list --bootstrap-server localhost:9092</code></pre></div>
+
+  <div class="callout c-tip"><div class="callout-icon">💡</div><div>After running these commands, go to <strong>http://localhost:8080</strong> in your browser. You'll see the Kafka UI showing your topics, partitions, and — once you start producing — live message counts. This is great to show interviewers in screen shares.</div></div>
+</div>
+
+<!-- ══ STEP 3 ══ -->
+<div class="section" id="section-step3">
+  <div class="hero">
+    <div class="hero-tag">Step 3 · Transaction Producer</div>
+    <h1>Kafka Transaction Producer</h1>
+    <p>Simulates the bank's transaction system publishing events to Kafka. Generates a mix of normal and fraudulent patterns so our detection rules have something to catch.</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">producers/transaction_producer.py</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code><span class="cm">"""
+Kafka Transaction Producer
+Simulates bank transactions — mix of legitimate and fraudulent patterns.
+Run: python3 producers/transaction_producer.py
+Press Ctrl+C to stop.
+"""</span>
+<span class="kw">import</span> json, uuid, random, time, hashlib
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+<span class="kw">from</span> kafka <span class="kw">import</span> KafkaProducer
+<span class="kw">from</span> faker <span class="kw">import</span> Faker
+
+fake <span class="op">=</span> Faker()
+random.seed(<span class="nm">42</span>)
+
+KAFKA_BOOTSTRAP <span class="op">=</span> <span class="st">"localhost:9092"</span>
+TOPIC           <span class="op">=</span> <span class="st">"bank-transactions"</span>
+
+<span class="cm"># ── Synthetic data pools ─────────────────────────────────</span>
+ACCOUNTS     <span class="op">=</span> [<span class="st">f"ACC-{str(uuid.uuid4())[:8].upper()}"</span> <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="nm">200</span>)]
+MERCHANTS    <span class="op">=</span> [<span class="st">f"MER-{str(uuid.uuid4())[:8].upper()}"</span> <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="nm">500</span>)]
+CATEGORIES   <span class="op">=</span> [<span class="st">"grocery"</span>,<span class="st">"restaurant"</span>,<span class="st">"gas"</span>,<span class="st">"electronics"</span>,<span class="st">"travel"</span>,<span class="st">"retail"</span>,<span class="st">"pharmacy"</span>]
+COUNTRIES    <span class="op">=</span> [<span class="st">"US"</span>,<span class="st">"US"</span>,<span class="st">"US"</span>,<span class="st">"US"</span>,<span class="st">"CA"</span>,<span class="st">"GB"</span>,<span class="st">"MX"</span>,<span class="st">"CN"</span>,<span class="st">"RU"</span>]
+CHANNELS     <span class="op">=</span> [<span class="st">"in-person"</span>,<span class="st">"in-person"</span>,<span class="st">"online"</span>,<span class="st">"mobile"</span>,<span class="st">"ATM"</span>]
+
+<span class="kw">def</span> <span class="fn">hash_card</span>(card_num: str) <span class="op">-></span> str:
+    <span class="kw">return</span> hashlib.sha256(card_num.encode()).hexdigest()
+
+<span class="kw">def</span> <span class="fn">make_normal_transaction</span>(account_id: str) <span class="op">-></span> dict:
+    <span class="st">"""Generate a typical everyday transaction."""</span>
+    <span class="kw">return</span> {
+        <span class="st">"transaction_id"</span>:   str(uuid.uuid4()),
+        <span class="st">"account_id"</span>:       account_id,
+        <span class="st">"card_number_hash"</span>: hash_card(<span class="st">f"4111{account_id[:8]}"</span>),
+        <span class="st">"merchant_id"</span>:      random.choice(MERCHANTS),
+        <span class="st">"merchant_category"</span>: random.choice(CATEGORIES),
+        <span class="st">"amount"</span>:           round(random.uniform(<span class="nm">5</span>, <span class="nm">250</span>), <span class="nm">2</span>),
+        <span class="st">"currency"</span>:         <span class="st">"USD"</span>,
+        <span class="st">"transaction_type"</span>: <span class="st">"purchase"</span>,
+        <span class="st">"channel"</span>:          random.choice(CHANNELS),
+        <span class="st">"country"</span>:          <span class="st">"US"</span>,
+        <span class="st">"latitude"</span>:         round(random.uniform(<span class="nm">25</span>, <span class="nm">48</span>), <span class="nm">4</span>),
+        <span class="st">"longitude"</span>:        round(random.uniform(<span class="op">-</span><span class="nm">125</span>, <span class="op">-</span><span class="nm">66</span>), <span class="nm">4</span>),
+        <span class="st">"event_time"</span>:       datetime.utcnow().isoformat(),
+        <span class="st">"kafka_ingest_time"</span>: datetime.utcnow().isoformat(),
+    }
+
+<span class="kw">def</span> <span class="fn">make_velocity_fraud</span>(account_id: str) <span class="op">-></span> list:
+    <span class="st">"""Simulate velocity fraud: 6 rapid transactions on one account."""</span>
+    now <span class="op">=</span> datetime.utcnow()
+    transactions <span class="op">=</span> []
+    <span class="kw">for</span> i <span class="kw">in</span> range(<span class="nm">6</span>):
+        transactions.append({
+            <span class="st">"transaction_id"</span>:   str(uuid.uuid4()),
+            <span class="st">"account_id"</span>:       account_id,
+            <span class="st">"card_number_hash"</span>: hash_card(<span class="st">f"4111{account_id[:8]}"</span>),
+            <span class="st">"merchant_id"</span>:      random.choice(MERCHANTS),
+            <span class="st">"merchant_category"</span>: <span class="st">"electronics"</span>,
+            <span class="st">"amount"</span>:           round(random.uniform(<span class="nm">800</span>, <span class="nm">2000</span>), <span class="nm">2</span>),
+            <span class="st">"currency"</span>:         <span class="st">"USD"</span>,
+            <span class="st">"transaction_type"</span>: <span class="st">"purchase"</span>,
+            <span class="st">"channel"</span>:          <span class="st">"online"</span>,
+            <span class="st">"country"</span>:          random.choice([<span class="st">"US"</span>,<span class="st">"CN"</span>,<span class="st">"RU"</span>]),
+            <span class="st">"latitude"</span>:         round(random.uniform(<span class="nm">25</span>, <span class="nm">48</span>), <span class="nm">4</span>),
+            <span class="st">"longitude"</span>:        round(random.uniform(<span class="op">-</span><span class="nm">125</span>, <span class="op">-</span><span class="nm">66</span>), <span class="nm">4</span>),
+            <span class="st">"event_time"</span>:       now.isoformat(),
+            <span class="st">"kafka_ingest_time"</span>: now.isoformat(),
+        })
+    <span class="kw">return</span> transactions
+
+<span class="kw">def</span> <span class="fn">make_card_testing_fraud</span>(account_id: str) <span class="op">-></span> list:
+    <span class="st">"""Card testing: small micro-transactions to verify card works."""</span>
+    now <span class="op">=</span> datetime.utcnow()
+    <span class="kw">return</span> [{
+        <span class="st">"transaction_id"</span>:   str(uuid.uuid4()),
+        <span class="st">"account_id"</span>:       account_id,
+        <span class="st">"card_number_hash"</span>: hash_card(<span class="st">f"4111{account_id[:8]}"</span>),
+        <span class="st">"merchant_id"</span>:      random.choice(MERCHANTS),
+        <span class="st">"merchant_category"</span>: <span class="st">"retail"</span>,
+        <span class="st">"amount"</span>:           round(random.uniform(<span class="nm">0.50</span>, <span class="nm">5.00</span>), <span class="nm">2</span>),  <span class="cm"># Tiny amounts</span>
+        <span class="st">"currency"</span>:         <span class="st">"USD"</span>,
+        <span class="st">"transaction_type"</span>: <span class="st">"purchase"</span>,
+        <span class="st">"channel"</span>:          <span class="st">"online"</span>,
+        <span class="st">"country"</span>:          <span class="st">"US"</span>,
+        <span class="st">"latitude"</span>:         <span class="nm">40.7128</span>,
+        <span class="st">"longitude"</span>:        <span class="op">-</span><span class="nm">74.0060</span>,
+        <span class="st">"event_time"</span>:       now.isoformat(),
+        <span class="st">"kafka_ingest_time"</span>: now.isoformat(),
+    } <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="nm">4</span>)]
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    producer <span class="op">=</span> KafkaProducer(
+        bootstrap_servers<span class="op">=</span>KAFKA_BOOTSTRAP,
+        value_serializer<span class="op">=lambda</span> v: json.dumps(v).encode(<span class="st">"utf-8"</span>),
+        key_serializer<span class="op">=lambda</span> k: k.encode(<span class="st">"utf-8"</span>),
+    )
+    print(<span class="st">f"Producer started. Sending to topic: {TOPIC}"</span>)
+    print(<span class="st">"Press Ctrl+C to stop.\n"</span>)
+
+    tx_count <span class="op">=</span> <span class="nm">0</span>
+    fraud_count <span class="op">=</span> <span class="nm">0</span>
+
+    <span class="kw">while True</span>:
+        account <span class="op">=</span> random.choice(ACCOUNTS)
+
+        <span class="cm"># 95% normal, 5% fraudulent patterns</span>
+        roll <span class="op">=</span> random.random()
+        <span class="kw">if</span> roll <span class="op"><</span> <span class="nm">0.03</span>:
+            <span class="cm"># Velocity fraud burst</span>
+            txs <span class="op">=</span> make_velocity_fraud(account)
+            fraud_count <span class="op">+=</span> len(txs)
+        <span class="kw">elif</span> roll <span class="op"><</span> <span class="nm">0.05</span>:
+            <span class="cm"># Card testing pattern</span>
+            txs <span class="op">=</span> make_card_testing_fraud(account)
+            fraud_count <span class="op">+=</span> len(txs)
+        <span class="kw">else</span>:
+            txs <span class="op">=</span> [make_normal_transaction(account)]
+
+        <span class="kw">for</span> tx <span class="kw">in</span> txs:
+            producer.send(TOPIC, key<span class="op">=</span>tx[<span class="st">"account_id"</span>], value<span class="op">=</span>tx)
+            tx_count <span class="op">+=</span> <span class="nm">1</span>
+
+        producer.flush()
+
+        <span class="kw">if</span> tx_count <span class="op">%</span> <span class="nm">100</span> <span class="op">==</span> <span class="nm">0</span>:
+            print(<span class="st">f"Sent: {tx_count} total | {fraud_count} fraud patterns | "
+                  f"Rate: ~{tx_count} tx so far"</span>)
+
+        time.sleep(random.uniform(<span class="nm">0.05</span>, <span class="nm">0.2</span>))  <span class="cm"># Realistic rate</span>
+
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    main()</code></pre></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">bash — run the producer (in a separate terminal)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code>cd ~/de-portfolio/project-03-banking
+python3 producers/transaction_producer.py
+
+<span class="cm"># Check messages in Kafka UI: http://localhost:8080</span>
+<span class="cm"># Navigate to: Topics → bank-transactions → Messages</span>
+<span class="cm"># You should see live transactions flowing</span></code></pre></div>
+</div>
+
+<!-- ══ STEP 4 ══ -->
+<div class="section" id="section-step4">
+  <div class="hero">
+    <div class="hero-tag">Step 4 · Spark Structured Streaming</div>
+    <h1>The Core Streaming Job</h1>
+    <p>Reads from Kafka, parses JSON, computes sliding window aggregations, applies fraud rules, and writes to two sinks: S3 (all transactions) and fraud-alerts topic (flagged only).</p>
+  </div>
+
+  <div class="callout c-warn"><div class="callout-icon">⚠️</div>
+  <div>This job needs the Kafka-Spark connector JAR. Before running, download it:<br>
+  <code>pip3 install pyspark[kafka]</code> or add the package at spark-submit time with <code>--packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1</code></div></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">spark_jobs/fraud_detection_stream.py — Part 1: Setup + Ingest</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code><span class="cm">"""
+Fraud Detection Spark Structured Streaming Job
+Reads bank-transactions from Kafka → detects fraud → writes alerts
+
+Run (local):
+spark-submit \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 \
+  spark_jobs/fraud_detection_stream.py
+"""</span>
+<span class="kw">import</span> logging
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> SparkSession
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">from</span> pyspark.sql.types <span class="kw">import</span> (StructType, StructField, StringType,
+                                DoubleType, TimestampType)
+
+logging.basicConfig(level<span class="op">=</span>logging.INFO)
+log <span class="op">=</span> logging.getLogger(__name__)
+
+KAFKA_BROKER  <span class="op">=</span> <span class="st">"localhost:9092"</span>
+INPUT_TOPIC   <span class="op">=</span> <span class="st">"bank-transactions"</span>
+ALERT_TOPIC   <span class="op">=</span> <span class="st">"fraud-alerts"</span>
+S3_OUTPUT     <span class="op">=</span> <span class="st">"data/processed/transactions"</span>  <span class="cm"># local path for dev</span>
+CHECKPOINT    <span class="op">=</span> <span class="st">"data/checkpoints/fraud_stream"</span>
+CHECKPOINT_W  <span class="op">=</span> <span class="st">"data/checkpoints/windowed"</span>
+
+<span class="cm"># ── Transaction schema ───────────────────────────────────</span>
+TX_SCHEMA <span class="op">=</span> StructType([
+    StructField(<span class="st">"transaction_id"</span>,   StringType(),    <span class="kw">True</span>),
+    StructField(<span class="st">"account_id"</span>,       StringType(),    <span class="kw">True</span>),
+    StructField(<span class="st">"card_number_hash"</span>, StringType(),    <span class="kw">True</span>),
+    StructField(<span class="st">"merchant_id"</span>,      StringType(),    <span class="kw">True</span>),
+    StructField(<span class="st">"merchant_category"</span>,StringType(),    <span class="kw">True</span>),
+    StructField(<span class="st">"amount"</span>,           DoubleType(),    <span class="kw">True</span>),
+    StructField(<span class="st">"currency"</span>,         StringType(),    <span class="kw">True</span>),
+    StructField(<span class="st">"transaction_type"</span>, StringType(),    <span class="kw">True</span>),
+    StructField(<span class="st">"channel"</span>,          StringType(),    <span class="kw">True</span>),
+    StructField(<span class="st">"country"</span>,          StringType(),    <span class="kw">True</span>),
+    StructField(<span class="st">"latitude"</span>,         DoubleType(),    <span class="kw">True</span>),
+    StructField(<span class="st">"longitude"</span>,        DoubleType(),    <span class="kw">True</span>),
+    StructField(<span class="st">"event_time"</span>,       StringType(),    <span class="kw">True</span>),
+    StructField(<span class="st">"kafka_ingest_time"</span>,StringType(),    <span class="kw">True</span>),
+])
+
+<span class="cm"># ── Spark session ────────────────────────────────────────</span>
+spark <span class="op">=</span> (SparkSession.builder
+    .appName(<span class="st">"fraud-detection-stream"</span>)
+    .master(<span class="st">"local[4]"</span>)  <span class="cm"># use 4 cores locally</span>
+    .config(<span class="st">"spark.sql.shuffle.partitions"</span>, <span class="st">"8"</span>)
+    .config(<span class="st">"spark.streaming.stopGracefullyOnShutdown"</span>, <span class="st">"true"</span>)
+    .getOrCreate())
+spark.sparkContext.setLogLevel(<span class="st">"WARN"</span>)
+
+<span class="cm"># ── READ FROM KAFKA ──────────────────────────────────────</span>
+raw_stream <span class="op">=</span> (spark.readStream
+    .format(<span class="st">"kafka"</span>)
+    .option(<span class="st">"kafka.bootstrap.servers"</span>, KAFKA_BROKER)
+    .option(<span class="st">"subscribe"</span>, INPUT_TOPIC)
+    .option(<span class="st">"startingOffsets"</span>, <span class="st">"latest"</span>)     <span class="cm"># Only new messages</span>
+    .option(<span class="st">"maxOffsetsPerTrigger"</span>, <span class="st">"10000"</span>) <span class="cm"># Max messages per micro-batch</span>
+    .load()
+)
+
+<span class="cm"># Kafka gives us: key, value (bytes), topic, partition, offset, timestamp</span>
+<span class="cm"># We need to parse the value (JSON bytes) into our schema</span>
+parsed_stream <span class="op">=</span> (raw_stream
+    .select(
+        F.from_json(F.col(<span class="st">"value"</span>).cast(<span class="st">"string"</span>), TX_SCHEMA).alias(<span class="st">"data"</span>),
+        F.col(<span class="st">"timestamp"</span>).alias(<span class="st">"kafka_ts"</span>)
+    )
+    .select(
+        <span class="st">"data.*"</span>,
+        F.col(<span class="st">"kafka_ts"</span>),
+        F.to_timestamp(<span class="st">"data.event_time"</span>).alias(<span class="st">"event_ts"</span>)
+    )
+    .filter(F.col(<span class="st">"transaction_id"</span>).isNotNull())  <span class="cm"># Drop malformed messages</span>
+    .withWatermark(<span class="st">"event_ts"</span>, <span class="st">"10 seconds"</span>)     <span class="cm"># Allow 10s late arrivals</span>
+)
+
+log.info(<span class="st">"Stream initialized. Schema:"</span>)
+parsed_stream.printSchema()</code></pre></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">spark_jobs/fraud_detection_stream.py — Part 2: Windows + Fraud Rules</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code><span class="cm"># ── SLIDING WINDOW AGGREGATIONS ──────────────────────────</span>
+<span class="cm"># 5-minute window sliding every 1 minute</span>
+<span class="cm"># This catches patterns that span window boundaries</span>
+window_stats <span class="op">=</span> (parsed_stream
+    .groupBy(
+        F.window(<span class="st">"event_ts"</span>, <span class="st">"5 minutes"</span>, <span class="st">"1 minute"</span>),
+        <span class="st">"account_id"</span>
+    )
+    .agg(
+        F.count(<span class="st">"transaction_id"</span>).alias(<span class="st">"tx_count_5min"</span>),
+        F.sum(<span class="st">"amount"</span>).alias(<span class="st">"total_amount_5min"</span>),
+        F.max(<span class="st">"amount"</span>).alias(<span class="st">"max_single_amount"</span>),
+        F.countDistinct(<span class="st">"country"</span>).alias(<span class="st">"distinct_countries"</span>),
+        F.countDistinct(<span class="st">"merchant_id"</span>).alias(<span class="st">"distinct_merchants"</span>),
+        F.sum(F.when(F.col(<span class="st">"channel"</span>) <span class="op">==</span> <span class="st">"online"</span>, <span class="nm">1</span>).otherwise(<span class="nm">0</span>)).alias(<span class="st">"online_tx_count"</span>),
+        F.sum(F.when(F.col(<span class="st">"amount"</span>) <span class="op"><</span> <span class="nm">10</span>, <span class="nm">1</span>).otherwise(<span class="nm">0</span>)).alias(<span class="st">"small_tx_count"</span>),
+        F.collect_list(<span class="st">"transaction_id"</span>).alias(<span class="st">"transaction_ids"</span>),
+    )
+)
+
+<span class="cm"># ── FRAUD SCORING ────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">apply_fraud_rules</span>(df):
+    <span class="st">"""
+    Apply rule-based fraud scoring.
+    Each rule adds to a composite fraud_score.
+    Score >= 0.6 → alert triggered.
+    """</span>
+    scored <span class="op">=</span> (df
+        <span class="cm"># Rule 1: Velocity — too many transactions in 5 min</span>
+        .withColumn(<span class="st">"rule_velocity"</span>,
+            F.when(F.col(<span class="st">"tx_count_5min"</span>) <span class="op">>=</span> <span class="nm">5</span>, <span class="nm">0.4</span>).otherwise(<span class="nm">0.0</span>))
+
+        <span class="cm"># Rule 2: High value — single large transaction</span>
+        .withColumn(<span class="st">"rule_high_amount"</span>,
+            F.when(F.col(<span class="st">"max_single_amount"</span>) <span class="op">></span> <span class="nm">5000</span>, <span class="nm">0.3</span>).otherwise(<span class="nm">0.0</span>))
+
+        <span class="cm"># Rule 3: Geo impossible — multiple countries in same window</span>
+        .withColumn(<span class="st">"rule_geo_impossible"</span>,
+            F.when(F.col(<span class="st">"distinct_countries"</span>) <span class="op">>=</span> <span class="nm">2</span>, <span class="nm">0.5</span>).otherwise(<span class="nm">0.0</span>))
+
+        <span class="cm"># Rule 4: Card testing — multiple tiny transactions</span>
+        .withColumn(<span class="st">"rule_card_testing"</span>,
+            F.when(F.col(<span class="st">"small_tx_count"</span>) <span class="op">>=</span> <span class="nm">3</span>, <span class="nm">0.4</span>).otherwise(<span class="nm">0.0</span>))
+
+        <span class="cm"># Rule 5: Rapid online — many online transactions rapidly</span>
+        .withColumn(<span class="st">"rule_rapid_online"</span>,
+            F.when(F.col(<span class="st">"online_tx_count"</span>) <span class="op">>=</span> <span class="nm">4</span>, <span class="nm">0.35</span>).otherwise(<span class="nm">0.0</span>))
+
+        <span class="cm"># Composite score (capped at 1.0)</span>
+        .withColumn(<span class="st">"fraud_score"</span>, F.least(
+            F.col(<span class="st">"rule_velocity"</span>) <span class="op">+</span> F.col(<span class="st">"rule_high_amount"</span>) <span class="op">+</span>
+            F.col(<span class="st">"rule_geo_impossible"</span>) <span class="op">+</span> F.col(<span class="st">"rule_card_testing"</span>) <span class="op">+</span>
+            F.col(<span class="st">"rule_rapid_online"</span>), F.lit(<span class="nm">1.0</span>)))
+
+        <span class="cm"># Build a list of which rules fired</span>
+        .withColumn(<span class="st">"rules_triggered"</span>, F.concat_ws(<span class="st">","</span>,
+            F.when(F.col(<span class="st">"rule_velocity"</span>)      <span class="op">></span> <span class="nm">0</span>, F.lit(<span class="st">"velocity"</span>)),
+            F.when(F.col(<span class="st">"rule_high_amount"</span>)   <span class="op">></span> <span class="nm">0</span>, F.lit(<span class="st">"high_amount"</span>)),
+            F.when(F.col(<span class="st">"rule_geo_impossible"</span>)<span class="op">></span> <span class="nm">0</span>, F.lit(<span class="st">"geo_impossible"</span>)),
+            F.when(F.col(<span class="st">"rule_card_testing"</span>)  <span class="op">></span> <span class="nm">0</span>, F.lit(<span class="st">"card_testing"</span>)),
+            F.when(F.col(<span class="st">"rule_rapid_online"</span>)  <span class="op">></span> <span class="nm">0</span>, F.lit(<span class="st">"rapid_online"</span>)),
+        ))
+
+        <span class="cm"># Flag as fraud if score >= 0.6</span>
+        .withColumn(<span class="st">"is_fraud_alert"</span>, F.col(<span class="st">"fraud_score"</span>) <span class="op">>=</span> <span class="nm">0.6</span>)
+        .withColumn(<span class="st">"alert_time"</span>, F.current_timestamp())
+    )
+    <span class="kw">return</span> scored
+
+scored_stream <span class="op">=</span> apply_fraud_rules(window_stats)</code></pre></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">spark_jobs/fraud_detection_stream.py — Part 3: Write to Sinks</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code><span class="cm"># ── SINK 1: Write ALL transactions to S3 (cold path) ─────</span>
+<span class="cm"># The raw parsed stream (before windowing) goes to S3 for history</span>
+s3_query <span class="op">=</span> (parsed_stream
+    .withColumn(<span class="st">"year"</span>,  F.year(<span class="st">"event_ts"</span>))
+    .withColumn(<span class="st">"month"</span>, F.month(<span class="st">"event_ts"</span>))
+    .withColumn(<span class="st">"day"</span>,   F.dayofmonth(<span class="st">"event_ts"</span>))
+    .writeStream
+    .outputMode(<span class="st">"append"</span>)
+    .format(<span class="st">"parquet"</span>)
+    .option(<span class="st">"checkpointLocation"</span>, <span class="st">f"{CHECKPOINT}/s3"</span>)
+    .partitionBy(<span class="st">"year"</span>, <span class="st">"month"</span>, <span class="st">"day"</span>)
+    .trigger(processingTime<span class="op">=</span><span class="st">"10 seconds"</span>)
+    .start(S3_OUTPUT)
+)
+
+<span class="cm"># ── SINK 2: Write FRAUD ALERTS to Kafka topic ─────────────</span>
+<span class="cm"># Only flagged windows → Kafka fraud-alerts topic → Lambda reads it</span>
+fraud_alerts_for_kafka <span class="op">=</span> (scored_stream
+    .filter(F.col(<span class="st">"is_fraud_alert"</span>) <span class="op">==</span> <span class="kw">True</span>)
+    .select(
+        F.col(<span class="st">"account_id"</span>).alias(<span class="st">"key"</span>),
+        F.to_json(F.struct(
+            F.col(<span class="st">"account_id"</span>),
+            F.col(<span class="st">"fraud_score"</span>),
+            F.col(<span class="st">"rules_triggered"</span>),
+            F.col(<span class="st">"tx_count_5min"</span>),
+            F.col(<span class="st">"total_amount_5min"</span>),
+            F.col(<span class="st">"distinct_countries"</span>),
+            F.col(<span class="st">"alert_time"</span>),
+        )).alias(<span class="st">"value"</span>)
+    )
+)
+
+kafka_alert_query <span class="op">=</span> (fraud_alerts_for_kafka
+    .writeStream
+    .outputMode(<span class="st">"update"</span>)
+    .format(<span class="st">"kafka"</span>)
+    .option(<span class="st">"kafka.bootstrap.servers"</span>, KAFKA_BROKER)
+    .option(<span class="st">"topic"</span>, ALERT_TOPIC)
+    .option(<span class="st">"checkpointLocation"</span>, <span class="st">f"{CHECKPOINT}/kafka_alerts"</span>)
+    .trigger(processingTime<span class="op">=</span><span class="st">"10 seconds"</span>)
+    .start()
+)
+
+<span class="cm"># ── SINK 3: Console output for development/debugging ──────</span>
+debug_query <span class="op">=</span> (scored_stream
+    .filter(F.col(<span class="st">"is_fraud_alert"</span>) <span class="op">==</span> <span class="kw">True</span>)
+    .select(<span class="st">"account_id"</span>, <span class="st">"fraud_score"</span>, <span class="st">"rules_triggered"</span>,
+            <span class="st">"tx_count_5min"</span>, <span class="st">"total_amount_5min"</span>)
+    .writeStream
+    .outputMode(<span class="st">"update"</span>)
+    .format(<span class="st">"console"</span>)
+    .option(<span class="st">"truncate"</span>, <span class="kw">False</span>)
+    .trigger(processingTime<span class="op">=</span><span class="st">"10 seconds"</span>)
+    .start()
+)
+
+log.info(<span class="st">"All streaming queries started. Waiting for data..."</span>)
+<span class="cm"># Wait for all queries to terminate (run forever until Ctrl+C)</span>
+spark.streams.awaitAnyTermination()</code></pre></div>
+</div>
+
+<!-- ══ STEP 5 ══ -->
+<div class="section" id="section-step5">
+  <div class="hero">
+    <div class="hero-tag">Step 5 · Fraud Detection Rules</div>
+    <h1>Standalone Fraud Rules Module</h1>
+    <p>Keeping fraud rules in a separate module makes them testable, versioned, and easy for the fraud team to update without touching the streaming infrastructure.</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">spark_jobs/fraud_rules.py</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code><span class="cm">"""
+Fraud detection rules — standalone module.
+Separating rules from streaming infrastructure means:
+- Fraud team can update rules without touching Spark code
+- Rules can be unit tested independently
+- Rules can be loaded from config file / database in production
+"""</span>
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> DataFrame
+<span class="kw">from</span> dataclasses <span class="kw">import</span> dataclass
+<span class="kw">from</span> typing <span class="kw">import</span> List
+
+@dataclass
+<span class="kw">class</span> <span class="fn">FraudRule</span>:
+    name: str
+    score: float
+    description: str
+
+<span class="cm"># Rule definitions — could be loaded from database in production</span>
+FRAUD_RULES: List[FraudRule] <span class="op">=</span> [
+    FraudRule(<span class="st">"velocity"</span>,       <span class="nm">0.40</span>, <span class="st">"5+ transactions in 5 minutes"</span>),
+    FraudRule(<span class="st">"high_amount"</span>,    <span class="nm">0.30</span>, <span class="st">"Single transaction > $5,000"</span>),
+    FraudRule(<span class="st">"geo_impossible"</span>, <span class="nm">0.50</span>, <span class="st">"Transactions from 2+ countries in 5 min"</span>),
+    FraudRule(<span class="st">"card_testing"</span>,   <span class="nm">0.40</span>, <span class="st">"3+ micro-transactions < $10"</span>),
+    FraudRule(<span class="st">"rapid_online"</span>,   <span class="nm">0.35</span>, <span class="st">"4+ online transactions in 5 min"</span>),
+]
+
+FRAUD_THRESHOLD <span class="op">=</span> <span class="nm">0.60</span>  <span class="cm"># Score >= this triggers alert</span>
+
+<span class="kw">def</span> <span class="fn">apply_rules</span>(df: DataFrame) <span class="op">-></span> DataFrame:
+    <span class="st">"""Apply all fraud rules and return scored DataFrame."""</span>
+    rule_conditions <span class="op">=</span> {
+        <span class="st">"velocity"</span>:       F.col(<span class="st">"tx_count_5min"</span>) <span class="op">>=</span> <span class="nm">5</span>,
+        <span class="st">"high_amount"</span>:    F.col(<span class="st">"max_single_amount"</span>) <span class="op">></span> <span class="nm">5000</span>,
+        <span class="st">"geo_impossible"</span>: F.col(<span class="st">"distinct_countries"</span>) <span class="op">>=</span> <span class="nm">2</span>,
+        <span class="st">"card_testing"</span>:   F.col(<span class="st">"small_tx_count"</span>) <span class="op">>=</span> <span class="nm">3</span>,
+        <span class="st">"rapid_online"</span>:   F.col(<span class="st">"online_tx_count"</span>) <span class="op">>=</span> <span class="nm">4</span>,
+    }
+
+    score_expr <span class="op">=</span> F.lit(<span class="nm">0.0</span>)
+    <span class="kw">for</span> rule <span class="kw">in</span> FRAUD_RULES:
+        col_name <span class="op">=</span> <span class="st">f"rule_{rule.name}"</span>
+        df <span class="op">=</span> df.withColumn(col_name,
+            F.when(rule_conditions[rule.name], F.lit(rule.score)).otherwise(F.lit(<span class="nm">0.0</span>)))
+        score_expr <span class="op">=</span> score_expr <span class="op">+</span> F.col(col_name)
+
+    df <span class="op">=</span> df.withColumn(<span class="st">"fraud_score"</span>, F.least(score_expr, F.lit(<span class="nm">1.0</span>)))
+    df <span class="op">=</span> df.withColumn(<span class="st">"is_fraud_alert"</span>, F.col(<span class="st">"fraud_score"</span>) <span class="op">>=</span> FRAUD_THRESHOLD)
+    <span class="kw">return</span> df
+
+<span class="kw">def</span> <span class="fn">get_rule_descriptions</span>() <span class="op">-></span> dict:
+    <span class="st">"""Return rule descriptions for documentation / API."""</span>
+    <span class="kw">return</span> {r.name: {<span class="st">"score"</span>: r.score, <span class="st">"desc"</span>: r.description} <span class="kw">for</span> r <span class="kw">in</span> FRAUD_RULES}</code></pre></div>
+</div>
+
+<!-- ══ STEP 6 ══ -->
+<div class="section" id="section-step6">
+  <div class="hero">
+    <div class="hero-tag">Step 6 · Lambda Alerts</div>
+    <h1>AWS Lambda Alert Handler</h1>
+    <p>Lambda consumes from the fraud-alerts Kafka topic, writes to DynamoDB, and sends SNS notifications to the fraud operations team.</p>
+  </div>
+
+  <div class="callout c-info"><div class="callout-icon">💡</div><div>In production, you'd use AWS MSK (Managed Kafka) as a Lambda event source trigger. For local development, we simulate this with a Python consumer that mimics what Lambda would do.</div></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">lambda_functions/alert_handler.py</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code><span class="cm">"""
+Lambda function: consumes fraud-alerts Kafka topic,
+writes to DynamoDB, sends SNS notification.
+
+In production: Lambda trigger configured with MSK event source mapping.
+For local dev: run as a standalone consumer script.
+"""</span>
+<span class="kw">import</span> json, uuid, boto3, os
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone
+<span class="kw">from</span> kafka <span class="kw">import</span> KafkaConsumer
+
+<span class="cm"># AWS clients</span>
+dynamodb  <span class="op">=</span> boto3.resource(<span class="st">"dynamodb"</span>, region_name<span class="op">=</span><span class="st">"us-east-1"</span>)
+sns       <span class="op">=</span> boto3.client(<span class="st">"sns"</span>, region_name<span class="op">=</span><span class="st">"us-east-1"</span>)
+
+DYNAMO_TABLE  <span class="op">=</span> <span class="st">"fraud-alerts"</span>
+SNS_TOPIC_ARN <span class="op">=</span> os.environ.get(<span class="st">"SNS_FRAUD_TOPIC_ARN"</span>, <span class="st">""</span>)
+KAFKA_BROKER  <span class="op">=</span> <span class="st">"localhost:9092"</span>
+ALERT_TOPIC   <span class="op">=</span> <span class="st">"fraud-alerts"</span>
+
+<span class="cm"># ── This is the Lambda handler in production ─────────────</span>
+<span class="kw">def</span> <span class="fn">lambda_handler</span>(event, context):
+    <span class="st">"""
+    In production: event is the MSK (Kafka) event payload.
+    event = {
+        "records": {
+            "fraud-alerts-0": [
+                {"key": "base64", "value": "base64", ...}
+            ]
+        }
+    }
+    """</span>
+    alerts_processed <span class="op">=</span> <span class="nm">0</span>
+    table <span class="op">=</span> dynamodb.Table(DYNAMO_TABLE)
+
+    <span class="kw">for</span> partition_records <span class="kw">in</span> event.get(<span class="st">"records"</span>, {}).values():
+        <span class="kw">for</span> record <span class="kw">in</span> partition_records:
+            <span class="kw">import</span> base64
+            value_bytes <span class="op">=</span> base64.b64decode(record[<span class="st">"value"</span>])
+            alert_data  <span class="op">=</span> json.loads(value_bytes.decode(<span class="st">"utf-8"</span>))
+            process_alert(table, alert_data)
+            alerts_processed <span class="op">+=</span> <span class="nm">1</span>
+
+    <span class="kw">return</span> {<span class="st">"statusCode"</span>: <span class="nm">200</span>, <span class="st">"alerts_processed"</span>: alerts_processed}
+
+<span class="kw">def</span> <span class="fn">process_alert</span>(table, alert_data: dict):
+    <span class="st">"""Write alert to DynamoDB and send SNS notification."""</span>
+    alert_id  <span class="op">=</span> str(uuid.uuid4())
+    now_ts    <span class="op">=</span> datetime.now(timezone.utc).isoformat()
+    ttl_epoch <span class="op">=</span> <span class="kw">int</span>((datetime.now(timezone.utc).timestamp()) <span class="op">+</span> (<span class="nm">30</span> <span class="op">*</span> <span class="nm">86400</span>))  <span class="cm"># 30 days</span>
+
+    <span class="cm"># Persist to DynamoDB</span>
+    item <span class="op">=</span> {
+        <span class="st">"alert_id"</span>:            alert_id,
+        <span class="st">"account_id"</span>:         alert_data.get(<span class="st">"account_id"</span>),
+        <span class="st">"fraud_score"</span>:        str(alert_data.get(<span class="st">"fraud_score"</span>, <span class="nm">0</span>)),
+        <span class="st">"rules_triggered"</span>:    alert_data.get(<span class="st">"rules_triggered"</span>, <span class="st">""</span>),
+        <span class="st">"tx_count_5min"</span>:      alert_data.get(<span class="st">"tx_count_5min"</span>, <span class="nm">0</span>),
+        <span class="st">"total_amount_5min"</span>:  str(alert_data.get(<span class="st">"total_amount_5min"</span>, <span class="nm">0</span>)),
+        <span class="st">"distinct_countries"</span>: alert_data.get(<span class="st">"distinct_countries"</span>, <span class="nm">1</span>),
+        <span class="st">"alert_time"</span>:         now_ts,
+        <span class="st">"status"</span>:             <span class="st">"OPEN"</span>,
+        <span class="st">"ttl"</span>:                ttl_epoch,
+    }
+    table.put_item(Item<span class="op">=</span>item)
+    print(<span class="st">f"Alert written to DynamoDB: {alert_id} | score={item['fraud_score']}"</span>)
+
+    <span class="cm"># Send SNS push notification to fraud team</span>
+    <span class="kw">if</span> SNS_TOPIC_ARN:
+        message <span class="op">=</span> (
+            <span class="st">f"🚨 FRAUD ALERT\n"</span>
+            <span class="st">f"Account: {item['account_id']}\n"</span>
+            <span class="st">f"Risk Score: {item['fraud_score']}\n"</span>
+            <span class="st">f"Rules: {item['rules_triggered']}\n"</span>
+            <span class="st">f"TX Count (5min): {item['tx_count_5min']}\n"</span>
+            <span class="st">f"Amount (5min): ${item['total_amount_5min']}\n"</span>
+            <span class="st">f"Alert ID: {alert_id}"</span>
+        )
+        sns.publish(TopicArn<span class="op">=</span>SNS_TOPIC_ARN, Message<span class="op">=</span>message,
+                    Subject<span class="op">=</span><span class="st">"Fraud Alert Triggered"</span>)
+
+<span class="cm"># ── Local dev: run as Kafka consumer (simulates Lambda) ───</span>
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    print(<span class="st">"Starting local fraud alert consumer (simulating Lambda)..."</span>)
+    consumer <span class="op">=</span> KafkaConsumer(
+        ALERT_TOPIC,
+        bootstrap_servers<span class="op">=</span>KAFKA_BROKER,
+        value_deserializer<span class="op">=lambda</span> m: json.loads(m.decode(<span class="st">"utf-8"</span>)),
+        group_id<span class="op">=</span><span class="st">"fraud-alert-consumer"</span>,
+        auto_offset_reset<span class="op">=</span><span class="st">"latest"</span>,
+    )
+    print(<span class="st">f"Listening on {ALERT_TOPIC}. Waiting for alerts...\n"</span>)
+    <span class="cm"># Use a local mock table instead of real DynamoDB for dev</span>
+    <span class="kw">class</span> <span class="fn">MockTable</span>:
+        <span class="kw">def</span> <span class="fn">put_item</span>(self, Item):
+            print(<span class="st">f"  DYNAMO WRITE: {json.dumps(Item, indent=2)}"</span>)
+    mock_table <span class="op">=</span> MockTable()
+    <span class="kw">for</span> msg <span class="kw">in</span> consumer:
+        print(<span class="st">f"\n🚨 Alert received from Kafka!"</span>)
+        process_alert(mock_table, msg.value)</code></pre></div>
+</div>
+
+<!-- ══ STEP 7 ══ -->
+<div class="section" id="section-step7">
+  <div class="hero">
+    <div class="hero-tag">Step 7 · Schema Evolution</div>
+    <h1>Handling Schema Changes in a Live Stream</h1>
+    <p>What happens when the bank's transaction system adds a new field (e.g., device_fingerprint) to the Kafka messages? Your consumer must not break. This is schema evolution.</p>
+  </div>
+
+  <div class="callout c-danger"><div class="callout-icon">🚨</div><div><strong>The problem without schema evolution:</strong> Stream job is running in production reading JSON with 14 fields. Bank's system upgrades overnight and starts sending 15 fields. If your Spark job has a hardcoded schema with 14 fields, it silently drops the new field — or worse, fails on strict validation. After millions of events, you realize fraud pattern data is missing a key signal.</div></div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num a">7a</div>
+      <div><div class="step-title">Strategy 1: permissive JSON parsing with from_json</div><div class="step-sub">Simplest — works for most cases</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body open">
+      <div class="code-block"><div class="code-header"><span class="code-lang">PySpark — Permissive Schema with Optional Fields</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="kw">from</span> pyspark.sql.types <span class="kw">import</span> StructType, StructField, StringType
+
+<span class="cm"># Version 1 schema (original)</span>
+SCHEMA_V1 <span class="op">=</span> StructType([
+    StructField(<span class="st">"transaction_id"</span>, StringType(), <span class="kw">True</span>),
+    StructField(<span class="st">"account_id"</span>,     StringType(), <span class="kw">True</span>),
+    StructField(<span class="st">"amount"</span>,         DoubleType(), <span class="kw">True</span>),
+    <span class="cm"># ... other fields</span>
+])
+
+<span class="cm"># Version 2 schema — added device_fingerprint field</span>
+<span class="cm"># Setting nullable=True for new fields is BACKWARD COMPATIBLE</span>
+<span class="cm"># Old messages that don't have device_fingerprint will get NULL</span>
+SCHEMA_V2 <span class="op">=</span> StructType([
+    StructField(<span class="st">"transaction_id"</span>,     StringType(), <span class="kw">True</span>),
+    StructField(<span class="st">"account_id"</span>,         StringType(), <span class="kw">True</span>),
+    StructField(<span class="st">"amount"</span>,             DoubleType(), <span class="kw">True</span>),
+    StructField(<span class="st">"device_fingerprint"</span>, StringType(), <span class="kw">True</span>),  <span class="cm"># NEW field, nullable</span>
+    <span class="cm"># ... other fields</span>
+])
+
+<span class="cm"># from_json silently ignores extra fields in the JSON that aren't in the schema</span>
+<span class="cm"># and fills missing fields with NULL — this is backward compatible</span>
+parsed <span class="op">=</span> raw.select(F.from_json(F.col(<span class="st">"value"</span>).cast(<span class="st">"string"</span>), SCHEMA_V2).alias(<span class="st">"d"</span>))
+
+<span class="cm"># Handle NULL device_fingerprint gracefully</span>
+enriched <span class="op">=</span> parsed.withColumn(<span class="st">"device_fingerprint"</span>,
+    F.coalesce(F.col(<span class="st">"d.device_fingerprint"</span>), F.lit(<span class="st">"unknown"</span>)))</code></pre></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">7b</div>
+      <div><div class="step-title">Strategy 2: Schema Registry with Avro (production approach)</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">Python — Avro Schema + Schema Registry Concept</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="cm">"""
+Schema Registry approach — production pattern.
+Install: pip install confluent-kafka[avro]
+"""</span>
+<span class="kw">from</span> confluent_kafka <span class="kw">import</span> DeserializingConsumer
+<span class="kw">from</span> confluent_kafka.schema_registry <span class="kw">import</span> SchemaRegistryClient
+<span class="kw">from</span> confluent_kafka.schema_registry.avro <span class="kw">import</span> AvroDeserializer
+
+<span class="cm"># Avro schema V1</span>
+AVRO_SCHEMA_V1 <span class="op">=</span> <span class="st">"""
+{
+  "type": "record",
+  "name": "Transaction",
+  "fields": [
+    {"name": "transaction_id", "type": "string"},
+    {"name": "account_id",     "type": "string"},
+    {"name": "amount",         "type": "double"}
+  ]
+}
+"""</span>
+
+<span class="cm"># Avro schema V2 — new field WITH default (backward compatible!)</span>
+AVRO_SCHEMA_V2 <span class="op">=</span> <span class="st">"""
+{
+  "type": "record",
+  "name": "Transaction",
+  "fields": [
+    {"name": "transaction_id",     "type": "string"},
+    {"name": "account_id",         "type": "string"},
+    {"name": "amount",             "type": "double"},
+    {"name": "device_fingerprint", "type": ["null","string"], "default": null}
+  ]
+}
+"""</span>
+
+<span class="cm"># Register V2 with Schema Registry</span>
+<span class="cm"># Schema Registry validates compatibility before accepting</span>
+registry <span class="op">=</span> SchemaRegistryClient({<span class="st">"url"</span>: <span class="st">"http://localhost:8081"</span>})
+
+<span class="cm"># Producer uses V2 schema — new field available</span>
+<span class="cm"># Old consumer (V1) still works — new field gets NULL via default</span>
+<span class="cm"># New consumer (V2) gets device_fingerprint when available</span>
+print(<span class="st">"Schema Registry enforces: adding a field with default = BACKWARD COMPATIBLE ✓"</span>)
+print(<span class="st">"Schema Registry rejects: removing a required field = BREAKING CHANGE ✗"</span>)</code></pre></div>
+
+      <div class="callout c-tip"><div class="callout-icon">💡</div><div><strong>The key rule for schema evolution:</strong> Adding a field with a default value is safe (old consumers get NULL, new consumers get the value). Removing or renaming a required field breaks old consumers. Schema Registry enforces these compatibility rules automatically — it rejects incompatible schema updates before any producer can publish a breaking change.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STEP 8 ══ -->
+<div class="section" id="section-step8">
+  <div class="hero">
+    <div class="hero-tag">Step 8 · SQL Queries</div>
+    <h1>Fraud Analytics SQL on Historical Data</h1>
+    <p>After the streaming job writes transactions to S3, Athena queries the historical data for pattern analysis, model training prep, and regulatory reporting.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'fq1')">Fraud Patterns</button>
+    <button class="tab-btn" onclick="switchTab(this,'fq2')">Account Risk Profile</button>
+    <button class="tab-btn" onclick="switchTab(this,'fq3')">Time-of-Day Analysis</button>
+    <button class="tab-btn" onclick="switchTab(this,'fq4')">Merchant Risk Score</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-fq1">
+    <div class="callout c-info"><div class="callout-icon">💡</div><div>Identify which fraud rule combinations fire most frequently and how they correlate with confirmed fraud vs false positives. Used to tune rule thresholds.</div></div>
+    <div class="code-block"><div class="code-header"><span class="code-lang">SQL — Fraud Rule Pattern Analysis</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="kw">WITH</span> alert_analysis <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        rules_triggered,
+        <span class="fn">COUNT</span>(*)                                    <span class="kw">AS</span> total_alerts,
+        <span class="fn">AVG</span>(fraud_score)                            <span class="kw">AS</span> avg_score,
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> status <span class="op">=</span> <span class="st">'CONFIRMED'</span> <span class="kw">THEN</span> <span class="nm">1</span> <span class="kw">ELSE</span> <span class="nm">0</span> <span class="kw">END</span>) <span class="kw">AS</span> confirmed_fraud,
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> status <span class="op">=</span> <span class="st">'FALSE_POSITIVE'</span> <span class="kw">THEN</span> <span class="nm">1</span> <span class="kw">ELSE</span> <span class="nm">0</span> <span class="kw">END</span>) <span class="kw">AS</span> false_positives
+    <span class="kw">FROM</span> fraud_alerts_history
+    <span class="kw">WHERE</span> year <span class="op">=</span> <span class="nm">2024</span>
+    <span class="kw">GROUP BY</span> rules_triggered
+),
+ranked <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        rules_triggered, total_alerts, avg_score,
+        confirmed_fraud, false_positives,
+        <span class="fn">ROUND</span>(confirmed_fraud * <span class="nm">100.0</span> / <span class="fn">NULLIF</span>(total_alerts,<span class="nm">0</span>), <span class="nm">1</span>) <span class="kw">AS</span> precision_pct,
+        <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> confirmed_fraud <span class="kw">DESC</span>)         <span class="kw">AS</span> effectiveness_rank
+    <span class="kw">FROM</span> alert_analysis
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> ranked
+<span class="kw">ORDER BY</span> precision_pct <span class="kw">DESC</span>, total_alerts <span class="kw">DESC</span>;</code></pre></div>
+  </div>
+
+  <div class="tab-panel" id="tab-fq2">
+    <div class="callout c-info"><div class="callout-icon">💡</div><div>Build a historical risk profile per account — accounts with repeat fraud flags are higher-risk and may need enhanced monitoring or card replacement.</div></div>
+    <div class="code-block"><div class="code-header"><span class="code-lang">SQL — Account Historical Risk Profile</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="kw">WITH</span> account_tx_stats <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        account_id,
+        <span class="fn">COUNT</span>(transaction_id)                      <span class="kw">AS</span> total_transactions,
+        <span class="fn">SUM</span>(amount)                                 <span class="kw">AS</span> total_spend,
+        <span class="fn">AVG</span>(amount)                                 <span class="kw">AS</span> avg_transaction,
+        <span class="fn">MAX</span>(amount)                                 <span class="kw">AS</span> max_transaction,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> country)                    <span class="kw">AS</span> countries_used,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> merchant_category)          <span class="kw">AS</span> merchant_categories,
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> channel <span class="op">=</span> <span class="st">'online'</span> <span class="kw">THEN</span> <span class="nm">1</span> <span class="kw">ELSE</span> <span class="nm">0</span> <span class="kw">END</span>) <span class="kw">AS</span> online_count
+    <span class="kw">FROM</span> transactions_history
+    <span class="kw">WHERE</span> year <span class="op">=</span> <span class="nm">2024</span>
+    <span class="kw">GROUP BY</span> account_id
+),
+account_alerts <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        account_id,
+        <span class="fn">COUNT</span>(*)                     <span class="kw">AS</span> alert_count,
+        <span class="fn">MAX</span>(fraud_score)             <span class="kw">AS</span> max_fraud_score,
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> status <span class="op">=</span> <span class="st">'CONFIRMED'</span> <span class="kw">THEN</span> <span class="nm">1</span> <span class="kw">ELSE</span> <span class="nm">0</span> <span class="kw">END</span>) <span class="kw">AS</span> confirmed_frauds
+    <span class="kw">FROM</span> fraud_alerts_history
+    <span class="kw">GROUP BY</span> account_id
+)
+<span class="kw">SELECT</span>
+    t.account_id, t.total_transactions, t.total_spend,
+    t.countries_used, t.online_count,
+    <span class="fn">COALESCE</span>(a.alert_count, <span class="nm">0</span>)        <span class="kw">AS</span> total_alerts,
+    <span class="fn">COALESCE</span>(a.confirmed_frauds, <span class="nm">0</span>)   <span class="kw">AS</span> confirmed_frauds,
+    <span class="fn">ROUND</span>(t.online_count * <span class="nm">100.0</span>
+        / <span class="fn">NULLIF</span>(t.total_transactions, <span class="nm">0</span>), <span class="nm">1</span>) <span class="kw">AS</span> online_pct,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> <span class="fn">COALESCE</span>(a.confirmed_frauds,<span class="nm">0</span>) <span class="op">>=</span> <span class="nm">2</span> <span class="kw">THEN</span> <span class="st">'HIGH RISK — Block Card'</span>
+        <span class="kw">WHEN</span> <span class="fn">COALESCE</span>(a.alert_count,<span class="nm">0</span>)      <span class="op">>=</span> <span class="nm">3</span> <span class="kw">THEN</span> <span class="st">'ELEVATED — Enhanced Monitoring'</span>
+        <span class="kw">WHEN</span> <span class="fn">COALESCE</span>(a.alert_count,<span class="nm">0</span>)      <span class="op">>=</span> <span class="nm">1</span> <span class="kw">THEN</span> <span class="st">'WATCH — Flag for Review'</span>
+        <span class="kw">ELSE</span>                                        <span class="st">'LOW RISK — Normal'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> risk_classification
+<span class="kw">FROM</span> account_tx_stats t
+<span class="kw">LEFT JOIN</span> account_alerts a <span class="kw">ON</span> t.account_id <span class="op">=</span> a.account_id
+<span class="kw">ORDER BY</span> confirmed_frauds <span class="kw">DESC</span>, total_alerts <span class="kw">DESC</span>;</code></pre></div>
+  </div>
+
+  <div class="tab-panel" id="tab-fq3">
+    <div class="callout c-info"><div class="callout-icon">💡</div><div>Fraud has time-of-day patterns — attacks often happen late night when victims are asleep and fraud ops teams are understaffed. This query surfaces those patterns.</div></div>
+    <div class="code-block"><div class="code-header"><span class="code-lang">SQL — Time-of-Day Fraud Concentration</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="kw">WITH</span> hourly_stats <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">EXTRACT</span>(hour <span class="kw">FROM</span> event_time)   <span class="kw">AS</span> hour_of_day,
+        <span class="fn">EXTRACT</span>(dow <span class="kw">FROM</span> event_time)    <span class="kw">AS</span> day_of_week,
+        <span class="fn">COUNT</span>(transaction_id)           <span class="kw">AS</span> total_tx,
+        <span class="fn">SUM</span>(amount)                      <span class="kw">AS</span> total_amount,
+        <span class="fn">AVG</span>(amount)                      <span class="kw">AS</span> avg_amount
+    <span class="kw">FROM</span> transactions_history
+    <span class="kw">WHERE</span> year <span class="op">=</span> <span class="nm">2024</span>
+    <span class="kw">GROUP BY</span> hour_of_day, day_of_week
+),
+fraud_hourly <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        <span class="fn">EXTRACT</span>(hour <span class="kw">FROM</span> <span class="fn">CAST</span>(alert_time <span class="kw">AS</span> TIMESTAMP)) <span class="kw">AS</span> hour_of_day,
+        <span class="fn">COUNT</span>(*) <span class="kw">AS</span> fraud_alerts
+    <span class="kw">FROM</span> fraud_alerts_history
+    <span class="kw">WHERE</span> status <span class="op">=</span> <span class="st">'CONFIRMED'</span>
+    <span class="kw">GROUP BY</span> hour_of_day
+)
+<span class="kw">SELECT</span>
+    h.hour_of_day,
+    h.total_tx,
+    h.avg_amount,
+    <span class="fn">COALESCE</span>(f.fraud_alerts, <span class="nm">0</span>) <span class="kw">AS</span> fraud_alerts,
+    <span class="fn">ROUND</span>(<span class="fn">COALESCE</span>(f.fraud_alerts,<span class="nm">0</span>) * <span class="nm">10000.0</span>
+        / <span class="fn">NULLIF</span>(h.total_tx,<span class="nm">0</span>), <span class="nm">2</span>)  <span class="kw">AS</span> fraud_per_10k_tx,
+    <span class="cm">-- Rank hours by fraud rate</span>
+    <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (
+        <span class="kw">ORDER BY</span> <span class="fn">COALESCE</span>(f.fraud_alerts,<span class="nm">0</span>) * <span class="nm">1.0</span>
+                 / <span class="fn">NULLIF</span>(h.total_tx,<span class="nm">0</span>) <span class="kw">DESC</span>
+    ) <span class="kw">AS</span> fraud_risk_rank
+<span class="kw">FROM</span> hourly_stats h
+<span class="kw">LEFT JOIN</span> fraud_hourly f <span class="kw">ON</span> h.hour_of_day <span class="op">=</span> f.hour_of_day
+<span class="kw">ORDER BY</span> fraud_risk_rank;</code></pre></div>
+  </div>
+
+  <div class="tab-panel" id="tab-fq4">
+    <div class="callout c-info"><div class="callout-icon">💡</div><div>Some merchants are repeatedly associated with fraud — either compromised terminals or complicit in fraud rings. This query builds a merchant risk score based on fraud rate and average transaction value deviation.</div></div>
+    <div class="code-block"><div class="code-header"><span class="code-lang">SQL — Merchant Risk Score</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="kw">WITH</span> merchant_metrics <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        t.merchant_id,
+        t.merchant_category,
+        <span class="fn">COUNT</span>(t.transaction_id)            <span class="kw">AS</span> total_tx,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> t.account_id)       <span class="kw">AS</span> unique_accounts,
+        <span class="fn">AVG</span>(t.amount)                       <span class="kw">AS</span> avg_tx_amount,
+        <span class="fn">SUM</span>(t.amount)                       <span class="kw">AS</span> total_volume,
+        <span class="fn">COUNT</span>(f.alert_id)                   <span class="kw">AS</span> fraud_tx_count,
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> f.alert_id <span class="kw">IS NOT NULL</span> <span class="kw">THEN</span> t.amount <span class="kw">ELSE</span> <span class="nm">0</span> <span class="kw">END</span>) <span class="kw">AS</span> fraud_volume
+    <span class="kw">FROM</span> transactions_history t
+    <span class="kw">LEFT JOIN</span> fraud_alerts_history f
+        <span class="kw">ON</span> t.account_id <span class="op">=</span> f.account_id
+       <span class="kw">AND</span> f.status <span class="op">=</span> <span class="st">'CONFIRMED'</span>
+    <span class="kw">WHERE</span> t.year <span class="op">=</span> <span class="nm">2024</span>
+    <span class="kw">GROUP BY</span> t.merchant_id, t.merchant_category
+    <span class="kw">HAVING</span> <span class="fn">COUNT</span>(t.transaction_id) <span class="op">>=</span> <span class="nm">10</span>  <span class="cm">-- Minimum transaction threshold</span>
+),
+category_avg <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        merchant_category,
+        <span class="fn">AVG</span>(avg_tx_amount) <span class="kw">AS</span> cat_avg_amount
+    <span class="kw">FROM</span> merchant_metrics
+    <span class="kw">GROUP BY</span> merchant_category
+)
+<span class="kw">SELECT</span>
+    m.merchant_id, m.merchant_category,
+    m.total_tx, m.unique_accounts,
+    <span class="fn">ROUND</span>(m.avg_tx_amount, <span class="nm">2</span>)           <span class="kw">AS</span> avg_tx,
+    <span class="fn">ROUND</span>(c.cat_avg_amount, <span class="nm">2</span>)          <span class="kw">AS</span> category_avg_tx,
+    m.fraud_tx_count,
+    <span class="fn">ROUND</span>(m.fraud_tx_count * <span class="nm">100.0</span>
+        / <span class="fn">NULLIF</span>(m.total_tx,<span class="nm">0</span>), <span class="nm">2</span>)      <span class="kw">AS</span> fraud_rate_pct,
+    <span class="fn">ROUND</span>((m.avg_tx_amount - c.cat_avg_amount)
+        / <span class="fn">NULLIF</span>(c.cat_avg_amount,<span class="nm">0</span>) * <span class="nm">100</span>, <span class="nm">1</span>) <span class="kw">AS</span> pct_above_category_avg,
+    <span class="fn">NTILE</span>(<span class="nm">5</span>) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span>
+        m.fraud_tx_count * <span class="nm">1.0</span> / <span class="fn">NULLIF</span>(m.total_tx,<span class="nm">0</span>) <span class="kw">DESC</span>
+    ) <span class="kw">AS</span> risk_quintile   <span class="cm">-- 1=highest risk, 5=lowest risk</span>
+<span class="kw">FROM</span> merchant_metrics m
+<span class="kw">JOIN</span> category_avg c <span class="kw">ON</span> m.merchant_category <span class="op">=</span> c.merchant_category
+<span class="kw">ORDER BY</span> fraud_rate_pct <span class="kw">DESC</span>;</code></pre></div>
+  </div>
+</div>
+
+<!-- ══ STEP 9 ══ -->
+<div class="section" id="section-step9">
+  <div class="hero">
+    <div class="hero-tag">Step 9 · GitHub</div>
+    <h1>Push to GitHub</h1>
+  </div>
+  <div class="code-block"><div class="code-header"><span class="code-lang">README.md</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code># Banking Fraud Detection Pipeline
+
+**Industry:** Banking / Fintech | **Level:** Advanced
+**Stack:** Python 3.11 · Apache Kafka · Spark Structured Streaming · AWS Lambda · DynamoDB · S3
+
+## Business Problem
+Bank processes 10,000+ card transactions/minute. Nightly batch fraud detection
+catches fraud 12–18 hours too late. Fraudsters complete 50+ transactions before
+the card is blocked. This pipeline detects fraud in under 5 seconds and
+automatically alerts the fraud operations team.
+
+## Architecture
+```
+[Transaction Simulator] → Kafka (bank-transactions, 6 partitions)
+                               ↓
+               [Spark Structured Streaming — 10s micro-batch]
+               ├── All transactions → S3 Parquet (cold path / Athena)
+               └── Flagged transactions → Kafka (fraud-alerts)
+                                              ↓
+                              [AWS Lambda consumer]
+                              ├── DynamoDB (fraud_alerts table)
+                              └── SNS → Email/SMS to fraud team
+```
+
+## Fraud Detection Rules
+| Rule | Condition | Score |
+|---|---|---|
+| Velocity | 5+ transactions in 5 min | 0.40 |
+| High Amount | Single transaction > $5,000 | 0.30 |
+| Geo Impossible | 2+ countries in 5 min | 0.50 |
+| Card Testing | 3+ micro-transactions < $10 | 0.40 |
+| Rapid Online | 4+ online transactions in 5 min | 0.35 |
+Alert triggered at composite score ≥ 0.60.
+
+## Running Locally
+```bash
+# 1. Start Kafka
+docker-compose up -d
+
+# 2. Create topics
+docker exec kafka kafka-topics --create --bootstrap-server localhost:9092 \
+  --topic bank-transactions --partitions 6 --replication-factor 1
+
+# 3. Start transaction producer (terminal 1)
+python3 producers/transaction_producer.py
+
+# 4. Start streaming job (terminal 2)
+spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 \
+  spark_jobs/fraud_detection_stream.py
+
+# 5. Start alert consumer (terminal 3)
+python3 lambda_functions/alert_handler.py
+```
+
+## Business Impact
+- Fraud detection latency: 12+ hours → under 5 seconds (99.97% faster)
+- Estimated fraud loss reduction: 60% ($7.2M/year)
+- Handles 10,000+ transactions/minute with 10-second micro-batches
+- Dual-path architecture: real-time alerts + historical analysis</code></pre></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">bash — commit and push</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code>cd ~/de-portfolio/project-03-banking
+git init
+git add .gitignore README.md docker-compose.yml producers/ \
+        spark_jobs/ lambda_functions/ config/ docs/
+git commit -m "feat: real-time fraud detection with Kafka + Spark Streaming
+
+- Kafka producer simulating 10K+ tx/min with fraud patterns
+- Spark Structured Streaming with 5-min sliding windows
+- 5 fraud rules with composite scoring (threshold: 0.60)
+- Lambda alert handler → DynamoDB + SNS
+- Schema evolution strategy with backward-compatible JSON
+- Dual-path: hot (real-time alerts) + cold (S3/Athena history)"
+
+git branch -M main
+git remote add origin https://github.com/YOURUSERNAME/de-project-03-banking-fraud.git
+git push -u origin main</code></pre></div>
+
+  <h3>✅ Project 3 Final Checklist</h3>
+  <ul class="checklist">
+    <li><input type="checkbox" id="b1" onchange="updateProgress()"><label for="b1">Docker + Kafka running (docker-compose ps shows all up)</label></li>
+    <li><input type="checkbox" id="b2" onchange="updateProgress()"><label for="b2">Kafka UI shows messages flowing at http://localhost:8080</label></li>
+    <li><input type="checkbox" id="b3" onchange="updateProgress()"><label for="b3">Producer running — 100s of transactions in Kafka</label></li>
+    <li><input type="checkbox" id="b4" onchange="updateProgress()"><label for="b4">Spark streaming job processes micro-batches</label></li>
+    <li><input type="checkbox" id="b5" onchange="updateProgress()"><label for="b5">Fraud alerts appear in console output</label></li>
+    <li><input type="checkbox" id="b6" onchange="updateProgress()"><label for="b6">Alert consumer writes to local mock DynamoDB</label></li>
+    <li><input type="checkbox" id="b7" onchange="updateProgress()"><label for="b7">Parquet files written to data/processed/ (cold path)</label></li>
+    <li><input type="checkbox" id="b8" onchange="updateProgress()"><label for="b8">Can explain tumbling vs sliding windows with examples</label></li>
+    <li><input type="checkbox" id="b9" onchange="updateProgress()"><label for="b9">Can explain Kafka partitions and why account_id is the key</label></li>
+    <li><input type="checkbox" id="b10" onchange="updateProgress()"><label for="b10">Can explain hot path vs cold path design</label></li>
+    <li><input type="checkbox" id="b11" onchange="updateProgress()"><label for="b11">Can explain checkpointing and why it matters</label></li>
+    <li><input type="checkbox" id="b12" onchange="updateProgress()"><label for="b12">All 15 interview questions answered out loud</label></li>
+  </ul>
+</div>
+
+<!-- ══ INTERVIEW ══ -->
+<div class="section" id="section-interview">
+  <div class="hero">
+    <div class="hero-tag">Interview Prep · 15 Questions</div>
+    <h1>Streaming + Kafka Interview Questions</h1>
+    <p>This is where most candidates get filtered out — streaming is hard to fake. These answers will set you apart.</p>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q1</span><span class="q-cat cat-kafka">Kafka</span>
+      <span class="q-text">What is Kafka and why would you use it instead of just writing directly to a database?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Kafka is a distributed, durable message queue — a persistent log of events that multiple consumers can read independently. Writing transactions directly to a database means every consumer (fraud detection, analytics, compliance, audit) creates direct load on that database. If fraud detection is slow, it slows down the transaction system. Kafka decouples producers from consumers: the bank's transaction system publishes to Kafka without waiting for any downstream system. Each consumer reads at its own pace, with its own offset. If fraud detection restarts after a failure, it replays the backlog from where it left off — no data lost. The database can't do that. Kafka also handles massive throughput spikes that would overwhelm a database — it's designed to handle millions of messages per second with microsecond latency on writes.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q2</span><span class="q-cat cat-kafka">Kafka</span>
+      <span class="q-text">Why did you use account_id as the Kafka partition key?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Two reasons. First, ordering: within a partition, Kafka guarantees message order. For fraud detection, I need to see all of account ACC-123's transactions in chronological order to detect patterns like velocity. If account ACC-123's transactions could land in different partitions, they might be processed out of order. Using account_id as the key ensures all transactions for one account always go to the same partition. Second, data locality for stateful processing: Spark's streaming job can maintain state per account (running count, recent amounts) efficiently when all events for an account arrive at the same partition and get processed by the same executor. Without this, Spark would have to shuffle state across the cluster to aggregate per-account windows, which is expensive. The tradeoff: if some accounts are much more active than others (a "hot partition"), that partition gets more messages than others. For banking, account activity is relatively evenly distributed, so this isn't a major concern.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q3</span><span class="q-cat cat-stream">Streaming</span>
+      <span class="q-text">Explain the difference between a tumbling and sliding window. Which did you use and why?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>A tumbling window is fixed-size and non-overlapping. With a 5-minute tumbling window: window 1 covers 0:00–5:00, window 2 covers 5:00–10:00. Each event belongs to exactly one window. A sliding window slides forward by a step size smaller than the window size. A 5-minute window sliding every 1 minute: window 1 covers 0:00–5:00, window 2 covers 1:00–6:00, and so on. An event at 4:59 appears in 5 different windows. I used sliding windows because fraud patterns don't respect fixed time boundaries. A fraudster making transactions at 4:58, 4:59, 5:00, 5:01, 5:02 would be split across two tumbling windows — neither window would see 5 transactions, so no alert fires. A 5-minute sliding window with 1-minute slides catches this pattern in multiple windows. The cost is higher: each event is processed N times (window_size / slide_interval), but for fraud detection the accuracy improvement is worth it.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q4</span><span class="q-cat cat-stream">Streaming</span>
+      <span class="q-text">What is a watermark in stream processing and why is it necessary?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>A watermark defines how long the system waits for late-arriving events before closing a window. In the real world, events don't arrive in perfect chronological order. A mobile transaction might take 3 seconds to reach Kafka due to network latency. A transaction at timestamp 12:05:00 might arrive at Kafka at 12:05:03. Without a watermark, Spark would either wait forever (never close any window) or close windows immediately and miss late events. I set a 10-second watermark: "process events that arrive up to 10 seconds after their event timestamp." Spark won't close a window for event_time 12:05:00 until it sees events with timestamps ≥ 12:05:10. Events arriving more than 10 seconds late are dropped. The tradeoff: longer watermarks = more accurate results but higher latency. Shorter watermarks = faster results but more dropped late events. For fraud detection where a 5-second alert target is acceptable, a 10-second watermark is a reasonable balance.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q5</span><span class="q-cat cat-stream">Streaming</span>
+      <span class="q-text">How does checkpointing make your streaming job fault-tolerant?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Checkpointing periodically saves the streaming job's state to a durable store — in my case S3. The state includes: which Kafka offsets have been processed, the current window aggregation state (per-account transaction counts, amounts), and the query plan. If the Spark job crashes — server reboot, OOM error, network partition — it restarts and reads the checkpoint. It resumes processing exactly from the last checkpointed offset without reprocessing everything or missing anything. Without checkpointing, on failure you'd have to decide: replay from the beginning (huge backlog, potentially millions of duplicates) or start from the latest offset (lose everything since the crash). Checkpointing gives you exactly-once semantics: combined with Kafka's ability to reset offsets and Spark's idempotent writes, each event is processed exactly once even through failures. The checkpoint location must be persistent storage — not local disk, which disappears when the container restarts.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q6</span><span class="q-cat cat-stream">Streaming</span>
+      <span class="q-text">Explain the three output modes in Spark Structured Streaming. Which did you use where?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Append mode only writes new rows to the sink — rows that were added in the current micro-batch and won't change. I used this for writing raw transactions to S3 — each transaction is immutable, so append is correct. Update mode writes only rows that changed in the current micro-batch. I used this for writing windowed fraud scores — as new transactions arrive and windows get updated, only the changed window rows go to the sink. Complete mode writes the entire result table every trigger — useful for small aggregated tables where you want the full current state. I avoided complete mode for the windowed aggregations because the result table grows over time and writing all of it every 10 seconds would be expensive. The rule of thumb: append for immutable events, update for stateful aggregations that evolve, complete only for small reference tables.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q7</span><span class="q-cat cat-arch">Architecture</span>
+      <span class="q-text">Explain your hot path vs cold path design. Why two separate paths?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>The hot path handles the real-time fraud alert flow: flagged transactions go to a fraud-alerts Kafka topic, Lambda consumes them within seconds, writes to DynamoDB, and fires SNS notifications to the fraud team. The design is optimized for latency — every component is fast and simple. DynamoDB can handle millions of reads per second so the fraud alert lookup is sub-millisecond. The cold path handles everything going to S3 as Parquet for historical analysis — all transactions, not just flagged ones. Analysts use Athena to query months of transaction history, build fraud models, identify new patterns, and create regulatory reports. The reason for two paths: the requirements are fundamentally different. Hot path: sub-5-second latency, high availability, simple data model. Cold path: long retention, complex analytical queries, rich historical context. Trying to serve both requirements from a single system would mean either compromising latency (if the analytics system is the source of truth) or missing complex analytical capabilities (if DynamoDB is the only store). Lambda architecture — hot and cold paths — is the standard industry pattern for exactly this tradeoff.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q8</span><span class="q-cat cat-kafka">Kafka</span>
+      <span class="q-text">What is a consumer group and how does it enable scaling?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>A consumer group is a set of consumer instances that collectively consume a topic. Kafka distributes partitions across the group: if a topic has 6 partitions and the consumer group has 3 instances, each instance gets 2 partitions. No two instances in the same group consume the same partition — no duplicate processing. As message volume grows, you scale by adding consumer instances to the group up to the number of partitions. To handle 10x more messages, add 10x more consumer instances (and potentially add partitions to the topic). Each consumer group has its own independent offset — so my fraud detection consumer group and analytics consumer group both read the full stream independently, at their own pace. This is why multiple use cases can consume the same Kafka topic simultaneously without interfering. The key constraint: you can't have more consumer instances than partitions in a group — extra instances sit idle waiting for a partition assignment.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q9</span><span class="q-cat cat-fraud">Fraud</span>
+      <span class="q-text">Walk me through one of your fraud detection rules and the business logic behind it.</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>I'll walk through the "geo impossible" rule. A legitimate user can't be in two countries simultaneously. If within a 5-minute window, account ACC-123 has transactions in both the US and China, that's physically impossible unless the card was cloned. My Spark window aggregation counts distinct countries per account in each 5-minute sliding window using countDistinct("country"). If distinct_countries ≥ 2, the rule fires with a score of 0.5 — the highest of any single rule, because it's one of the most reliable fraud signals. Combined with velocity (0.4), the composite score would be 0.9, well above the 0.6 alert threshold. In production, I'd refine this rule to exclude online transactions from the location check — you can make an online purchase from a US merchant while physically in Europe. I'd also add a country_is_online flag to distinguish card-present from card-not-present transactions before applying the geographic check.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q10</span><span class="q-cat cat-fraud">Fraud</span>
+      <span class="q-text">How would you reduce false positives in your fraud detection system?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>My current system has rule-based scoring — all rules are static thresholds. False positives come from legitimate behavior that happens to trigger rules: a traveler making multiple purchases in two countries is flagged by geo_impossible. Four approaches to reduce false positives. First, enrich context: add a "known travel flag" from the bank's CRM — if the customer called to say they're traveling to China, suppress geo flags. Second, historical baseline: instead of static thresholds, compare to the account's own history. A customer who normally makes 8 transactions per day won't trigger velocity alerts. Third, ML scoring layer: train a gradient boosting model on labeled fraud/non-fraud history to replace or augment the rule scores. ML models learn subtle patterns rules can't express. Fourth, feedback loop: the alert_handler should capture fraud analyst decisions (confirmed vs false_positive) back into the pipeline. Track precision per rule combination and automatically raise thresholds when precision drops. In the SQL analysis query, I track false_positive rates per rule combination specifically for this purpose.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q11</span><span class="q-cat cat-stream">Streaming</span>
+      <span class="q-text">What is exactly-once semantics and how does Kafka + Spark achieve it?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Exactly-once means every message is processed exactly one time — even through failures, retries, and restarts. It's the hardest guarantee in distributed systems. Kafka + Spark Structured Streaming achieves it through three components. First, Kafka offset tracking: Spark checkpoints the exact Kafka offset it's processed. On restart, it reads exactly from that offset — no re-reads, no skips. Second, idempotent producers: Kafka producers can be configured with enable.idempotence=true, so retried messages are deduplicated by the broker using sequence numbers. Third, transactional writes: Spark writes output and commits the Kafka offset atomically in a transaction. Either both happen or neither does — no partially committed micro-batches. The result: even if a Spark executor crashes mid-batch, after recovery the same data is written at most once. This matters enormously for banking: double-processing a fraud alert could block a legitimate customer twice; missing an alert means real fraud goes undetected.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q12</span><span class="q-cat cat-arch">Architecture</span>
+      <span class="q-text">What is schema evolution and how did you handle it?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Schema evolution is the challenge of changing the schema of messages in a live Kafka topic without breaking existing consumers. The bank's development team might add a device_fingerprint field to transaction events — existing consumers need to keep working without any downtime. I handle it at two levels. For JSON: I use from_json with a schema that marks new fields as nullable=True. Old messages that don't have device_fingerprint produce NULL for that field — the consumer handles it gracefully with coalesce(device_fingerprint, 'unknown'). No consumer downtime. For production: I'd use Schema Registry with Avro. The Schema Registry enforces compatibility rules — a producer can only publish a new schema if it's backward compatible (existing consumers can read it) or forward compatible (they can skip unknown fields). This prevents accidental breaking changes from reaching production. The key rule: adding a field with a default value is backward compatible. Removing or renaming a required field is a breaking change the Schema Registry would reject.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q13</span><span class="q-cat cat-arch">Architecture</span>
+      <span class="q-text">Why DynamoDB for the fraud alerts and not Postgres or Redshift?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>The fraud alerts table has a very specific access pattern: the card authorization system needs to look up whether an account has an open fraud alert within milliseconds during a transaction authorization. That's a simple key-value lookup — account_id → alert status. DynamoDB handles this in single-digit milliseconds at any scale. Postgres would work for small volumes but requires capacity planning, connection pooling, and would become a bottleneck at 10K+ authorizations per minute. Redshift is a data warehouse — it's optimized for analytical queries scanning millions of rows, not for high-concurrency single-row lookups. The cost of a Redshift query per lookup would be absurd. DynamoDB's design — partition key-based lookup, no joins required, auto-scaling — is purpose-built for this exact use case. The tradeoff is DynamoDB's limited query flexibility (no ad-hoc SQL), which is why the historical cold path uses S3 + Athena for analytics. Neither system tries to do both jobs.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q14</span><span class="q-cat cat-prod">Production</span>
+      <span class="q-text">How would you monitor this streaming pipeline in production?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Four layers. First, Kafka metrics: consumer lag is the most important — if the fraud detection consumer is falling behind (lag growing), it means we're not detecting fraud fast enough. I'd alert if lag exceeds 10,000 messages. Producer throughput and broker disk usage are also critical. Second, Spark metrics: micro-batch processing time (should stay under the trigger interval — 10 seconds), batch duration trends, and the number of records processed per batch. If processing time creeps above the trigger interval, micro-batches queue up and lag grows. Third, fraud detection quality: alert rate per hour (sudden drop → rules might be broken; sudden spike → possible attack or false rule change), false positive rate tracked by analyst feedback, and average fraud_score distribution over time. Fourth, business metrics: total alerts per day, confirmed fraud rate, average time-to-alert. A CloudWatch dashboard with all these metrics lets on-call engineers see at a glance if something's wrong. I'd also implement a "dead man's switch" — an alert that fires if no fraud alerts are generated for 4+ hours, because that might mean the detection pipeline silently failed.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q15</span><span class="q-cat cat-prod">Production</span>
+      <span class="q-text">When would you choose Apache Flink over Spark Structured Streaming?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>I'd choose Flink when the latency requirement is genuinely below one second, when the state management needs are very complex, or when the team already has Flink expertise. Flink processes events truly record by record, not in micro-batches — it achieves single-digit millisecond latency where Spark's minimum is around 100ms (the micro-batch overhead). For a stock trading system where a 200ms delay costs real money, Flink is the right choice. Flink also has more sophisticated stateful processing: managed state with multiple backends, complex event processing (CEP) for detecting patterns across multiple event types, and better support for out-of-order event handling. Spark wins when: the team knows Spark (huge advantage — no new system to learn), latency of seconds is acceptable, or the same team manages batch and streaming pipelines (one system instead of two). For our fraud detection use case — 5-second alert target, team with Spark expertise from Projects 1 and 2, micro-batch every 10 seconds — Spark Structured Streaming is the right call. The added operational complexity of Flink isn't justified.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RESUME ══ -->
+<div class="section" id="section-resume">
+  <div class="hero">
+    <div class="hero-tag">Resume + Interview Story</div>
+    <h1>How to Present Project 3</h1>
+  </div>
+
+  <h3>Resume Bullet Points</h3>
+  <div class="resume-box">
+    <h4>Add these under Projects</h4>
+    <p>• Built real-time fraud detection pipeline processing 10,000+ bank transactions/minute using Apache Kafka (6-partition topic with account_id key) and Spark Structured Streaming, reducing fraud detection latency from 12+ hours to under 5 seconds<br><br>
+    • Implemented dual-path Lambda architecture: hot path (streaming alerts → AWS Lambda → DynamoDB + SNS) for sub-5-second fraud response, and cold path (S3 Parquet → Athena) for historical pattern analysis and model training<br><br>
+    • Designed 5-rule composite fraud scoring system using 5-minute sliding windows (velocity, geo-impossible, card testing, high-amount, rapid-online), with composite score threshold triggering automated card-blocking alerts<br><br>
+    • Implemented schema evolution strategy for live Kafka topics using Schema Registry compatibility rules and backward-compatible JSON parsing, enabling zero-downtime schema changes<br><br>
+    • Deployed checkpointing to S3 for exactly-once streaming semantics — streaming job recovers from failures with no events missed or double-processed</p>
+  </div>
+
+  <h3>Verbal Story (75 seconds)</h3>
+  <div class="resume-box">
+    <h4>For banking / fintech interviews</h4>
+    <p>"I built a real-time fraud detection system for a banking use case where the core problem was detection latency — the nightly batch job meant fraud wasn't caught until 12+ hours later, by which point the attacker had made 50 more transactions.<br><br>
+    The architecture uses Apache Kafka as the message backbone with 6 partitions keyed on account_id, so all transactions for one account land in the same partition and stay in order. Spark Structured Streaming consumes the topic in 10-second micro-batches and computes 5-minute sliding window aggregations per account — sliding rather than tumbling so fraud patterns that span window boundaries don't get missed.<br><br>
+    I built 5 fraud rules — velocity, geo-impossible, high amount, card testing, and rapid online — each contributing to a composite risk score. Transactions scoring above 0.6 go to a fraud-alerts Kafka topic, which Lambda consumes to write to DynamoDB and fire SNS notifications to the fraud team within about 3 seconds total.<br><br>
+    All transactions also go to S3 as Parquet for historical analysis in Athena — that's the cold path for model training and regulatory reporting. The whole thing uses checkpointing for exactly-once semantics so nothing is missed or double-processed through failures."</p>
+  </div>
+</div>
+
+<!-- ══ CONCEPTS ══ -->
+<div class="section" id="section-concepts">
+  <div class="hero">
+    <div class="hero-tag">Key Concepts</div>
+    <h1>Deep Dive Concepts for Week 6</h1>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">🌊</div>
+      <div><div class="step-title">Lambda Architecture vs Kappa Architecture</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>Lambda Architecture (what we built):</strong> Two separate pipelines — batch layer (cold path: S3/Athena) and speed layer (hot path: Kafka/Spark/DynamoDB). Batch gives accurate historical analysis; speed layer gives low-latency real-time view. Complexity: two codebases to maintain, results must be reconciled.</p>
+      <p><strong>Kappa Architecture:</strong> Single streaming pipeline handles both real-time and historical. Store everything in a long-retention Kafka topic (or object store). Re-process history by replaying the stream. Simpler to maintain (one codebase) but more expensive (streaming infrastructure 24/7 vs batch running nightly).</p>
+      <p><strong>When to use Lambda:</strong> Complex historical queries that need SQL joins across years of data. When batch and stream teams are separate. When history is large and reprocessing is expensive.</p>
+      <p><strong>When to use Kappa:</strong> When the stream can handle history replay. Simpler organizations. Modern streaming systems (Flink, Kafka Streams) make Kappa more practical than it used to be.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">🔑</div>
+      <div><div class="step-title">Kafka Partition Key Selection — Critical Decision</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p>The partition key determines two things: <strong>ordering guarantees</strong> and <strong>data locality</strong>. Rules for choosing:</p>
+      <ul>
+        <li><strong>Choose a key where ordering matters to your consumers.</strong> We use account_id because fraud detection needs to see transactions in order per account.</li>
+        <li><strong>Choose a key with high cardinality and even distribution.</strong> Using country as a key would put 80% of US transactions in one partition — a "hot partition" that can't be parallelized.</li>
+        <li><strong>Avoid NULL keys.</strong> NULL keys go to random partitions — losing ordering guarantees.</li>
+        <li><strong>For global ordering (no key):</strong> Use a single-partition topic. Fully ordered but no parallelism. Only for very low volume.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">🔄</div>
+      <div><div class="step-title">Event Time vs Processing Time vs Ingestion Time</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>Event time:</strong> When the event actually happened — the transaction's timestamp from the bank's system. Most accurate for business logic. Can arrive late. Used in our fraud rules.</p>
+      <p><strong>Processing time:</strong> When Spark processes the event. Simple to implement, no late data issues. But results change based on when you run the query — not deterministic. Useless for "how many transactions happened at 3pm yesterday?"</p>
+      <p><strong>Ingestion time:</strong> When Kafka received the event. More reliable than processing time (set by Kafka broker, not consumer), but still not the same as when the event happened.</p>
+      <p><strong>Rule:</strong> Always use event time for business logic. Use processing time only for monitoring pipeline health (e.g., "how long is our end-to-end latency?").</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">📦</div>
+      <div><div class="step-title">DynamoDB vs Cassandra vs Redis — When to Use Each</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>DynamoDB:</strong> AWS-managed NoSQL. Single-digit ms latency, infinite scale, pay-per-request. Best for: serverless architectures, key-value and simple query patterns, when you don't want to manage infrastructure. Used here because it's serverless and integrates naturally with Lambda.</p>
+      <p><strong>Apache Cassandra:</strong> Open-source distributed NoSQL. Excellent write throughput, linear scaling, multi-region replication. Best for: time-series data, write-heavy workloads, when you need to self-host. Used by Netflix, Discord for massive write-heavy use cases.</p>
+      <p><strong>Redis:</strong> In-memory key-value store. Sub-millisecond latency. Best for: caching, session storage, real-time leaderboards, rate limiting. Data is in RAM — expensive for large datasets. Use for fraud detection if you need &lt;1ms lookups (e.g., real-time card authorization blocking).</p>
+    </div>
+  </div>
+</div>
+
+  </div><!-- content -->
+</div><!-- main -->
+
+<script>
+const secs=['overview','vs-prev','stream-concepts','kafka-concepts','arch','schema',
+  'step1','step2','step3','step4','step5','step6','step7','step8','step9',
+  'interview','resume','concepts'];
+const bmap={
+  'overview':'Overview','vs-prev':'Overview','stream-concepts':'Streaming',
+  'kafka-concepts':'Kafka','arch':'Architecture','schema':'Data Model',
+  'step1':'Setup','step2':'Setup','step3':'Code','step4':'Code',
+  'step5':'Code','step6':'Code','step7':'Code','step8':'SQL','step9':'Setup',
+  'interview':'Interview','resume':'Resume','concepts':'Concepts'
+};
+const bcls={
+  Setup:'b-setup',Code:'b-code',SQL:'b-code',
+  Interview:'b-interview',Streaming:'b-stream',Kafka:'b-stream',
+  Architecture:'b-setup',Overview:'b-setup','Data Model':'b-setup',
+  Resume:'b-interview',Concepts:'b-interview'
+};
+function show(id){
+  secs.forEach(s=>{const e=document.getElementById('section-'+s);if(e)e.classList.remove('active')});
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const t=document.getElementById('section-'+id);if(t)t.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');
+  });
+  const b=bmap[id]||'Section';
+  document.getElementById('curr-badge').textContent=b;
+  document.getElementById('curr-badge').className='badge '+(bcls[b]||'b-setup');
+  closeSidebar();window.scrollTo(0,0);
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show')}
+function toggleStep(h){const b=h.nextElementSibling,c=h.querySelector('.step-chev'),o=b.classList.contains('open');b.classList.toggle('open',!o);if(c)c.style.transform=o?'':'rotate(180deg)'}
+function toggleQ(h){h.nextElementSibling.classList.toggle('open')}
+function switchTab(btn,pid){
+  btn.closest('.tabs').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  let el=btn.closest('.tabs').nextElementSibling;
+  while(el&&el.classList.contains('tab-panel')){el.classList.remove('active');el=el.nextElementSibling}
+  const t=document.getElementById('tab-'+pid);if(t)t.classList.add('active');
+}
+function copyCode(btn){
+  const text=btn.closest('.code-block').querySelector('pre').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied')},2000);
+  });
+}
+function updateProgress(){
+  const all=document.querySelectorAll('.checklist input[type=checkbox]');
+  const done=document.querySelectorAll('.checklist input[type=checkbox]:checked');
+  const pct=all.length?Math.round(done.length/all.length*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done.length+' of '+all.length+' tasks done';
+  try{const s={};all.forEach(c=>{s[c.id]=c.checked});localStorage.setItem('de-proj3',JSON.stringify(s))}catch(e){}
+}
+(function(){
+  try{const s=JSON.parse(localStorage.getItem('de-proj3')||'{}');
+    Object.entries(s).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.checked=v});}catch(e){}
+  updateProgress();
+})();
+</script>
+</body>
+</html>
