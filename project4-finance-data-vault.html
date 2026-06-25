@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DE Project 4 — Finance Audit Data Vault 2.0</title>
+<style>
+  :root{
+    --bg:#080c14;--bg2:#0d1420;--bg3:#141f35;--card:#0f1826;
+    --border:#1c2d4a;--accent:#22d3ee;--accent2:#a78bfa;
+    --accent3:#34d399;--text:#e2e8f0;--text2:#94a3b8;--text3:#4b6080;
+    --code-bg:#060a10;--green:#34d399;--red:#f87171;
+    --yellow:#fbbf24;--blue:#38bdf8;--purple:#a78bfa;
+    --cyan:#22d3ee;--orange:#fb923c;--pink:#f472b6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.7}
+
+  .sidebar{position:fixed;top:0;left:0;width:270px;height:100vh;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;z-index:100;transition:transform .3s}
+  .sidebar-logo{padding:18px 20px 14px;border-bottom:1px solid var(--border)}
+  .sidebar-logo .proj-tag{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:4px}
+  .sidebar-logo h2{font-size:13px;color:var(--text);font-weight:600;line-height:1.4}
+  .sb-section{padding:10px 0;border-bottom:1px solid var(--border)}
+  .sb-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text3);text-transform:uppercase;padding:0 20px 8px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:8px 20px;cursor:pointer;color:var(--text2);font-size:13px;border-left:3px solid transparent;transition:all .15s;text-decoration:none}
+  .nav-item:hover{color:var(--text);background:var(--bg3)}
+  .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(34,211,238,.07)}
+  .nav-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;background:var(--bg3);color:var(--text3)}
+  .nav-item.active .nav-dot{background:rgba(34,211,238,.2);color:var(--accent)}
+  .prog-wrap{padding:12px 20px 8px}
+  .prog-bar{height:4px;border-radius:2px;background:var(--border);overflow:hidden;margin-bottom:5px}
+  .prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--cyan),var(--purple));transition:width .4s}
+  .prog-label{font-size:11px;color:var(--text3)}
+
+  .main{margin-left:270px;min-height:100vh}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(8,12,20,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 32px;display:flex;align-items:center;justify-content:space-between}
+  .topbar-left{display:flex;align-items:center;gap:12px}
+  .badge{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px}
+  .b-setup{background:rgba(56,189,248,.15);color:var(--blue)}
+  .b-code{background:rgba(167,139,250,.15);color:var(--purple)}
+  .b-dv{background:rgba(34,211,238,.15);color:var(--cyan)}
+  .b-interview{background:rgba(52,211,153,.15);color:var(--green)}
+  .b-audit{background:rgba(251,191,36,.15);color:var(--yellow)}
+  .menu-btn{display:none;background:none;border:none;color:var(--text2);cursor:pointer;font-size:20px;padding:4px}
+  .content{padding:32px;max-width:920px}
+
+  .section{display:none}.section.active{display:block}
+
+  .hero{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:26px;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(34,211,238,.09) 0%,transparent 70%);pointer-events:none}
+  .hero-tag{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .hero h1{font-size:26px;font-weight:700;margin-bottom:10px;line-height:1.3}
+  .hero p{color:var(--text2);font-size:14px;margin-bottom:20px;max-width:640px}
+  .hero-stats{display:flex;gap:24px;flex-wrap:wrap}
+  .stat-val{font-size:22px;font-weight:700;color:var(--accent2)}
+  .stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+
+  .step-card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:18px;overflow:hidden}
+  .step-header{display:flex;align-items:center;gap:14px;padding:17px 22px;cursor:pointer;transition:background .15s}
+  .step-header:hover{background:rgba(255,255,255,.02)}
+  .step-num{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+  .step-num.a{background:rgba(34,211,238,.2);color:var(--cyan);border-color:rgba(34,211,238,.4)}
+  .step-title{font-size:15px;font-weight:600}
+  .step-sub{font-size:12px;color:var(--text3);margin-top:2px}
+  .step-time{margin-left:auto;font-size:11px;color:var(--text3);background:var(--bg3);padding:3px 10px;border-radius:20px;flex-shrink:0}
+  .step-chev{margin-left:8px;color:var(--text3);font-size:12px;transition:transform .2s;flex-shrink:0}
+  .step-body{display:none;padding:0 22px 22px;border-top:1px solid var(--border)}
+  .step-body.open{display:block}
+  .step-body p{color:var(--text2);font-size:14px;margin:12px 0 8px}
+  .step-body ul,.step-body ol{color:var(--text2);font-size:14px;padding-left:20px;margin:8px 0}
+  .step-body li{margin-bottom:6px}
+
+  .code-block{position:relative;margin:14px 0;border-radius:10px;overflow:hidden}
+  .code-header{background:#04070f;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+  .code-lang{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
+  .copy-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:11px;padding:4px 12px;border-radius:6px;cursor:pointer;transition:all .15s;font-family:inherit}
+  .copy-btn:hover{background:var(--accent);color:#000;border-color:var(--accent)}
+  .copy-btn.copied{background:rgba(52,211,153,.2);color:var(--green);border-color:var(--green)}
+  pre{background:var(--code-bg);padding:18px;overflow-x:auto;font-size:13px;line-height:1.7;font-family:'Cascadia Code','Fira Code','Consolas',monospace}
+  pre code{color:#c9d1d9}
+  .kw{color:#ff79c6}.fn{color:#50fa7b}.st{color:#f1fa8c}.cm{color:#6272a4;font-style:italic}.nm{color:#bd93f9}.op{color:#ff79c6}
+
+  .callout{border-radius:10px;padding:14px 18px;margin:14px 0;font-size:14px;display:flex;gap:12px;align-items:flex-start}
+  .callout-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+  .c-tip{background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);color:#a7f3d0}
+  .c-warn{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);color:#fde68a}
+  .c-info{background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);color:#a5f3fc}
+  .c-danger{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:#fecaca}
+  .c-dv{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);color:#ddd6fe}
+  .c-audit{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);color:#fde68a}
+
+  .checklist{list-style:none;padding:0;margin:14px 0}
+  .checklist li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--text2)}
+  .checklist li:last-child{border-bottom:none}
+  .checklist input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;margin-top:3px}
+  .checklist label{cursor:pointer}
+  .checklist input:checked+label{text-decoration:line-through;color:var(--text3)}
+
+  .q-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
+  .q-header{padding:14px 18px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;transition:background .15s}
+  .q-header:hover{background:rgba(255,255,255,.02)}
+  .q-num{font-size:11px;font-weight:700;color:var(--cyan);background:rgba(34,211,238,.15);padding:2px 8px;border-radius:10px;flex-shrink:0;margin-top:2px}
+  .q-cat{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:10px;flex-shrink:0;margin-top:2px}
+  .cat-dv{background:rgba(34,211,238,.15);color:var(--cyan)}
+  .cat-hub{background:rgba(251,191,36,.15);color:var(--yellow)}
+  .cat-link{background:rgba(167,139,250,.15);color:var(--purple)}
+  .cat-sat{background:rgba(52,211,153,.15);color:var(--green)}
+  .cat-audit{background:rgba(251,146,60,.15);color:var(--orange)}
+  .cat-arch{background:rgba(56,189,248,.15);color:var(--blue)}
+  .cat-prod{background:rgba(248,113,113,.15);color:var(--red)}
+  .q-text{font-size:14px;font-weight:500;color:var(--text);flex:1}
+  .q-body{display:none;padding:0 18px 18px;border-top:1px solid var(--border)}
+  .q-body.open{display:block}
+  .q-body p{font-size:14px;color:var(--text2);margin-top:12px;line-height:1.85}
+  .ans-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent2);margin-top:14px;margin-bottom:6px}
+
+  .tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+  .tab-btn{padding:7px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;background:var(--bg3);border:1px solid var(--border);color:var(--text2);transition:all .15s;font-family:inherit}
+  .tab-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .tab-btn.active{background:rgba(34,211,238,.2);border-color:var(--accent);color:var(--accent)}
+  .tab-panel{display:none}.tab-panel.active{display:block}
+
+  .comp-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  .comp-table th{background:var(--bg3);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);font-weight:600}
+  .comp-table td{padding:10px 14px;border-bottom:1px solid rgba(28,45,74,.5);color:var(--text2);vertical-align:top}
+  .comp-table .yes{color:var(--green)}.comp-table .no{color:var(--red)}.comp-table .mid{color:var(--yellow)}
+
+  .resume-box{background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2);border-radius:12px;padding:22px;margin:16px 0}
+  .resume-box h4{color:var(--accent2);font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+  .resume-box p{color:#a7f3d0;font-size:14px;line-height:1.85}
+
+  .schema-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px}
+  .schema-table th{background:var(--bg3);color:var(--text2);font-weight:600;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
+  .schema-table td{padding:9px 14px;border-bottom:1px solid rgba(28,45,74,.5);color:var(--text2);vertical-align:top}
+  .schema-table tr:hover td{background:rgba(255,255,255,.02)}
+  .col-type{color:var(--accent2);font-size:12px;font-family:monospace}
+  .col-pk{color:var(--yellow);font-weight:700;font-size:10px}
+  .col-bk{color:var(--cyan);font-weight:700;font-size:10px}
+
+  /* DV entity type badges */
+  .dv-hub{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.3);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700}
+  .dv-link{background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.3);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700}
+  .dv-sat{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.3);padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700}
+
+  .dv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:16px 0}
+  .dv-card{border-radius:10px;padding:16px}
+  .dv-card.hub{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25)}
+  .dv-card.link{background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.25)}
+  .dv-card.sat{background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.25)}
+  .dv-card .dc-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+  .dv-card.hub .dc-type{color:var(--yellow)}
+  .dv-card.link .dc-type{color:var(--purple)}
+  .dv-card.sat .dc-type{color:var(--green)}
+  .dv-card .dc-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
+  .dv-card .dc-col{font-size:12px;color:var(--text3);font-family:monospace;padding:1px 0}
+
+  .flow-box{background:var(--code-bg);border:1px solid var(--border);border-radius:12px;padding:22px;margin:14px 0;font-family:monospace;font-size:13px;color:var(--text2);line-height:2.2}
+  .fh{color:var(--cyan);font-weight:600}
+  .fo{color:var(--green)}
+  .fa{color:var(--red)}
+
+  h3{font-size:17px;font-weight:600;margin:22px 0 12px;color:var(--text)}
+  h3:first-child{margin-top:14px}
+  .tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;margin-right:6px;margin-bottom:4px}
+  .tag-aws{background:rgba(255,153,0,.15);color:#ffaa44}
+  .tag-py{background:rgba(56,189,248,.15);color:var(--blue)}
+  .tag-new{background:rgba(167,139,250,.15);color:var(--purple)}
+  .tag-spark{background:rgba(248,113,113,.15);color:var(--red)}
+  .tag-dv{background:rgba(34,211,238,.15);color:var(--cyan)}
+
+  @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.menu-btn{display:block}.content{padding:18px 14px}.hero h1{font-size:20px}}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
+  .overlay.show{display:block}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="proj-tag">Project 04 · Finance</div>
+    <h2>Audit Compliance Data Vault 2.0</h2>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-label" id="prog-label">0 of 12 tasks done</div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Overview</div>
+    <a class="nav-item active" onclick="show('overview')" href="#">
+      <span class="nav-dot">🏠</span> Overview & Goals
+    </a>
+    <a class="nav-item" onclick="show('vs-prev')" href="#">
+      <span class="nav-dot">⬆️</span> What's New vs Proj 3
+    </a>
+    <a class="nav-item" onclick="show('dv-concepts')" href="#">
+      <span class="nav-dot">🏛</span> Data Vault 2.0 Theory
+    </a>
+    <a class="nav-item" onclick="show('why-dv')" href="#">
+      <span class="nav-dot">🎯</span> Why DV for Finance/Audit
+    </a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Data Model</div>
+    <a class="nav-item" onclick="show('hubs')" href="#">
+      <span class="nav-dot">🟡</span> Hubs
+    </a>
+    <a class="nav-item" onclick="show('links')" href="#">
+      <span class="nav-dot">🟣</span> Links
+    </a>
+    <a class="nav-item" onclick="show('satellites')" href="#">
+      <span class="nav-dot">🟢</span> Satellites
+    </a>
+    <a class="nav-item" onclick="show('pit-bridge')" href="#">
+      <span class="nav-dot">⚡</span> PIT & Bridge Tables
+    </a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Build Steps</div>
+    <a class="nav-item" onclick="show('step1')" href="#">
+      <span class="nav-dot">1</span> Project Setup
+    </a>
+    <a class="nav-item" onclick="show('step2')" href="#">
+      <span class="nav-dot">2</span> Generate Finance Data
+    </a>
+    <a class="nav-item" onclick="show('step3')" href="#">
+      <span class="nav-dot">3</span> Raw Vault Load
+    </a>
+    <a class="nav-item" onclick="show('step4')" href="#">
+      <span class="nav-dot">4</span> Business Vault
+    </a>
+    <a class="nav-item" onclick="show('step5')" href="#">
+      <span class="nav-dot">5</span> Information Mart
+    </a>
+    <a class="nav-item" onclick="show('step6')" href="#">
+      <span class="nav-dot">6</span> EMR Deployment
+    </a>
+    <a class="nav-item" onclick="show('step7')" href="#">
+      <span class="nav-dot">7</span> Regulatory Reports (SQL)
+    </a>
+    <a class="nav-item" onclick="show('step8')" href="#">
+      <span class="nav-dot">8</span> GitHub + README
+    </a>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Interview Prep</div>
+    <a class="nav-item" onclick="show('interview')" href="#">
+      <span class="nav-dot">🎯</span> 15 Questions + Answers
+    </a>
+    <a class="nav-item" onclick="show('resume')" href="#">
+      <span class="nav-dot">📄</span> Resume Story
+    </a>
+    <a class="nav-item" onclick="show('concepts')" href="#">
+      <span class="nav-dot">📚</span> Key Concepts
+    </a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <span class="badge b-dv" id="curr-badge">Overview</span>
+      <span style="color:var(--text3);font-size:13px" id="curr-title">Finance Audit Data Vault 2.0</span>
+    </div>
+    <div style="font-size:12px;color:var(--text3)">Level 4→5 · Weeks 7–8</div>
+  </div>
+  <div class="content">
+
+<!-- OVERVIEW -->
+<div class="section active" id="section-overview">
+  <div class="hero">
+    <div class="hero-tag">Project 04 · Level 4→5 · Finance / Audit Industry</div>
+    <h1>Audit Compliance Data Vault 2.0</h1>
+    <p>Build an enterprise-grade financial data warehouse using Data Vault 2.0 methodology — the industry standard for regulated industries. Supports SOX compliance, multi-source integration, and complete audit lineage from raw transaction to regulatory report.</p>
+    <div class="hero-stats">
+      <div><div class="stat-val">DV 2.0</div><div class="stat-label">Methodology</div></div>
+      <div><div class="stat-val">SOX</div><div class="stat-label">Compliance</div></div>
+      <div><div class="stat-val">3-Layer</div><div class="stat-label">Architecture</div></div>
+      <div><div class="stat-val">EMR</div><div class="stat-label">Compute</div></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+    <div class="step-card" style="margin-bottom:0"><div style="padding:18px 20px">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Stack</div>
+      <span class="tag tag-py">Python 3.11</span>
+      <span class="tag tag-spark">PySpark 3.5</span>
+      <span class="tag tag-aws">AWS EMR</span>
+      <span class="tag tag-aws">S3</span>
+      <span class="tag tag-aws">Athena</span>
+      <span class="tag tag-dv">Data Vault 2.0</span>
+      <span class="tag tag-new">SOX Compliance</span>
+    </div></div>
+    <div class="step-card" style="margin-bottom:0"><div style="padding:18px 20px">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Brand New Skills</div>
+      <ul style="color:var(--text2);font-size:13px;padding-left:18px">
+        <li>Data Vault Hubs, Links, Satellites</li>
+        <li>Raw Vault → Business Vault → Info Mart</li>
+        <li>Point-in-Time (PIT) tables</li>
+        <li>Bridge tables for cross-vault queries</li>
+        <li>SOX regulatory reporting</li>
+        <li>AWS EMR cluster deployment</li>
+      </ul>
+    </div></div>
+  </div>
+
+  <h3>Business Problem</h3>
+  <div class="callout c-audit">
+    <div class="callout-icon">📋</div>
+    <div>A mid-size financial services firm — managing $2B in assets across trading, loans, and asset management — is failing its Sarbanes-Oxley (SOX) audits. Auditors can't trace a number on a report back to the original transaction because the data warehouse overwrites historical data. Finance teams can't answer "what was the balance on March 15th?" Three source systems (GL, trading, loans) have inconsistent entity definitions. You're building a Data Vault 2.0 warehouse that provides <strong>complete audit lineage</strong>, <strong>point-in-time accuracy</strong>, and <strong>multi-source reconciliation</strong>.</div>
+  </div>
+</div>
+
+<!-- VS PREV -->
+<div class="section" id="section-vs-prev">
+  <div class="hero">
+    <div class="hero-tag">Progression Map</div>
+    <h1>What's New vs Projects 1–3</h1>
+    <p>Data Vault 2.0 is a different modeling paradigm entirely — not star, not snowflake, not just streaming. It's a methodology for building enterprise data warehouses that never lose history.</p>
+  </div>
+  <table class="comp-table">
+    <tr><th>Concept</th><th>Projects 1–3</th><th>Project 4</th><th>Why harder</th></tr>
+    <tr><td><strong>Data model</strong></td><td>Star / Snowflake schema</td><td>Data Vault 2.0 (Hubs + Links + Sats)</td><td class="mid">Completely different modeling philosophy</td></tr>
+    <tr><td><strong>History</strong></td><td>SCD Type 2 for specific dims</td><td>All changes preserved forever</td><td class="mid">Every record has load timestamp + record source</td></tr>
+    <tr><td><strong>Multi-source</strong></td><td>Single source of truth</td><td>Multiple sources reconciled</td><td class="mid">Same entity (customer) from 3 systems</td></tr>
+    <tr><td><strong>Auditability</strong></td><td>Basic ETL lineage</td><td>SOX-grade audit trail</td><td class="mid">Every row traceable to exact source file + timestamp</td></tr>
+    <tr><td><strong>Architecture layers</strong></td><td>Raw → Processed → Serve</td><td>Raw Vault → Business Vault → Info Mart</td><td class="mid">Each layer has specific rules and purposes</td></tr>
+    <tr><td><strong>Compute</strong></td><td>Local / AWS Glue</td><td>AWS EMR cluster</td><td class="mid">Production-grade distributed compute</td></tr>
+    <tr><td><strong>Query performance</strong></td><td>Direct from fact tables</td><td>PIT + Bridge tables required</td><td class="mid">DV raw model is not optimized for queries</td></tr>
+    <tr><td><strong>Compliance</strong></td><td>HIPAA (proj 2)</td><td>SOX — Sarbanes-Oxley Act</td><td class="mid">Financial reporting accuracy requirements</td></tr>
+  </table>
+  <div class="callout c-dv">
+    <div class="callout-icon">🏛</div>
+    <div><strong>Interview framing:</strong> "Data Vault solves problems that star schema can't. When a regulator asks 'what was the reported balance on March 15th and what source system did that number come from?', a star schema that overwrites history can't answer that. Data Vault stores every version of every record with load timestamps and source system tags — you can reconstruct any report as it existed at any point in time. That traceability is required for SOX compliance."</div>
+  </div>
+</div>
+
+<!-- DV CONCEPTS -->
+<div class="section" id="section-dv-concepts">
+  <div class="hero">
+    <div class="hero-tag">Data Vault 2.0 Theory</div>
+    <h1>The Complete Data Vault Mental Model</h1>
+    <p>Before writing a single line of code, you must understand the three building blocks. Every table in a Data Vault is one of exactly three types.</p>
+  </div>
+
+  <div class="callout c-dv">
+    <div class="callout-icon">🏛</div>
+    <div><strong>Dan Linstedt's core insight (creator of Data Vault):</strong> "Separate what you know (business keys) from how things relate (links) from what you know about them (attributes). Business keys are stable. Relationships change. Attributes change the most." This separation is why Data Vault can accommodate schema changes, new sources, and regulatory audits — without breaking existing pipelines.</div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num a" style="background:rgba(251,191,36,.2);color:var(--yellow);border-color:rgba(251,191,36,.4)">H</div>
+      <div><div class="step-title">🟡 Hubs — The "What Exists"</div><div class="step-sub">One row per unique business entity. No history. No attributes.</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body open">
+      <p>A Hub captures the existence of a business entity — nothing more. It stores the business key (account number, customer ID, trade ID), a hash key (surrogate key), when it was first seen, and which source system reported it. No attributes (no name, no balance) — those go in Satellites.</p>
+      <p><strong>Rules:</strong></p>
+      <ul>
+        <li>Primary key is a hash of the business key (MD5 or SHA-256)</li>
+        <li>Never updated — new business keys get new rows, existing rows never change</li>
+        <li>No foreign keys — Hubs reference nothing</li>
+        <li>Always includes: load_date, record_source, hash_key, business_key</li>
+      </ul>
+      <div class="code-block"><div class="code-header"><span class="code-lang">Hub — Example Structure</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="cm">-- Hub_Account: every unique account we've ever seen</span>
+<span class="kw">CREATE TABLE</span> raw_vault.hub_account (
+    account_hash_key  CHAR(<span class="nm">32</span>) <span class="kw">NOT NULL</span>,   <span class="cm">-- MD5(account_id)</span>
+    load_date         TIMESTAMP <span class="kw">NOT NULL</span>,  <span class="cm">-- When first loaded</span>
+    record_source     VARCHAR(<span class="nm">100</span>) <span class="kw">NOT NULL</span>,<span class="cm">-- "GL_SYSTEM" / "TRADING_SYS"</span>
+    account_id        VARCHAR(<span class="nm">50</span>) <span class="kw">NOT NULL</span>, <span class="cm">-- The actual business key</span>
+    <span class="kw">PRIMARY KEY</span> (account_hash_key)
+);
+<span class="cm">-- NO name, NO balance, NO type — those go in SAT_ACCOUNT_DETAILS</span></code></pre></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num" style="background:rgba(167,139,250,.2);color:var(--purple);border-color:rgba(167,139,250,.4)">L</div>
+      <div><div class="step-title">🟣 Links — The "How Things Relate"</div><div class="step-sub">Relationships between Hubs. Every join lives here.</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p>A Link records a relationship between two or more Hubs — like a transaction that connects an account to a counterparty. Links are immutable like Hubs — the relationship itself is recorded, but no attributes about it.</p>
+      <p><strong>Rules:</strong></p>
+      <ul>
+        <li>Contains foreign hash keys to parent Hubs</li>
+        <li>Primary key is a hash of all the business keys it links</li>
+        <li>Never updated — new relationships get new rows</li>
+        <li>No business attributes (transaction amount goes in a Satellite)</li>
+        <li>Always includes: link_hash_key, load_date, record_source, + FK hash keys</li>
+      </ul>
+      <div class="code-block"><div class="code-header"><span class="code-lang">Link — Example Structure</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="cm">-- Link_Transaction: a transaction connecting account to counterparty</span>
+<span class="kw">CREATE TABLE</span> raw_vault.link_transaction (
+    transaction_hash_key  CHAR(<span class="nm">32</span>) <span class="kw">NOT NULL</span>, <span class="cm">-- MD5(transaction_id)</span>
+    load_date             TIMESTAMP <span class="kw">NOT NULL</span>,
+    record_source         VARCHAR(<span class="nm">100</span>) <span class="kw">NOT NULL</span>,
+    account_hash_key      CHAR(<span class="nm">32</span>) <span class="kw">NOT NULL</span>,  <span class="cm">-- FK → Hub_Account</span>
+    counterparty_hash_key CHAR(<span class="nm">32</span>) <span class="kw">NOT NULL</span>,  <span class="cm">-- FK → Hub_Counterparty</span>
+    instrument_hash_key   CHAR(<span class="nm">32</span>) <span class="kw">NOT NULL</span>,  <span class="cm">-- FK → Hub_Instrument</span>
+    transaction_id        VARCHAR(<span class="nm">50</span>) <span class="kw">NOT NULL</span>, <span class="cm">-- Business key of the link</span>
+    <span class="kw">PRIMARY KEY</span> (transaction_hash_key)
+);
+<span class="cm">-- NO amount, NO trade_date — those go in SAT_TRANSACTION_DETAILS</span></code></pre></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num" style="background:rgba(52,211,153,.2);color:var(--green);border-color:rgba(52,211,153,.4)">S</div>
+      <div><div class="step-title">🟢 Satellites — The "What We Know About Them"</div><div class="step-sub">All descriptive attributes + full history. The workhorse of Data Vault.</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p>Satellites store all the attributes of a Hub or Link — and every time anything changes, a new row is inserted. This is full history by design, not SCD Type 2 — there's no closing old records, just appending new ones with a load_date.</p>
+      <p><strong>Rules:</strong></p>
+      <ul>
+        <li>Attached to exactly one Hub or Link</li>
+        <li>Primary key = parent_hash_key + load_date (composite)</li>
+        <li>Insert-only — never update or delete</li>
+        <li>Include a hash_diff column: MD5 of all attributes. Only insert new row if hash_diff changed (deduplication)</li>
+        <li>May split by rate-of-change: SAT_ACCOUNT_STATIC (rare changes) + SAT_ACCOUNT_BALANCE (daily changes)</li>
+      </ul>
+      <div class="code-block"><div class="code-header"><span class="code-lang">Satellite — Example Structure</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="cm">-- Sat_Account_Details: attributes of an account (version history)</span>
+<span class="kw">CREATE TABLE</span> raw_vault.sat_account_details (
+    account_hash_key  CHAR(<span class="nm">32</span>) <span class="kw">NOT NULL</span>,   <span class="cm">-- FK → Hub_Account</span>
+    load_date         TIMESTAMP <span class="kw">NOT NULL</span>,  <span class="cm">-- When THIS version was loaded</span>
+    load_end_date     TIMESTAMP,             <span class="cm">-- NULL = current version</span>
+    record_source     VARCHAR(<span class="nm">100</span>) <span class="kw">NOT NULL</span>,
+    hash_diff         CHAR(<span class="nm">32</span>) <span class="kw">NOT NULL</span>,   <span class="cm">-- MD5 of all attributes (for dedup)</span>
+    <span class="cm">-- The actual attributes:</span>
+    account_name      VARCHAR(<span class="nm">200</span>),
+    account_type      VARCHAR(<span class="nm">50</span>),
+    account_status    VARCHAR(<span class="nm">20</span>),
+    credit_rating     VARCHAR(<span class="nm">10</span>),
+    <span class="kw">PRIMARY KEY</span> (account_hash_key, load_date)
+);
+<span class="cm">-- To get current version: WHERE load_end_date IS NULL</span>
+<span class="cm">-- To get as-of date: WHERE load_date <= target_date</span>
+<span class="cm">--                       AND (load_end_date IS NULL OR load_end_date > target_date)</span></code></pre></div>
+    </div>
+  </div>
+
+  <h3>The Three-Layer Architecture</h3>
+  <div class="flow-box">
+    <span class="fh">Layer 1: Raw Vault</span>  ← Everything you loaded, exactly as it came in<br>
+    &nbsp;&nbsp;Hubs + Links + Satellites (no transformations, no business rules)<br>
+    &nbsp;&nbsp;Purpose: immutable audit record — "what did source systems tell us?"<br>
+    &nbsp;&nbsp;Never modified after loading<br><br>
+    <span class="fh">Layer 2: Business Vault</span>  ← Cleaned, standardized, business rules applied<br>
+    &nbsp;&nbsp;Computed Satellites + Bridge tables<br>
+    &nbsp;&nbsp;Purpose: "what do we know after applying business interpretation?"<br>
+    &nbsp;&nbsp;e.g., "amount in USD after FX conversion"<br><br>
+    <span class="fh">Layer 3: Information Marts</span>  ← Star/Snowflake schema for end users<br>
+    &nbsp;&nbsp;PIT (Point-In-Time) tables + dimensional views<br>
+    &nbsp;&nbsp;Purpose: analyst-friendly query performance<br>
+    &nbsp;&nbsp;"What was the account balance on March 15th?"
+  </div>
+</div>
+
+<!-- WHY DV -->
+<div class="section" id="section-why-dv">
+  <div class="hero">
+    <div class="hero-tag">Why Data Vault for Finance/Audit</div>
+    <h1>SOX Compliance + Data Vault = Perfect Match</h1>
+  </div>
+
+  <div class="callout c-audit">
+    <div class="callout-icon">📋</div>
+    <div><strong>SOX (Sarbanes-Oxley Act, 2002):</strong> US law requiring public companies to maintain accurate financial records with full audit trails. Section 302: CEOs must certify financial statements are accurate. Section 404: internal controls over financial reporting must be documented and tested. Violations = criminal charges, SEC investigation, delisting. This is why financial companies take data lineage so seriously.</div>
+  </div>
+
+  <h3>What SOX Requires from a Data System</h3>
+  <table class="comp-table">
+    <tr><th>SOX Requirement</th><th>How Data Vault Meets It</th></tr>
+    <tr><td><strong>Complete audit trail</strong> — trace any number on a report back to source</td><td class="yes">Every Sat row has record_source + load_date → exact file, exact timestamp</td></tr>
+    <tr><td><strong>Point-in-time reproducibility</strong> — reproduce last quarter's report exactly</td><td class="yes">PIT tables + satellite history → any report reproducible at any past date</td></tr>
+    <tr><td><strong>No data overwrites</strong> — changes must be captured, not hidden</td><td class="yes">Insert-only architecture — nothing is ever deleted or updated</td></tr>
+    <tr><td><strong>Multi-source reconciliation</strong> — same entity reported from GL and trading must match</td><td class="yes">Hubs resolve entity identity across sources via business key hashing</td></tr>
+    <tr><td><strong>Change detection</strong> — know exactly when a value changed and from what</td><td class="yes">Hash_diff in Satellites detects changes; full version history preserved</td></tr>
+    <tr><td><strong>Data lineage</strong> — where did this number come from?</td><td class="yes">record_source on every row + Raw Vault preserved forever</td></tr>
+  </table>
+
+  <div class="callout c-tip">
+    <div class="callout-icon">💡</div>
+    <div><strong>Interview talking point:</strong> "A CFO once asked our team 'I need to see the exact report we filed on March 15th, recalculated as if it were today, and I need to know which source system each number came from.' With a traditional overwriting DW, that's impossible. With Data Vault, we can reconstruct the exact state of every account on March 15th from the satellite history, trace each number to the exact source file and load timestamp, and then recalculate with today's FX rates using the Business Vault layer. That's why Data Vault exists."</div>
+  </div>
+
+  <h3>When NOT to Use Data Vault</h3>
+  <div class="callout c-warn">
+    <div class="callout-icon">⚠️</div>
+    <div>Data Vault adds complexity — 3x more tables than star schema, slower raw query performance, steeper learning curve. Don't use it for: small teams without DV expertise, simple reporting use cases, startups that need speed over auditability, or systems where history truly doesn't matter. Use it for: regulated industries (banking, healthcare, insurance, government), large multi-source enterprise warehouses, anywhere full audit lineage is a legal or regulatory requirement.</div>
+  </div>
+</div>
+
+<!-- HUBS -->
+<div class="section" id="section-hubs">
+  <div class="hero">
+    <div class="hero-tag">Data Model · Hubs</div>
+    <h1>Hub Tables — Business Entities</h1>
+    <p>Five hubs covering the core business entities in a financial firm. Each hub is a unique registry of business keys.</p>
+  </div>
+  <div class="dv-grid">
+    <div class="dv-card hub">
+      <div class="dc-type">🟡 Hub</div>
+      <div class="dc-name">Hub_Account</div>
+      <div class="dc-col" style="color:var(--yellow)">account_hash_key (PK)</div>
+      <div class="dc-col">account_id (BK)</div>
+      <div class="dc-col">load_date</div>
+      <div class="dc-col">record_source</div>
+    </div>
+    <div class="dv-card hub">
+      <div class="dc-type">🟡 Hub</div>
+      <div class="dc-name">Hub_Counterparty</div>
+      <div class="dc-col" style="color:var(--yellow)">counterparty_hash_key (PK)</div>
+      <div class="dc-col">counterparty_id (BK)</div>
+      <div class="dc-col">load_date</div>
+      <div class="dc-col">record_source</div>
+    </div>
+    <div class="dv-card hub">
+      <div class="dc-type">🟡 Hub</div>
+      <div class="dc-name">Hub_Instrument</div>
+      <div class="dc-col" style="color:var(--yellow)">instrument_hash_key (PK)</div>
+      <div class="dc-col">instrument_id (BK)</div>
+      <div class="dc-col">load_date</div>
+      <div class="dc-col">record_source</div>
+    </div>
+    <div class="dv-card hub">
+      <div class="dc-type">🟡 Hub</div>
+      <div class="dc-name">Hub_Employee</div>
+      <div class="dc-col" style="color:var(--yellow)">employee_hash_key (PK)</div>
+      <div class="dc-col">employee_id (BK)</div>
+      <div class="dc-col">load_date</div>
+      <div class="dc-col">record_source</div>
+    </div>
+    <div class="dv-card hub">
+      <div class="dc-type">🟡 Hub</div>
+      <div class="dc-name">Hub_GLAccount</div>
+      <div class="dc-col" style="color:var(--yellow)">gl_hash_key (PK)</div>
+      <div class="dc-col">gl_account_code (BK)</div>
+      <div class="dc-col">load_date</div>
+      <div class="dc-col">record_source</div>
+    </div>
+  </div>
+
+  <div class="callout c-info">
+    <div class="callout-icon">💡</div>
+    <div><strong>Why MD5 hash of business key as PK?</strong> The hash is always 32 chars regardless of business key length. Joins on fixed-length CHAR(32) are faster than VARCHAR joins. The same business key from two different source systems produces the same hash — enabling cross-source entity resolution. You must use consistent hashing — all uppercase, trim whitespace, same encoding — or the same entity from two sources won't match.</div>
+  </div>
+</div>
+
+<!-- LINKS -->
+<div class="section" id="section-links">
+  <div class="hero">
+    <div class="hero-tag">Data Model · Links</div>
+    <h1>Link Tables — Relationships</h1>
+  </div>
+  <div class="dv-grid">
+    <div class="dv-card link">
+      <div class="dc-type">🟣 Link</div>
+      <div class="dc-name">Link_Transaction</div>
+      <div class="dc-col" style="color:var(--purple)">transaction_hash_key (PK)</div>
+      <div class="dc-col">transaction_id (BK)</div>
+      <div class="dc-col">account_hash_key (FK)</div>
+      <div class="dc-col">counterparty_hash_key (FK)</div>
+      <div class="dc-col">instrument_hash_key (FK)</div>
+      <div class="dc-col">load_date / record_source</div>
+    </div>
+    <div class="dv-card link">
+      <div class="dc-type">🟣 Link</div>
+      <div class="dc-name">Link_GLJournalEntry</div>
+      <div class="dc-col" style="color:var(--purple)">journal_hash_key (PK)</div>
+      <div class="dc-col">journal_id (BK)</div>
+      <div class="dc-col">gl_hash_key (FK)</div>
+      <div class="dc-col">employee_hash_key (FK)</div>
+      <div class="dc-col">load_date / record_source</div>
+    </div>
+    <div class="dv-card link">
+      <div class="dc-type">🟣 Link</div>
+      <div class="dc-name">Link_AccountEmployee</div>
+      <div class="dc-col" style="color:var(--purple)">rel_hash_key (PK)</div>
+      <div class="dc-col">account_hash_key (FK)</div>
+      <div class="dc-col">employee_hash_key (FK)</div>
+      <div class="dc-col">relationship_type (BK part)</div>
+      <div class="dc-col">load_date / record_source</div>
+    </div>
+  </div>
+
+  <div class="callout c-dv">
+    <div class="callout-icon">🟣</div>
+    <div><strong>Links vs Satellites — the common confusion:</strong> A Link records THAT a relationship existed. A Satellite records the details ABOUT that relationship. Link_Transaction says "this trade connected this account to this counterparty." Sat_Transaction_Details says "the trade was for $500K at 3.5% interest on Jan 15." The link is the noun; the satellite is the adjective.</div>
+  </div>
+</div>
+
+<!-- SATELLITES -->
+<div class="section" id="section-satellites">
+  <div class="hero">
+    <div class="hero-tag">Data Model · Satellites</div>
+    <h1>Satellite Tables — All Attributes + Full History</h1>
+  </div>
+
+  <div class="dv-grid">
+    <div class="dv-card sat">
+      <div class="dc-type">🟢 Sat (Hub)</div>
+      <div class="dc-name">Sat_Account_Details</div>
+      <div class="dc-col" style="color:var(--green)">account_hash_key + load_date (PK)</div>
+      <div class="dc-col">hash_diff</div>
+      <div class="dc-col">account_name</div>
+      <div class="dc-col">account_type</div>
+      <div class="dc-col">account_status</div>
+      <div class="dc-col">credit_rating</div>
+      <div class="dc-col">jurisdiction</div>
+    </div>
+    <div class="dv-card sat">
+      <div class="dc-type">🟢 Sat (Hub)</div>
+      <div class="dc-name">Sat_Account_Balance</div>
+      <div class="dc-col" style="color:var(--green)">account_hash_key + load_date (PK)</div>
+      <div class="dc-col">hash_diff</div>
+      <div class="dc-col">balance_amount</div>
+      <div class="dc-col">currency_code</div>
+      <div class="dc-col">balance_date</div>
+      <div class="dc-col">balance_type</div>
+    </div>
+    <div class="dv-card sat">
+      <div class="dc-type">🟢 Sat (Link)</div>
+      <div class="dc-name">Sat_Transaction_Details</div>
+      <div class="dc-col" style="color:var(--green)">transaction_hash_key + load_date (PK)</div>
+      <div class="dc-col">hash_diff</div>
+      <div class="dc-col">trade_date</div>
+      <div class="dc-col">settlement_date</div>
+      <div class="dc-col">notional_amount</div>
+      <div class="dc-col">currency</div>
+      <div class="dc-col">transaction_status</div>
+    </div>
+    <div class="dv-card sat">
+      <div class="dc-type">🟢 Sat (Link)</div>
+      <div class="dc-name">Sat_GLJournal_Details</div>
+      <div class="dc-col" style="color:var(--green)">journal_hash_key + load_date (PK)</div>
+      <div class="dc-col">hash_diff</div>
+      <div class="dc-col">debit_amount</div>
+      <div class="dc-col">credit_amount</div>
+      <div class="dc-col">posting_date</div>
+      <div class="dc-col">fiscal_period</div>
+      <div class="dc-col">approved_by</div>
+    </div>
+    <div class="dv-card sat">
+      <div class="dc-type">🟢 Sat (Hub)</div>
+      <div class="dc-name">Sat_Instrument_Pricing</div>
+      <div class="dc-col" style="color:var(--green)">instrument_hash_key + load_date (PK)</div>
+      <div class="dc-col">hash_diff</div>
+      <div class="dc-col">price_date</div>
+      <div class="dc-col">close_price</div>
+      <div class="dc-col">bid_price / ask_price</div>
+      <div class="dc-col">price_source</div>
+    </div>
+    <div class="dv-card sat">
+      <div class="dc-type">🟢 Sat (Hub)</div>
+      <div class="dc-name">Sat_Counterparty_Details</div>
+      <div class="dc-col" style="color:var(--green)">counterparty_hash_key + load_date (PK)</div>
+      <div class="dc-col">hash_diff</div>
+      <div class="dc-col">legal_name</div>
+      <div class="dc-col">lei_code (Legal Entity ID)</div>
+      <div class="dc-col">credit_rating</div>
+      <div class="dc-col">country_of_incorporation</div>
+    </div>
+  </div>
+
+  <div class="callout c-warn">
+    <div class="callout-icon">⚠️</div>
+    <div><strong>Splitting satellites by rate of change:</strong> Account name changes maybe once a year. Account balance changes daily. If they're in the same satellite, a daily balance load creates a new row for name and type too — even though they didn't change. Splitting into Sat_Account_Details (slow-changing) and Sat_Account_Balance (fast-changing) means each satellite only stores new rows when its specific attributes change. This is a key DV performance optimization.</div>
+  </div>
+</div>
+
+<!-- PIT & BRIDGE -->
+<div class="section" id="section-pit-bridge">
+  <div class="hero">
+    <div class="hero-tag">Performance Layer</div>
+    <h1>PIT Tables + Bridge Tables</h1>
+    <p>The Raw Vault is auditable but slow to query — too many joins and time-range conditions. PIT and Bridge tables are the performance layer that makes the vault queryable at analyst speed.</p>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num a">PIT</div>
+      <div><div class="step-title">Point-In-Time (PIT) Tables</div><div class="step-sub">Pre-computed "which satellite version was current at each snapshot date?"</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body open">
+      <p>Without PIT, to get account state on March 15th you'd write: <code>WHERE sat.load_date &lt;= '2024-03-15' AND (sat.load_end_date IS NULL OR sat.load_end_date &gt; '2024-03-15')</code> for every satellite in every query. That's expensive. A PIT table pre-computes the answer for each snapshot date (daily or monthly).</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">SQL — PIT Table Structure</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="cm">-- PIT_Account: for each account, on each snapshot date,</span>
+<span class="cm">-- which version of each satellite was current?</span>
+<span class="kw">CREATE TABLE</span> business_vault.pit_account (
+    account_hash_key        CHAR(<span class="nm">32</span>) <span class="kw">NOT NULL</span>,
+    snapshot_date           DATE <span class="kw">NOT NULL</span>,
+
+    <span class="cm">-- For each satellite: the load_date of the current version as of snapshot_date</span>
+    sat_account_details_ldts TIMESTAMP,   <span class="cm">-- NULL = no record existed yet</span>
+    sat_account_balance_ldts TIMESTAMP,
+
+    <span class="kw">PRIMARY KEY</span> (account_hash_key, snapshot_date)
+);
+
+<span class="cm">-- Now to get account state on March 15th:</span>
+<span class="kw">SELECT</span> h.account_id, d.account_name, b.balance_amount
+<span class="kw">FROM</span> business_vault.pit_account p
+<span class="kw">JOIN</span> raw_vault.hub_account h <span class="kw">ON</span> p.account_hash_key <span class="op">=</span> h.account_hash_key
+<span class="kw">JOIN</span> raw_vault.sat_account_details d
+  <span class="kw">ON</span> p.account_hash_key <span class="op">=</span> d.account_hash_key
+ <span class="kw">AND</span> p.sat_account_details_ldts <span class="op">=</span> d.load_date  <span class="cm">← simple equality!</span>
+<span class="kw">JOIN</span> raw_vault.sat_account_balance b
+  <span class="kw">ON</span> p.account_hash_key <span class="op">=</span> b.account_hash_key
+ <span class="kw">AND</span> p.sat_account_balance_ldts <span class="op">=</span> b.load_date   <span class="cm">← simple equality!</span>
+<span class="kw">WHERE</span> p.snapshot_date <span class="op">=</span> <span class="st">'2024-03-15'</span>;
+<span class="cm">-- No complex date range conditions — PIT pre-computed the answer</span></code></pre></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num" style="border-color:rgba(167,139,250,.4);color:var(--purple)">BRG</div>
+      <div><div class="step-title">Bridge Tables</div><div class="step-sub">Pre-computed join paths across multiple Links for fast cross-vault queries</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p>Some queries need to cross multiple Links: "show me all transactions for accounts managed by employees in the London office." Without a Bridge, this requires joining Hub_Account → Link_AccountEmployee → Hub_Employee → Sat_Employee_Details. A Bridge pre-computes this path.</p>
+      <div class="code-block"><div class="code-header"><span class="code-lang">SQL — Bridge Table Structure</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="cm">-- Bridge_AccountTransactions: pre-computed path from account through transactions</span>
+<span class="kw">CREATE TABLE</span> business_vault.bridge_account_transactions (
+    bridge_hash_key       CHAR(<span class="nm">32</span>) <span class="kw">NOT NULL</span>,
+    snapshot_date         DATE <span class="kw">NOT NULL</span>,
+    account_hash_key      CHAR(<span class="nm">32</span>) <span class="kw">NOT NULL</span>,
+    transaction_hash_key  CHAR(<span class="nm">32</span>) <span class="kw">NOT NULL</span>,
+    counterparty_hash_key CHAR(<span class="nm">32</span>) <span class="kw">NOT NULL</span>,
+    instrument_hash_key   CHAR(<span class="nm">32</span>) <span class="kw">NOT NULL</span>,
+    <span class="kw">PRIMARY KEY</span> (bridge_hash_key, snapshot_date)
+);
+
+<span class="cm">-- Now a complex cross-vault query becomes a simple join:</span>
+<span class="kw">SELECT</span> a.account_id, t.notional_amount, c.legal_name
+<span class="kw">FROM</span> business_vault.bridge_account_transactions b
+<span class="kw">JOIN</span> raw_vault.hub_account ha   <span class="kw">ON</span> b.account_hash_key <span class="op">=</span> ha.account_hash_key
+<span class="kw">JOIN</span> raw_vault.sat_account_details a
+    <span class="kw">ON</span> b.account_hash_key <span class="op">=</span> a.account_hash_key
+<span class="kw">JOIN</span> raw_vault.sat_transaction_details t
+    <span class="kw">ON</span> b.transaction_hash_key <span class="op">=</span> t.transaction_hash_key
+<span class="kw">JOIN</span> raw_vault.sat_counterparty_details c
+    <span class="kw">ON</span> b.counterparty_hash_key <span class="op">=</span> c.counterparty_hash_key
+<span class="kw">WHERE</span> b.snapshot_date <span class="op">=</span> <span class="st">'2024-03-15'</span>;</code></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 1 -->
+<div class="section" id="section-step1">
+  <div class="hero">
+    <div class="hero-tag">Step 1 · Project Setup</div>
+    <h1>Create Project Structure</h1>
+  </div>
+  <div class="code-block"><div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code>mkdir -p ~/de-portfolio/project-04-finance
+cd ~/de-portfolio/project-04-finance
+
+mkdir -p data/raw_sources/{gl,trading,loans}
+mkdir -p data/raw_vault/{hubs,links,satellites}
+mkdir -p data/business_vault/{pit,bridge,computed_sats}
+mkdir -p data/information_mart
+mkdir -p scripts tests docs emr_scripts config
+
+touch scripts/generate_finance_data.py
+touch scripts/load_raw_vault.py
+touch scripts/build_business_vault.py
+touch scripts/build_information_mart.py
+touch scripts/build_pit_tables.py
+touch scripts/regulatory_reports.sql
+touch scripts/hash_utils.py
+touch emr_scripts/bootstrap.sh
+touch .gitignore README.md
+
+echo "Project 4 structure created ✓"</code></pre></div>
+</div>
+
+<!-- STEP 2 -->
+<div class="section" id="section-step2">
+  <div class="hero">
+    <div class="hero-tag">Step 2 · Generate Finance Data</div>
+    <h1>Synthetic Financial Data Generator</h1>
+    <p>Generates data from three separate source systems: General Ledger, Trading System, and Loan Management System. Each has slightly different schemas for the same entities — this cross-system inconsistency is exactly what Data Vault is designed to handle.</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">scripts/generate_finance_data.py</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code><span class="cm">"""
+Financial data generator — 3 source systems with overlapping entities.
+GL System: accounts, journal entries, chart of accounts
+Trading System: accounts, counterparties, instruments, trades
+Loan System: accounts, borrowers, loan details
+"""</span>
+<span class="kw">import</span> csv, json, random, uuid, hashlib
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timedelta
+<span class="kw">from</span> faker <span class="kw">import</span> Faker
+
+fake <span class="op">=</span> Faker()
+random.seed(<span class="nm">7</span>)
+
+START_DATE <span class="op">=</span> datetime(<span class="nm">2024</span>, <span class="nm">1</span>, <span class="nm">1</span>)
+END_DATE   <span class="op">=</span> datetime(<span class="nm">2024</span>, <span class="nm">12</span>, <span class="nm">31</span>)
+
+<span class="kw">def</span> <span class="fn">rand_date_str</span>():
+    d <span class="op">=</span> START_DATE <span class="op">+</span> timedelta(days<span class="op">=</span>random.randint(<span class="nm">0</span>,(END_DATE<span class="op">-</span>START_DATE).days))
+    <span class="kw">return</span> d.strftime(<span class="st">"%Y-%m-%d"</span>)
+
+<span class="cm"># 200 shared accounts — will appear in ALL THREE systems with same base ID</span>
+ACCOUNT_IDS <span class="op">=</span> [<span class="st">f"ACC-{str(uuid.uuid4())[:8].upper()}"</span> <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="nm">200</span>)]
+CPTY_IDS    <span class="op">=</span> [<span class="st">f"CPTY-{str(uuid.uuid4())[:8].upper()}"</span> <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="nm">100</span>)]
+INST_IDS    <span class="op">=</span> [<span class="st">f"INST-{str(uuid.uuid4())[:6].upper()}"</span> <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="nm">50</span>)]
+GL_CODES    <span class="op">=</span> [<span class="st">f"GL-{random.randint(1000,9999)}"</span> <span class="kw">for</span> _ <span class="kw">in</span> range(<span class="nm">30</span>)]
+
+ACCOUNT_TYPES <span class="op">=</span> [<span class="st">"trading"</span>,<span class="st">"investment"</span>,<span class="st">"custody"</span>,<span class="st">"credit"</span>,<span class="st">"cash"</span>]
+CURRENCIES    <span class="op">=</span> [<span class="st">"USD"</span>,<span class="st">"EUR"</span>,<span class="st">"GBP"</span>,<span class="st">"JPY"</span>,<span class="st">"CHF"</span>]
+INST_TYPES    <span class="op">=</span> [<span class="st">"equity"</span>,<span class="st">"bond"</span>,<span class="st">"derivative"</span>,<span class="st">"fx"</span>,<span class="st">"commodity"</span>]
+LOAN_TYPES    <span class="op">=</span> [<span class="st">"term_loan"</span>,<span class="st">"revolving"</span>,<span class="st">"mortgage"</span>,<span class="st">"syndicated"</span>]
+RATINGS       <span class="op">=</span> [<span class="st">"AAA"</span>,<span class="st">"AA"</span>,<span class="st">"A"</span>,<span class="st">"BBB"</span>,<span class="st">"BB"</span>,<span class="st">"B"</span>,<span class="st">"CCC"</span>]
+
+<span class="cm"># ── GL System ─────────────────────────────────────────────</span>
+print(<span class="st">"Generating GL System data..."</span>)
+gl_accounts <span class="op">=</span> []
+<span class="kw">for</span> acc_id <span class="kw">in</span> ACCOUNT_IDS:
+    gl_accounts.append({
+        <span class="st">"account_id"</span>:    acc_id,
+        <span class="st">"gl_account_name"</span>: fake.company() <span class="op">+</span> <span class="st">" Account"</span>,
+        <span class="st">"account_type"</span>:  random.choice(ACCOUNT_TYPES),
+        <span class="st">"currency"</span>:      random.choice(CURRENCIES),
+        <span class="st">"status"</span>:        random.choice([<span class="st">"active"</span>,<span class="st">"active"</span>,<span class="st">"active"</span>,<span class="st">"inactive"</span>]),
+        <span class="st">"credit_rating"</span>: random.choice(RATINGS),
+        <span class="st">"opened_date"</span>:   rand_date_str(),
+        <span class="st">"source_system"</span>: <span class="st">"GL_SYSTEM"</span>,
+    })
+<span class="kw">with</span> open(<span class="st">"data/raw_sources/gl/accounts.csv"</span>,<span class="st">"w"</span>,newline<span class="op">=</span><span class="st">""</span>) <span class="kw">as</span> f:
+    w <span class="op">=</span> csv.DictWriter(f, fieldnames<span class="op">=</span>gl_accounts[<span class="nm">0</span>].keys())
+    w.writeheader(); w.writerows(gl_accounts)
+
+<span class="cm"># GL Journal Entries</span>
+gl_journals <span class="op">=</span> []
+<span class="kw">for</span> _ <span class="kw">in</span> range(<span class="nm">10000</span>):
+    amt <span class="op">=</span> round(random.uniform(<span class="nm">1000</span>, <span class="nm">5000000</span>), <span class="nm">2</span>)
+    gl_journals.append({
+        <span class="st">"journal_id"</span>:   <span class="st">f"JE-{str(uuid.uuid4())[:10].upper()}"</span>,
+        <span class="st">"account_id"</span>:   random.choice(ACCOUNT_IDS),
+        <span class="st">"gl_code"</span>:      random.choice(GL_CODES),
+        <span class="st">"debit_amount"</span>: amt <span class="kw">if</span> random.random() <span class="op">></span> <span class="nm">0.5</span> <span class="kw">else</span> <span class="nm">0</span>,
+        <span class="st">"credit_amount"</span>: amt <span class="kw">if</span> random.random() <span class="op">&lt;=</span> <span class="nm">0.5</span> <span class="kw">else</span> <span class="nm">0</span>,
+        <span class="st">"posting_date"</span>: rand_date_str(),
+        <span class="st">"fiscal_period"</span>: random.randint(<span class="nm">1</span>, <span class="nm">12</span>),
+        <span class="st">"description"</span>:  fake.sentence(nb_words<span class="op">=</span><span class="nm">5</span>),
+        <span class="st">"approved_by"</span>:  fake.name(),
+        <span class="st">"source_system"</span>: <span class="st">"GL_SYSTEM"</span>,
+    })
+<span class="kw">with</span> open(<span class="st">"data/raw_sources/gl/journal_entries.csv"</span>,<span class="st">"w"</span>,newline<span class="op">=</span><span class="st">""</span>) <span class="kw">as</span> f:
+    w <span class="op">=</span> csv.DictWriter(f, fieldnames<span class="op">=</span>gl_journals[<span class="nm">0</span>].keys())
+    w.writeheader(); w.writerows(gl_journals)
+print(<span class="st">f"  → {len(gl_accounts)} GL accounts, {len(gl_journals)} journal entries"</span>)
+
+<span class="cm"># ── Trading System ─────────────────────────────────────────</span>
+print(<span class="st">"Generating Trading System data..."</span>)
+trades <span class="op">=</span> []
+<span class="kw">for</span> _ <span class="kw">in</span> range(<span class="nm">5000</span>):
+    trade_date    <span class="op">=</span> rand_date_str()
+    settle_days   <span class="op">=</span> random.choice([<span class="nm">1</span>,<span class="nm">2</span>,<span class="nm">3</span>,<span class="nm">5</span>])
+    trade_dt      <span class="op">=</span> datetime.strptime(trade_date, <span class="st">"%Y-%m-%d"</span>)
+    settle_date   <span class="op">=</span> (trade_dt <span class="op">+</span> timedelta(days<span class="op">=</span>settle_days)).strftime(<span class="st">"%Y-%m-%d"</span>)
+    trades.append({
+        <span class="st">"transaction_id"</span>: <span class="st">f"TRD-{str(uuid.uuid4())[:10].upper()}"</span>,
+        <span class="st">"account_id"</span>:     random.choice(ACCOUNT_IDS),
+        <span class="st">"counterparty_id"</span>:random.choice(CPTY_IDS),
+        <span class="st">"instrument_id"</span>:  random.choice(INST_IDS),
+        <span class="st">"trade_date"</span>:     trade_date,
+        <span class="st">"settlement_date"</span>:settle_date,
+        <span class="st">"direction"</span>:      random.choice([<span class="st">"BUY"</span>,<span class="st">"SELL"</span>]),
+        <span class="st">"notional_amount"</span>:round(random.uniform(<span class="nm">10000</span>,<span class="nm">10000000</span>),<span class="nm">2</span>),
+        <span class="st">"currency"</span>:       random.choice(CURRENCIES),
+        <span class="st">"price"</span>:          round(random.uniform(<span class="nm">0.5</span>,<span class="nm">500</span>),<span class="nm">4</span>),
+        <span class="st">"status"</span>:         random.choices([<span class="st">"settled"</span>,<span class="st">"pending"</span>,<span class="st">"cancelled"</span>],
+                                         weights<span class="op">=</span>[<span class="nm">75</span>,<span class="nm">20</span>,<span class="nm">5</span>])[<span class="nm">0</span>],
+        <span class="st">"trader_id"</span>:      <span class="st">f"EMP-{random.randint(100,999)}"</span>,
+        <span class="st">"source_system"</span>:  <span class="st">"TRADING_SYS"</span>,
+    })
+<span class="kw">with</span> open(<span class="st">"data/raw_sources/trading/trades.csv"</span>,<span class="st">"w"</span>,newline<span class="op">=</span><span class="st">""</span>) <span class="kw">as</span> f:
+    w <span class="op">=</span> csv.DictWriter(f, fieldnames<span class="op">=</span>trades[<span class="nm">0</span>].keys())
+    w.writeheader(); w.writerows(trades)
+print(<span class="st">f"  → {len(trades)} trades"</span>)
+
+<span class="cm"># ── Loan System ─────────────────────────────────────────────</span>
+print(<span class="st">"Generating Loan System data..."</span>)
+loans <span class="op">=</span> []
+<span class="kw">for</span> _ <span class="kw">in</span> range(<span class="nm">2000</span>):
+    origination <span class="op">=</span> rand_date_str()
+    orig_dt     <span class="op">=</span> datetime.strptime(origination, <span class="st">"%Y-%m-%d"</span>)
+    maturity    <span class="op">=</span> (orig_dt <span class="op">+</span> timedelta(days<span class="op">=</span>random.randint(<span class="nm">180</span>,<span class="nm">3650</span>))).strftime(<span class="st">"%Y-%m-%d"</span>)
+    principal   <span class="op">=</span> round(random.uniform(<span class="nm">50000</span>,<span class="nm">50000000</span>),<span class="nm">2</span>)
+    loans.append({
+        <span class="st">"loan_id"</span>:          <span class="st">f"LN-{str(uuid.uuid4())[:10].upper()}"</span>,
+        <span class="st">"account_id"</span>:       random.choice(ACCOUNT_IDS),
+        <span class="st">"borrower_id"</span>:      random.choice(CPTY_IDS),
+        <span class="st">"loan_type"</span>:        random.choice(LOAN_TYPES),
+        <span class="st">"principal_amount"</span>: principal,
+        <span class="st">"outstanding_balance"</span>: round(principal <span class="op">*</span> random.uniform(<span class="nm">0.1</span>,<span class="nm">1.0</span>),<span class="nm">2</span>),
+        <span class="st">"interest_rate"</span>:    round(random.uniform(<span class="nm">0.02</span>,<span class="nm">0.12</span>),<span class="nm">4</span>),
+        <span class="st">"origination_date"</span>: origination,
+        <span class="st">"maturity_date"</span>:    maturity,
+        <span class="st">"loan_status"</span>:      random.choices([<span class="st">"current"</span>,<span class="st">"current"</span>,<span class="st">"delinquent"</span>,<span class="st">"default"</span>],
+                                           weights<span class="op">=</span>[<span class="nm">75</span>,<span class="nm">10</span>,<span class="nm">10</span>,<span class="nm">5</span>])[<span class="nm">0</span>],
+        <span class="st">"currency"</span>:         random.choice([<span class="st">"USD"</span>,<span class="st">"EUR"</span>,<span class="st">"GBP"</span>]),
+        <span class="st">"source_system"</span>:    <span class="st">"LOAN_SYS"</span>,
+    })
+<span class="kw">with</span> open(<span class="st">"data/raw_sources/loans/loans.csv"</span>,<span class="st">"w"</span>,newline<span class="op">=</span><span class="st">""</span>) <span class="kw">as</span> f:
+    w <span class="op">=</span> csv.DictWriter(f, fieldnames<span class="op">=</span>loans[<span class="nm">0</span>].keys())
+    w.writeheader(); w.writerows(loans)
+print(<span class="st">f"  → {len(loans)} loans"</span>)
+print(<span class="st">"\n✅ Finance data generated!"</span>)</code></pre></div>
+</div>
+
+<!-- STEP 3 -->
+<div class="section" id="section-step3">
+  <div class="hero">
+    <div class="hero-tag">Step 3 · Raw Vault Load</div>
+    <h1>Loading the Raw Vault with PySpark</h1>
+    <p>The Raw Vault loader applies the most important Data Vault rule: never transform, just load. Hash the business keys, add metadata, insert new records only.</p>
+  </div>
+
+  <div class="callout c-dv">
+    <div class="callout-icon">🏛</div>
+    <div><strong>The Golden Rule of Raw Vault loading:</strong> No business logic. No FX conversion. No name standardization. No deduplication beyond hash_diff. The raw vault is a legal record — "this is what source systems told us, exactly, with timestamps." Business interpretation happens in the Business Vault layer.</div>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">scripts/hash_utils.py — reusable hashing functions</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code><span class="cm">"""
+Data Vault hashing utilities.
+Consistent hashing is CRITICAL — same business key from different sources
+must produce the same hash for entity resolution to work.
+"""</span>
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> DataFrame
+
+<span class="kw">def</span> <span class="fn">dv_hash_key</span>(col_name: str) <span class="op">-></span> F.Column:
+    <span class="st">"""
+    Compute Data Vault hash key from a business key column.
+    Rules: UPPERCASE, trim whitespace, MD5.
+    CONSISTENCY IS EVERYTHING — deviation breaks entity resolution.
+    """</span>
+    <span class="kw">return</span> F.md5(F.upper(F.trim(F.col(col_name))))
+
+<span class="kw">def</span> <span class="fn">dv_hash_key_multi</span>(<span class="op">*</span>col_names) <span class="op">-></span> F.Column:
+    <span class="st">"""
+    Hash multiple columns (for Link keys or multi-part business keys).
+    Concatenate with || separator before hashing.
+    """</span>
+    parts <span class="op">=</span> [F.upper(F.trim(F.col(c))) <span class="kw">for</span> c <span class="kw">in</span> col_names]
+    concat <span class="op">=</span> parts[<span class="nm">0</span>]
+    <span class="kw">for</span> p <span class="kw">in</span> parts[<span class="nm">1</span>:]:
+        concat <span class="op">=</span> F.concat(concat, F.lit(<span class="st">"||"</span>), p)
+    <span class="kw">return</span> F.md5(concat)
+
+<span class="kw">def</span> <span class="fn">dv_hash_diff</span>(<span class="op">*</span>col_names) <span class="op">-></span> F.Column:
+    <span class="st">"""
+    Hash all satellite attribute columns for change detection.
+    Only insert a new satellite row if hash_diff differs from latest version.
+    """</span>
+    concat_cols <span class="op">=</span> [F.coalesce(F.col(c).cast(<span class="st">"string"</span>), F.lit(<span class="st">"~NULL~"</span>))
+                   <span class="kw">for</span> c <span class="kw">in</span> col_names]
+    concat_expr <span class="op">=</span> concat_cols[<span class="nm">0</span>]
+    <span class="kw">for</span> p <span class="kw">in</span> concat_cols[<span class="nm">1</span>:]:
+        concat_expr <span class="op">=</span> F.concat(concat_expr, F.lit(<span class="st">"|"</span>), p)
+    <span class="kw">return</span> F.md5(concat_expr)
+
+<span class="kw">def</span> <span class="fn">add_dv_metadata</span>(df: DataFrame, record_source: str) <span class="op">-></span> DataFrame:
+    <span class="st">"""Add standard Data Vault metadata columns to any DataFrame."""</span>
+    <span class="kw">return</span> (df
+        .withColumn(<span class="st">"load_date"</span>,     F.current_timestamp())
+        .withColumn(<span class="st">"record_source"</span>, F.lit(record_source))
+    )</code></pre></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">scripts/load_raw_vault.py — Hub + Link + Satellite loading</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code><span class="cm">"""
+Raw Vault Loader — loads source data into Hubs, Links, Satellites.
+Rule: No transformations. Hash keys. Insert-only (new records only).
+"""</span>
+<span class="kw">import</span> logging
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> SparkSession, DataFrame
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">from</span> hash_utils <span class="kw">import</span> dv_hash_key, dv_hash_key_multi, dv_hash_diff, add_dv_metadata
+
+log <span class="op">=</span> logging.getLogger(__name__)
+logging.basicConfig(level<span class="op">=</span>logging.INFO, format<span class="op">=</span><span class="st">"%(asctime)s [%(levelname)s] %(message)s"</span>)
+
+spark <span class="op">=</span> (SparkSession.builder.appName(<span class="st">"raw-vault-load"</span>)
+    .master(<span class="st">"local[*]"</span>)
+    .config(<span class="st">"spark.sql.adaptive.enabled"</span>, <span class="st">"true"</span>)
+    .config(<span class="st">"spark.sql.shuffle.partitions"</span>, <span class="st">"8"</span>)
+    .getOrCreate())
+spark.sparkContext.setLogLevel(<span class="st">"WARN"</span>)
+
+RAW  <span class="op">=</span> <span class="st">"data/raw_sources"</span>
+VAULT<span class="op">=</span> <span class="st">"data/raw_vault"</span>
+
+<span class="kw">def</span> <span class="fn">load_or_empty</span>(path):
+    <span class="st">"""Load existing vault table or return empty DF (for first run)."""</span>
+    <span class="kw">import</span> os
+    <span class="kw">if</span> os.path.exists(path):
+        <span class="kw">return</span> spark.read.parquet(path)
+    <span class="kw">return</span> <span class="kw">None</span>
+
+<span class="kw">def</span> <span class="fn">insert_new_only</span>(new_df: DataFrame, existing_df, key_col: str, out_path: str):
+    <span class="st">"""Insert-only pattern: only write rows with new hash keys."""</span>
+    <span class="kw">if</span> existing_df <span class="kw">is not None</span>:
+        existing_keys <span class="op">=</span> existing_df.select(key_col)
+        new_only <span class="op">=</span> new_df.join(existing_keys, on<span class="op">=</span>key_col, how<span class="op">=</span><span class="st">"left_anti"</span>)
+    <span class="kw">else</span>:
+        new_only <span class="op">=</span> new_df
+    cnt <span class="op">=</span> new_only.count()
+    <span class="kw">if</span> cnt <span class="op">></span> <span class="nm">0</span>:
+        new_only.coalesce(<span class="nm">1</span>).write.mode(<span class="st">"append"</span>).parquet(out_path)
+        log.info(<span class="st">f"  Inserted {cnt} new rows → {out_path}"</span>)
+    <span class="kw">else</span>:
+        log.info(<span class="st">f"  No new rows for {out_path}"</span>)
+    <span class="kw">return</span> cnt
+
+<span class="cm"># ── LOAD HUBS ────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">load_hub_account</span>():
+    log.info(<span class="st">"Loading Hub_Account..."</span>)
+    gl_accts  <span class="op">=</span> spark.read.option(<span class="st">"header"</span>,<span class="kw">True</span>).csv(<span class="st">f"{RAW}/gl/accounts.csv"</span>)
+    trd_accts <span class="op">=</span> spark.read.option(<span class="st">"header"</span>,<span class="kw">True</span>).csv(<span class="st">f"{RAW}/trading/trades.csv"</span>).select(<span class="st">"account_id"</span>,<span class="st">"source_system"</span>).distinct()
+
+    <span class="cm"># Union all sources that have accounts</span>
+    all_accounts <span class="op">=</span> gl_accts.select(<span class="st">"account_id"</span>,<span class="st">"source_system"</span>).union(trd_accts).distinct()
+
+    hub <span class="op">=</span> (add_dv_metadata(all_accounts, <span class="st">"MULTI_SOURCE"</span>)
+        .withColumn(<span class="st">"account_hash_key"</span>, dv_hash_key(<span class="st">"account_id"</span>))
+        .withColumn(<span class="st">"record_source"</span>, F.col(<span class="st">"source_system"</span>))
+        .select(<span class="st">"account_hash_key"</span>, <span class="st">"load_date"</span>, <span class="st">"record_source"</span>, <span class="st">"account_id"</span>)
+        .dropDuplicates([<span class="st">"account_hash_key"</span>])
+    )
+    existing <span class="op">=</span> load_or_empty(<span class="st">f"{VAULT}/hubs/hub_account"</span>)
+    insert_new_only(hub, existing, <span class="st">"account_hash_key"</span>, <span class="st">f"{VAULT}/hubs/hub_account"</span>)
+
+<span class="kw">def</span> <span class="fn">load_hub_counterparty</span>():
+    log.info(<span class="st">"Loading Hub_Counterparty..."</span>)
+    trades <span class="op">=</span> spark.read.option(<span class="st">"header"</span>,<span class="kw">True</span>).csv(<span class="st">f"{RAW}/trading/trades.csv"</span>)
+    loans  <span class="op">=</span> spark.read.option(<span class="st">"header"</span>,<span class="kw">True</span>).csv(<span class="st">f"{RAW}/loans/loans.csv"</span>)
+
+    cptys <span class="op">=</span> (trades.select(F.col(<span class="st">"counterparty_id"</span>),F.col(<span class="st">"source_system"</span>))
+        .union(loans.select(F.col(<span class="st">"borrower_id"</span>).alias(<span class="st">"counterparty_id"</span>),F.col(<span class="st">"source_system"</span>)))
+        .distinct())
+
+    hub <span class="op">=</span> (add_dv_metadata(cptys, <span class="st">"MULTI_SOURCE"</span>)
+        .withColumn(<span class="st">"counterparty_hash_key"</span>, dv_hash_key(<span class="st">"counterparty_id"</span>))
+        .select(<span class="st">"counterparty_hash_key"</span>,<span class="st">"load_date"</span>,<span class="st">"source_system"</span>.alias(<span class="st">"record_source"</span>),<span class="st">"counterparty_id"</span>)
+        .dropDuplicates([<span class="st">"counterparty_hash_key"</span>])
+    )
+    existing <span class="op">=</span> load_or_empty(<span class="st">f"{VAULT}/hubs/hub_counterparty"</span>)
+    insert_new_only(hub, existing, <span class="st">"counterparty_hash_key"</span>, <span class="st">f"{VAULT}/hubs/hub_counterparty"</span>)
+
+<span class="cm"># ── LOAD LINK ─────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">load_link_transaction</span>():
+    log.info(<span class="st">"Loading Link_Transaction..."</span>)
+    trades <span class="op">=</span> spark.read.option(<span class="st">"header"</span>,<span class="kw">True</span>).csv(<span class="st">f"{RAW}/trading/trades.csv"</span>)
+
+    link <span class="op">=</span> (add_dv_metadata(trades, <span class="st">"TRADING_SYS"</span>)
+        .withColumn(<span class="st">"transaction_hash_key"</span>,  dv_hash_key(<span class="st">"transaction_id"</span>))
+        .withColumn(<span class="st">"account_hash_key"</span>,       dv_hash_key(<span class="st">"account_id"</span>))
+        .withColumn(<span class="st">"counterparty_hash_key"</span>,  dv_hash_key(<span class="st">"counterparty_id"</span>))
+        .withColumn(<span class="st">"instrument_hash_key"</span>,    dv_hash_key(<span class="st">"instrument_id"</span>))
+        .select(<span class="st">"transaction_hash_key"</span>,<span class="st">"load_date"</span>,<span class="st">"record_source"</span>,
+                <span class="st">"transaction_id"</span>,<span class="st">"account_hash_key"</span>,<span class="st">"counterparty_hash_key"</span>,<span class="st">"instrument_hash_key"</span>)
+        .dropDuplicates([<span class="st">"transaction_hash_key"</span>])
+    )
+    existing <span class="op">=</span> load_or_empty(<span class="st">f"{VAULT}/links/link_transaction"</span>)
+    insert_new_only(link, existing, <span class="st">"transaction_hash_key"</span>, <span class="st">f"{VAULT}/links/link_transaction"</span>)
+
+<span class="cm"># ── LOAD SATELLITE ────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">load_sat_transaction_details</span>():
+    log.info(<span class="st">"Loading Sat_Transaction_Details..."</span>)
+    trades <span class="op">=</span> spark.read.option(<span class="st">"header"</span>,<span class="kw">True</span>).option(<span class="st">"inferSchema"</span>,<span class="kw">True</span>).csv(<span class="st">f"{RAW}/trading/trades.csv"</span>)
+
+    SAT_COLS <span class="op">=</span> [<span class="st">"trade_date"</span>,<span class="st">"settlement_date"</span>,<span class="st">"direction"</span>,
+                <span class="st">"notional_amount"</span>,<span class="st">"currency"</span>,<span class="st">"price"</span>,<span class="st">"status"</span>]
+
+    sat <span class="op">=</span> (add_dv_metadata(trades, <span class="st">"TRADING_SYS"</span>)
+        .withColumn(<span class="st">"transaction_hash_key"</span>, dv_hash_key(<span class="st">"transaction_id"</span>))
+        .withColumn(<span class="st">"hash_diff"</span>, dv_hash_diff(<span class="op">*</span>SAT_COLS))
+        .select(<span class="st">"transaction_hash_key"</span>,<span class="st">"load_date"</span>,<span class="st">"record_source"</span>,<span class="st">"hash_diff"</span>, <span class="op">*</span>SAT_COLS)
+    )
+
+    <span class="cm"># Only insert rows where hash_diff changed (no duplicates)</span>
+    existing <span class="op">=</span> load_or_empty(<span class="st">f"{VAULT}/satellites/sat_transaction_details"</span>)
+    <span class="kw">if</span> existing <span class="kw">is not None</span>:
+        <span class="cm"># Get latest hash_diff per transaction</span>
+        latest <span class="op">=</span> (existing
+            .orderBy(F.desc(<span class="st">"load_date"</span>))
+            .dropDuplicates([<span class="st">"transaction_hash_key"</span>])
+            .select(<span class="st">"transaction_hash_key"</span>, F.col(<span class="st">"hash_diff"</span>).alias(<span class="st">"existing_hash"</span>)))
+        new_only <span class="op">=</span> (sat
+            .join(latest, <span class="st">"transaction_hash_key"</span>, <span class="st">"left"</span>)
+            .filter((F.col(<span class="st">"existing_hash"</span>).isNull()) <span class="op">|</span> (F.col(<span class="st">"hash_diff"</span>) <span class="op">!=</span> F.col(<span class="st">"existing_hash"</span>)))
+            .drop(<span class="st">"existing_hash"</span>))
+    <span class="kw">else</span>:
+        new_only <span class="op">=</span> sat
+    cnt <span class="op">=</span> new_only.count()
+    <span class="kw">if</span> cnt <span class="op">></span> <span class="nm">0</span>:
+        new_only.coalesce(<span class="nm">1</span>).write.mode(<span class="st">"append"</span>).parquet(<span class="st">f"{VAULT}/satellites/sat_transaction_details"</span>)
+        log.info(<span class="st">f"  Inserted {cnt} new/changed satellite rows"</span>)
+
+<span class="cm"># ── MAIN ─────────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">main</span>():
+    log.info(<span class="st">"=== Raw Vault Load Started ==="</span>)
+    load_hub_account()
+    load_hub_counterparty()
+    load_link_transaction()
+    load_sat_transaction_details()
+    log.info(<span class="st">"=== Raw Vault Load Complete ==="</span>)
+
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    main()</code></pre></div>
+</div>
+
+<!-- STEP 4 -->
+<div class="section" id="section-step4">
+  <div class="hero">
+    <div class="hero-tag">Step 4 · Business Vault</div>
+    <h1>Business Vault — Apply Business Rules</h1>
+    <p>The Business Vault sits on top of the Raw Vault and applies business interpretation: FX conversion, name standardization, derived metrics. Everything is computed, nothing destroys the raw record.</p>
+  </div>
+
+  <div class="callout c-info"><div class="callout-icon">💡</div>
+  <div><strong>Business Vault vs Raw Vault:</strong> Raw Vault = "what did source systems tell us?" Business Vault = "what does that mean in our business context?" FX conversion, USD normalization, credit rating standardization — these go in the Business Vault as Computed Satellites, not in the Raw Vault. This separation means if your FX rates were wrong, you can recalculate the Business Vault from the unchanged Raw Vault.</div></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">scripts/build_business_vault.py — Computed Satellites</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code><span class="cm">"""
+Business Vault Builder
+Creates Computed Satellites — derived from Raw Vault + business rules.
+Key computed satellite: USD-normalized transaction amounts (FX conversion).
+"""</span>
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> SparkSession
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">from</span> pyspark.sql.types <span class="kw">import</span> DoubleType
+<span class="kw">import</span> logging
+
+log <span class="op">=</span> logging.getLogger(__name__)
+logging.basicConfig(level<span class="op">=</span>logging.INFO, format<span class="op">=</span><span class="st">"%(asctime)s [%(levelname)s] %(message)s"</span>)
+
+spark <span class="op">=</span> (SparkSession.builder.appName(<span class="st">"business-vault"</span>).master(<span class="st">"local[*]"</span>)
+    .config(<span class="st">"spark.sql.shuffle.partitions"</span>,<span class="st">"8"</span>).getOrCreate())
+spark.sparkContext.setLogLevel(<span class="st">"WARN"</span>)
+
+VAULT <span class="op">=</span> <span class="st">"data/raw_vault"</span>
+BV    <span class="op">=</span> <span class="st">"data/business_vault"</span>
+
+<span class="cm"># Simplified FX rates (in production: load from market data feed)</span>
+FX_RATES_TO_USD <span class="op">=</span> {
+    <span class="st">"USD"</span>: <span class="nm">1.0000</span>, <span class="st">"EUR"</span>: <span class="nm">1.0850</span>, <span class="st">"GBP"</span>: <span class="nm">1.2700</span>,
+    <span class="st">"JPY"</span>: <span class="nm">0.0067</span>, <span class="st">"CHF"</span>: <span class="nm">1.1200</span>
+}
+
+<span class="kw">def</span> <span class="fn">build_computed_sat_transaction_usd</span>():
+    <span class="st">"""
+    Computed Satellite: Transaction amounts normalized to USD.
+    This is a BUSINESS RULE (FX conversion) applied on top of Raw Vault.
+    If FX rates change, we can recompute this satellite from raw data.
+    """</span>
+    log.info(<span class="st">"Building CSAT_Transaction_USD..."</span>)
+    sat <span class="op">=</span> spark.read.parquet(<span class="st">f"{VAULT}/satellites/sat_transaction_details"</span>)
+
+    <span class="cm"># Build FX mapping expression</span>
+    fx_expr <span class="op">=</span> F.lit(<span class="nm">1.0</span>)
+    <span class="kw">for</span> currency, rate <span class="kw">in</span> FX_RATES_TO_USD.items():
+        fx_expr <span class="op">=</span> F.when(F.col(<span class="st">"currency"</span>) <span class="op">==</span> currency, F.lit(rate)).otherwise(fx_expr)
+
+    csat <span class="op">=</span> (sat
+        .withColumn(<span class="st">"fx_rate_to_usd"</span>,      fx_expr)
+        .withColumn(<span class="st">"notional_amount_usd"</span>,
+            F.round(F.col(<span class="st">"notional_amount"</span>).cast(DoubleType()) <span class="op">*</span> fx_expr, <span class="nm">2</span>))
+        .withColumn(<span class="st">"price_usd"</span>,
+            F.round(F.col(<span class="st">"price"</span>).cast(DoubleType()) <span class="op">*</span> fx_expr, <span class="nm">4</span>))
+        .withColumn(<span class="st">"bv_load_date"</span>,         F.current_timestamp())
+        .withColumn(<span class="st">"bv_record_source"</span>,     F.lit(<span class="st">"BUSINESS_VAULT_FX"</span>))
+        .select(<span class="st">"transaction_hash_key"</span>, <span class="st">"bv_load_date"</span>, <span class="st">"bv_record_source"</span>,
+                <span class="st">"fx_rate_to_usd"</span>, <span class="st">"notional_amount_usd"</span>, <span class="st">"price_usd"</span>, <span class="st">"currency"</span>)
+    )
+    csat.coalesce(<span class="nm">1</span>).write.mode(<span class="st">"overwrite"</span>).parquet(<span class="st">f"{BV}/computed_sats/csat_transaction_usd"</span>)
+    log.info(<span class="st">f"  → {csat.count()} computed sat rows written"</span>)
+
+<span class="kw">def</span> <span class="fn">build_pit_account</span>():
+    <span class="st">"""
+    Build Point-In-Time table for accounts.
+    For each account + each snapshot date: which satellite version was current?
+    """</span>
+    log.info(<span class="st">"Building PIT_Account..."</span>)
+    hub      <span class="op">=</span> spark.read.parquet(<span class="st">f"{VAULT}/hubs/hub_account"</span>)
+    sat_det  <span class="op">=</span> spark.read.parquet(<span class="st">f"{VAULT}/satellites/sat_account_details"</span>) <span class="kw">if</span> __import__(<span class="st">'os'</span>).path.exists(<span class="st">f"{VAULT}/satellites/sat_account_details"</span>) <span class="kw">else</span> <span class="kw">None</span>
+
+    <span class="cm"># Generate daily snapshot dates for 2024</span>
+    snapshots <span class="op">=</span> spark.sql(<span class="st">"""
+        SELECT explode(sequence(to_date('2024-01-01'),
+               to_date('2024-12-31'), interval 1 day)) AS snapshot_date
+    """</span>)
+
+    <span class="cm"># Cross join accounts with snapshot dates</span>
+    pit_base <span class="op">=</span> hub.crossJoin(snapshots).select(<span class="st">"account_hash_key"</span>,<span class="st">"snapshot_date"</span>)
+
+    <span class="kw">if</span> sat_det <span class="kw">is not None</span>:
+        <span class="cm"># For each account + snapshot: find the latest satellite load_date <= snapshot_date</span>
+        sat_snapshot <span class="op">=</span> (sat_det
+            .join(snapshots, sat_det.load_date.cast(<span class="st">"date"</span>) <span class="op">&lt;=</span> snapshots.snapshot_date, <span class="st">"inner"</span>)
+            .groupBy(<span class="st">"account_hash_key"</span>, <span class="st">"snapshot_date"</span>)
+            .agg(F.max(<span class="st">"load_date"</span>).alias(<span class="st">"sat_account_details_ldts"</span>))
+        )
+        pit <span class="op">=</span> pit_base.join(sat_snapshot, [<span class="st">"account_hash_key"</span>,<span class="st">"snapshot_date"</span>], <span class="st">"left"</span>)
+    <span class="kw">else</span>:
+        pit <span class="op">=</span> pit_base.withColumn(<span class="st">"sat_account_details_ldts"</span>, F.lit(<span class="kw">None</span>))
+
+    pit.write.mode(<span class="st">"overwrite"</span>).partitionBy(<span class="st">"snapshot_date"</span>).parquet(<span class="st">f"{BV}/pit/pit_account"</span>)
+    log.info(<span class="st">f"  → PIT_Account built"</span>)
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    log.info(<span class="st">"=== Business Vault Build Started ==="</span>)
+    build_computed_sat_transaction_usd()
+    build_pit_account()
+    log.info(<span class="st">"=== Business Vault Complete ==="</span>)
+
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    main()</code></pre></div>
+</div>
+
+<!-- STEP 5 -->
+<div class="section" id="section-step5">
+  <div class="hero">
+    <div class="hero-tag">Step 5 · Information Mart</div>
+    <h1>Build the Information Mart</h1>
+    <p>The Information Mart is the analyst-facing layer — a traditional star schema built from the Data Vault. Analysts never query the Raw Vault directly.</p>
+  </div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">scripts/build_information_mart.py</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code><span class="cm">"""
+Information Mart Builder.
+Reads from Raw Vault + Business Vault.
+Outputs a clean star schema for analyst consumption.
+"""</span>
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> SparkSession
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">import</span> logging
+
+log <span class="op">=</span> logging.getLogger(__name__)
+logging.basicConfig(level<span class="op">=</span>logging.INFO, format<span class="op">=</span><span class="st">"%(asctime)s [%(levelname)s] %(message)s"</span>)
+
+spark <span class="op">=</span> (SparkSession.builder.appName(<span class="st">"info-mart"</span>).master(<span class="st">"local[*]"</span>)
+    .config(<span class="st">"spark.sql.shuffle.partitions"</span>,<span class="st">"8"</span>).getOrCreate())
+spark.sparkContext.setLogLevel(<span class="st">"WARN"</span>)
+
+VAULT <span class="op">=</span> <span class="st">"data/raw_vault"</span>
+BV    <span class="op">=</span> <span class="st">"data/business_vault"</span>
+MART  <span class="op">=</span> <span class="st">"data/information_mart"</span>
+
+<span class="kw">def</span> <span class="fn">build_fact_trading_activity</span>():
+    <span class="st">"""
+    Build the main fact table for trading activity.
+    Joins Hub → Link → Satellite (latest version via is_current pattern).
+    USD-normalized amounts from Business Vault computed satellite.
+    """</span>
+    log.info(<span class="st">"Building fact_trading_activity..."</span>)
+
+    <span class="cm"># Load vault components</span>
+    hub_acct  <span class="op">=</span> spark.read.parquet(<span class="st">f"{VAULT}/hubs/hub_account"</span>)
+    link_tx   <span class="op">=</span> spark.read.parquet(<span class="st">f"{VAULT}/links/link_transaction"</span>)
+    sat_tx    <span class="op">=</span> spark.read.parquet(<span class="st">f"{VAULT}/satellites/sat_transaction_details"</span>)
+    csat_usd  <span class="op">=</span> spark.read.parquet(<span class="st">f"{BV}/computed_sats/csat_transaction_usd"</span>)
+
+    <span class="cm"># Get latest version of each satellite (current record)</span>
+    sat_tx_latest <span class="op">=</span> (sat_tx
+        .withColumn(<span class="st">"rn"</span>, F.row_number().over(
+            __import__(<span class="st">'pyspark.sql.window'</span>, fromlist<span class="op">=</span>[<span class="st">'Window'</span>]).Window
+            .partitionBy(<span class="st">"transaction_hash_key"</span>).orderBy(F.desc(<span class="st">"load_date"</span>))))
+        .filter(F.col(<span class="st">"rn"</span>) <span class="op">==</span> <span class="nm">1</span>).drop(<span class="st">"rn"</span>)
+    )
+
+    <span class="cm"># Join vault layers → mart</span>
+    fact <span class="op">=</span> (link_tx
+        .join(sat_tx_latest, <span class="st">"transaction_hash_key"</span>, <span class="st">"left"</span>)
+        .join(csat_usd.select(<span class="st">"transaction_hash_key"</span>,<span class="st">"notional_amount_usd"</span>,<span class="st">"fx_rate_to_usd"</span>),
+              <span class="st">"transaction_hash_key"</span>, <span class="st">"left"</span>)
+        .join(hub_acct.select(<span class="st">"account_hash_key"</span>,<span class="st">"account_id"</span>), <span class="st">"account_hash_key"</span>, <span class="st">"left"</span>)
+        .withColumn(<span class="st">"year"</span>,  F.year(F.to_date(<span class="st">"trade_date"</span>)))
+        .withColumn(<span class="st">"month"</span>, F.month(F.to_date(<span class="st">"trade_date"</span>)))
+        .withColumn(<span class="st">"mart_load_ts"</span>, F.current_timestamp())
+        .select(
+            <span class="st">"transaction_hash_key"</span>, <span class="st">"transaction_id"</span>, <span class="st">"account_id"</span>,
+            <span class="st">"account_hash_key"</span>, <span class="st">"counterparty_hash_key"</span>, <span class="st">"instrument_hash_key"</span>,
+            <span class="st">"trade_date"</span>, <span class="st">"settlement_date"</span>, <span class="st">"direction"</span>, <span class="st">"status"</span>,
+            <span class="st">"notional_amount"</span>, <span class="st">"currency"</span>, <span class="st">"notional_amount_usd"</span>, <span class="st">"fx_rate_to_usd"</span>,
+            <span class="st">"year"</span>, <span class="st">"month"</span>, <span class="st">"mart_load_ts"</span>
+        )
+    )
+    fact.write.mode(<span class="st">"overwrite"</span>).partitionBy(<span class="st">"year"</span>,<span class="st">"month"</span>).parquet(<span class="st">f"{MART}/fact_trading_activity"</span>)
+    log.info(<span class="st">f"  → {fact.count()} rows in fact_trading_activity"</span>)
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    log.info(<span class="st">"=== Information Mart Build Started ==="</span>)
+    build_fact_trading_activity()
+    log.info(<span class="st">"=== Information Mart Complete ==="</span>)
+
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    main()</code></pre></div>
+</div>
+
+<!-- STEP 6 -->
+<div class="section" id="section-step6">
+  <div class="hero">
+    <div class="hero-tag">Step 6 · AWS EMR</div>
+    <h1>Deploy on AWS EMR</h1>
+    <p>EMR is AWS's managed Hadoop/Spark service. For large financial data sets, a multi-node EMR cluster handles what a single Glue job can't. EMR gives you full control over Spark configuration.</p>
+  </div>
+
+  <div class="callout c-warn"><div class="callout-icon">💰</div><div><strong>Cost warning:</strong> EMR charges by the hour per instance. An m5.xlarge cluster (1 master + 2 workers) costs ~$0.40/hr. For this project, run your job and terminate the cluster immediately. Estimated cost per run: under $1.</div></div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num a">6a</div>
+      <div><div class="step-title">EMR Bootstrap Script</div><div class="step-sub">Installs dependencies on all cluster nodes at startup</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body open">
+      <div class="code-block"><div class="code-header"><span class="code-lang">emr_scripts/bootstrap.sh</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code>#!/bin/bash
+# EMR Bootstrap Action — runs on every node at cluster creation
+set -e
+
+echo "Installing Python dependencies..."
+pip3 install faker boto3 --quiet
+
+echo "Setting Spark configuration..."
+cat >> /etc/spark/conf/spark-defaults.conf << 'EOF'
+spark.sql.adaptive.enabled=true
+spark.sql.adaptive.coalescePartitions.enabled=true
+spark.serializer=org.apache.spark.serializer.KryoSerializer
+spark.sql.parquet.compression.codec=snappy
+EOF
+
+echo "Bootstrap complete ✓"</code></pre></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">6b</div>
+      <div><div class="step-title">Create EMR Cluster (AWS CLI)</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block"><div class="code-header"><span class="code-lang">bash — create EMR cluster</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="cm"># Upload scripts to S3 first</span>
+aws s3 cp scripts/ s3://finance-dv-yourname/scripts/ --recursive
+aws s3 cp emr_scripts/ s3://finance-dv-yourname/emr_scripts/ --recursive
+aws s3 cp data/raw_sources/ s3://finance-dv-yourname/data/raw_sources/ --recursive
+
+<span class="cm"># Create EMR cluster</span>
+aws emr create-cluster \
+  --name "finance-data-vault-cluster" \
+  --release-label emr-7.0.0 \
+  --applications Name=Spark Name=Hadoop \
+  --instance-type m5.xlarge \
+  --instance-count 3 \
+  --use-default-roles \
+  --ec2-attributes KeyName=your-key-pair \
+  --bootstrap-actions Path=s3://finance-dv-yourname/emr_scripts/bootstrap.sh \
+  --log-uri s3://finance-dv-yourname/logs/ \
+  --auto-terminate
+
+<span class="cm"># Get cluster ID from output, then add a step:</span>
+aws emr add-steps \
+  --cluster-id j-XXXXXXXXXXXXX \
+  --steps Type=Spark,Name="Raw Vault Load",\
+ActionOnFailure=CONTINUE,\
+Args=[--deploy-mode,cluster,\
+      s3://finance-dv-yourname/scripts/load_raw_vault.py,\
+      --bucket,finance-dv-yourname]</code></pre></div>
+    </div>
+  </div>
+
+  <div class="callout c-tip"><div class="callout-icon">💡</div><div><strong>EMR vs Glue for interviews:</strong> Glue is serverless (no cluster management, pay per DPU-second). EMR gives you full control over Spark configuration, instance types, and can use spot instances for 70% cost savings. Use Glue for: simple ETL jobs, teams without Spark expertise, serverless preference. Use EMR for: complex Spark tuning needed, large-scale jobs, when you need custom Spark versions or libraries, cost optimization via spot instances.</div></div>
+</div>
+
+<!-- STEP 7 -->
+<div class="section" id="section-step7">
+  <div class="hero">
+    <div class="hero-tag">Step 7 · Regulatory Reports</div>
+    <h1>SOX Compliance + Regulatory SQL Queries</h1>
+    <p>Four queries that a compliance officer, CFO, or regulator would actually request. These demonstrate the power of Data Vault's audit lineage.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'rq1')">Audit Trail</button>
+    <button class="tab-btn" onclick="switchTab(this,'rq2')">Point-in-Time Balance</button>
+    <button class="tab-btn" onclick="switchTab(this,'rq3')">Exposure Report</button>
+    <button class="tab-btn" onclick="switchTab(this,'rq4')">Data Lineage</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-rq1">
+    <div class="callout c-audit"><div class="callout-icon">📋</div><div>SOX Section 302 audit: trace every GL journal entry to its source, approve status, and modification history. Auditors use this to verify that reported figures match source transactions.</div></div>
+    <div class="code-block"><div class="code-header"><span class="code-lang">SQL — SOX Audit Trail: GL Journal Entry Lineage</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm">-- Full audit trail: for every GL journal entry, show all versions</span>
+<span class="cm">-- and when it was loaded (proving no retroactive manipulation)</span>
+<span class="kw">WITH</span> journal_versions <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        lj.journal_id,
+        lj.account_hash_key,
+        lj.gl_hash_key,
+        sj.load_date                        <span class="kw">AS</span> version_loaded_at,
+        sj.record_source,
+        sj.posting_date,
+        sj.fiscal_period,
+        sj.debit_amount,
+        sj.credit_amount,
+        sj.description,
+        sj.approved_by,
+        sj.hash_diff,
+        <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> lj.journal_id
+            <span class="kw">ORDER BY</span> sj.load_date
+        )                                   <span class="kw">AS</span> version_number,
+        <span class="fn">LAG</span>(sj.hash_diff) <span class="kw">OVER</span> (
+            <span class="kw">PARTITION BY</span> lj.journal_id
+            <span class="kw">ORDER BY</span> sj.load_date
+        )                                   <span class="kw">AS</span> previous_hash_diff
+    <span class="kw">FROM</span> raw_vault.link_gl_journal_entry lj
+    <span class="kw">JOIN</span> raw_vault.sat_gl_journal_details sj
+        <span class="kw">ON</span> lj.journal_hash_key <span class="op">=</span> sj.journal_hash_key
+)
+<span class="kw">SELECT</span>
+    journal_id,
+    version_number,
+    version_loaded_at,
+    record_source,
+    posting_date,
+    fiscal_period,
+    debit_amount,
+    credit_amount,
+    approved_by,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> version_number <span class="op">=</span> <span class="nm">1</span>             <span class="kw">THEN</span> <span class="st">'ORIGINAL'</span>
+        <span class="kw">WHEN</span> previous_hash_diff <span class="op">!=</span> hash_diff <span class="kw">THEN</span> <span class="st">'MODIFIED'</span>
+        <span class="kw">ELSE</span>                                      <span class="st">'UNCHANGED RELOAD'</span>
+    <span class="kw">END</span>                                     <span class="kw">AS</span> change_type
+<span class="kw">FROM</span> journal_versions
+<span class="kw">ORDER BY</span> journal_id, version_number;</code></pre></div>
+  </div>
+
+  <div class="tab-panel" id="tab-rq2">
+    <div class="callout c-audit"><div class="callout-icon">📋</div><div>Point-in-time balance reconstruction — answer "what was the account balance on March 15th?" using PIT tables to avoid complex date-range joins.</div></div>
+    <div class="code-block"><div class="code-header"><span class="code-lang">SQL — Point-in-Time Account Balance (using PIT table)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm">-- Reconstruct account portfolio as of any past date</span>
+<span class="cm">-- Uses PIT table for simple equality joins instead of date-range logic</span>
+<span class="kw">WITH</span> portfolio_as_of_date <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        p.account_hash_key,
+        p.snapshot_date,
+        ha.account_id,
+        d.account_name,
+        d.account_type,
+        d.credit_rating,
+        b.balance_amount,
+        b.currency_code,
+        b.balance_date,
+        <span class="cm">-- USD normalization from Business Vault</span>
+        b.balance_amount <span class="op">*</span> fx.fx_rate_to_usd  <span class="kw">AS</span> balance_amount_usd,
+        <span class="cm">-- Full lineage: which source file and when</span>
+        d.record_source   <span class="kw">AS</span> details_source,
+        b.record_source   <span class="kw">AS</span> balance_source,
+        p.sat_account_details_ldts,
+        p.sat_account_balance_ldts
+    <span class="kw">FROM</span> business_vault.pit_account p
+    <span class="kw">JOIN</span> raw_vault.hub_account ha
+        <span class="kw">ON</span> p.account_hash_key <span class="op">=</span> ha.account_hash_key
+    <span class="kw">JOIN</span> raw_vault.sat_account_details d
+        <span class="kw">ON</span> p.account_hash_key <span class="op">=</span> d.account_hash_key
+       <span class="kw">AND</span> p.sat_account_details_ldts <span class="op">=</span> d.load_date  <span class="cm">← PIT removes date-range complexity</span>
+    <span class="kw">JOIN</span> raw_vault.sat_account_balance b
+        <span class="kw">ON</span> p.account_hash_key <span class="op">=</span> b.account_hash_key
+       <span class="kw">AND</span> p.sat_account_balance_ldts <span class="op">=</span> b.load_date  <span class="cm">← simple equality join</span>
+    <span class="kw">LEFT JOIN</span> business_vault.fx_rates_daily fx
+        <span class="kw">ON</span> b.currency_code <span class="op">=</span> fx.from_currency
+       <span class="kw">AND</span> p.snapshot_date <span class="op">=</span> fx.rate_date
+    <span class="kw">WHERE</span> p.snapshot_date <span class="op">=</span> <span class="st">'2024-03-15'</span>   <span class="cm">← Any date, exact reconstruction</span>
+)
+<span class="kw">SELECT</span>
+    account_id, account_name, account_type, credit_rating,
+    balance_amount, currency_code,
+    <span class="fn">ROUND</span>(balance_amount_usd, <span class="nm">2</span>) <span class="kw">AS</span> balance_usd,
+    details_source, balance_source,
+    sat_account_details_ldts      <span class="kw">AS</span> details_loaded_from_source_at,
+    sat_account_balance_ldts      <span class="kw">AS</span> balance_loaded_from_source_at
+<span class="kw">FROM</span> portfolio_as_of_date
+<span class="kw">ORDER BY</span> balance_amount_usd <span class="kw">DESC</span>;</code></pre></div>
+  </div>
+
+  <div class="tab-panel" id="tab-rq3">
+    <div class="callout c-audit"><div class="callout-icon">📋</div><div>Counterparty exposure report — regulatory requirement for banks to report concentration risk. How much exposure does the firm have to each counterparty, in USD, as of today?</div></div>
+    <div class="code-block"><div class="code-header"><span class="code-lang">SQL — Counterparty Exposure Report (Regulatory)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="kw">WITH</span> active_exposures <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        lt.counterparty_hash_key,
+        <span class="fn">SUM</span>(cs.notional_amount_usd)          <span class="kw">AS</span> total_exposure_usd,
+        <span class="fn">COUNT</span>(DISTINCT lt.transaction_id)    <span class="kw">AS</span> trade_count,
+        <span class="fn">COUNT</span>(DISTINCT lt.instrument_hash_key)<span class="kw">AS</span> instrument_count,
+        <span class="fn">MIN</span>(std.trade_date)                  <span class="kw">AS</span> earliest_trade,
+        <span class="fn">MAX</span>(std.settlement_date)             <span class="kw">AS</span> latest_settlement
+    <span class="kw">FROM</span> raw_vault.link_transaction lt
+    <span class="kw">JOIN</span> raw_vault.sat_transaction_details std
+        <span class="kw">ON</span> lt.transaction_hash_key <span class="op">=</span> std.transaction_hash_key
+    <span class="kw">JOIN</span> business_vault.csat_transaction_usd cs
+        <span class="kw">ON</span> lt.transaction_hash_key <span class="op">=</span> cs.transaction_hash_key
+    <span class="kw">WHERE</span> std.status <span class="op">!=</span> <span class="st">'cancelled'</span>
+      <span class="kw">AND</span> std.settlement_date <span class="op">>=</span> <span class="fn">CURRENT_DATE</span>   <span class="cm">-- Active/unsettled trades only</span>
+    <span class="kw">GROUP BY</span> lt.counterparty_hash_key
+),
+counterparty_totals <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> <span class="fn">SUM</span>(total_exposure_usd) <span class="kw">AS</span> firm_total_exposure
+    <span class="kw">FROM</span> active_exposures
+)
+<span class="kw">SELECT</span>
+    scp.legal_name,
+    scp.lei_code,
+    scp.credit_rating,
+    scp.country_of_incorporation,
+    <span class="fn">ROUND</span>(ae.total_exposure_usd, <span class="nm">0</span>)       <span class="kw">AS</span> exposure_usd,
+    ae.trade_count,
+    ae.instrument_count,
+    <span class="fn">ROUND</span>(ae.total_exposure_usd
+        / ct.firm_total_exposure * <span class="nm">100</span>, <span class="nm">2</span>) <span class="kw">AS</span> pct_of_total_exposure,
+    <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (
+        <span class="kw">ORDER BY</span> ae.total_exposure_usd <span class="kw">DESC</span>
+    )                                      <span class="kw">AS</span> exposure_rank,
+    <span class="cm">-- Regulatory flag: concentration > 10% of total = reportable</span>
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> ae.total_exposure_usd / ct.firm_total_exposure <span class="op">></span> <span class="nm">0.10</span>
+        <span class="kw">THEN</span> <span class="st">'CONCENTRATION RISK — Report to Regulator'</span>
+        <span class="kw">ELSE</span> <span class="st">'Within Limits'</span>
+    <span class="kw">END</span>                                    <span class="kw">AS</span> regulatory_status
+<span class="kw">FROM</span> active_exposures ae
+<span class="kw">JOIN</span> raw_vault.hub_counterparty hc
+    <span class="kw">ON</span> ae.counterparty_hash_key <span class="op">=</span> hc.counterparty_hash_key
+<span class="kw">JOIN</span> raw_vault.sat_counterparty_details scp
+    <span class="kw">ON</span> hc.counterparty_hash_key <span class="op">=</span> scp.counterparty_hash_key
+<span class="kw">CROSS JOIN</span> counterparty_totals ct
+<span class="kw">ORDER BY</span> exposure_usd <span class="kw">DESC</span>;</code></pre></div>
+  </div>
+
+  <div class="tab-panel" id="tab-rq4">
+    <div class="callout c-audit"><div class="callout-icon">📋</div><div>Data lineage query — for any number in a financial report, trace it back to the exact source system, file, and load timestamp. This is the core SOX requirement.</div></div>
+    <div class="code-block"><div class="code-header"><span class="code-lang">SQL — Data Lineage: Trace Report Number to Source</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm">-- Answer: "Where did this $47.3M notional figure in our Q1 report come from?"</span>
+<span class="cm">-- Trace to exact source records with full lineage chain</span>
+<span class="kw">WITH</span> report_figure_breakdown <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        ha.account_id,
+        lt.transaction_id,
+        lt.record_source             <span class="kw">AS</span> link_loaded_from,
+        lt.load_date                 <span class="kw">AS</span> link_first_seen,
+        std.record_source            <span class="kw">AS</span> sat_loaded_from,
+        std.load_date                <span class="kw">AS</span> sat_version_at,
+        std.trade_date,
+        std.notional_amount,
+        std.currency,
+        csu.notional_amount_usd,
+        csu.fx_rate_to_usd,
+        <span class="cm">-- Full lineage chain as a readable string</span>
+        <span class="fn">CONCAT</span>(
+            <span class="st">'Source: '</span>, std.record_source, <span class="st">' | '</span>,
+            <span class="st">'Loaded: '</span>, <span class="fn">CAST</span>(std.load_date <span class="kw">AS</span> VARCHAR), <span class="st">' | '</span>,
+            <span class="st">'FX Applied: '</span>, <span class="fn">CAST</span>(csu.fx_rate_to_usd <span class="kw">AS</span> VARCHAR), <span class="st">' (BV_FX)'</span>
+        )                            <span class="kw">AS</span> lineage_chain
+    <span class="kw">FROM</span> raw_vault.link_transaction lt
+    <span class="kw">JOIN</span> raw_vault.hub_account ha
+        <span class="kw">ON</span> lt.account_hash_key <span class="op">=</span> ha.account_hash_key
+    <span class="kw">JOIN</span> raw_vault.sat_transaction_details std
+        <span class="kw">ON</span> lt.transaction_hash_key <span class="op">=</span> std.transaction_hash_key
+    <span class="kw">JOIN</span> business_vault.csat_transaction_usd csu
+        <span class="kw">ON</span> lt.transaction_hash_key <span class="op">=</span> csu.transaction_hash_key
+    <span class="kw">WHERE</span> std.trade_date <span class="kw">BETWEEN</span> <span class="st">'2024-01-01'</span> <span class="kw">AND</span> <span class="st">'2024-03-31'</span>
+      <span class="kw">AND</span> std.status <span class="op">=</span> <span class="st">'settled'</span>
+)
+<span class="kw">SELECT</span>
+    account_id, transaction_id, trade_date,
+    notional_amount, currency,
+    <span class="fn">ROUND</span>(notional_amount_usd, <span class="nm">2</span>) <span class="kw">AS</span> notional_usd,
+    lineage_chain,
+    sat_loaded_from,
+    sat_version_at,
+    <span class="fn">SUM</span>(notional_amount_usd) <span class="kw">OVER</span> ()  <span class="kw">AS</span> total_q1_notional_usd
+<span class="kw">FROM</span> report_figure_breakdown
+<span class="kw">ORDER BY</span> notional_usd <span class="kw">DESC</span>;</code></pre></div>
+  </div>
+</div>
+
+<!-- STEP 8 -->
+<div class="section" id="section-step8">
+  <div class="hero">
+    <div class="hero-tag">Step 8 · GitHub</div>
+    <h1>Push to GitHub</h1>
+  </div>
+  <div class="code-block"><div class="code-header"><span class="code-lang">README.md</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code># Finance Audit Compliance Data Vault 2.0
+
+**Industry:** Financial Services | **Level:** Expert
+**Stack:** Python 3.11 · PySpark 3.5 · Data Vault 2.0 · AWS EMR · S3 · Athena
+
+## Business Problem
+A financial services firm managing $2B in assets was failing SOX audits.
+Auditors couldn't trace report figures back to source transactions. Finance teams
+couldn't reproduce historical reports (balance as of March 15th). Three source
+systems (GL, Trading, Loans) had inconsistent entity definitions.
+
+This Data Vault 2.0 implementation provides:
+- Complete SOX audit lineage from any report number to source transaction
+- Point-in-time reconstruction of any portfolio state at any past date
+- Multi-source entity resolution across GL, Trading, and Loan systems
+- Insert-only architecture — no data ever overwritten or deleted
+
+## Data Vault 2.0 Architecture
+```
+Three-Layer Architecture:
+├── Raw Vault (insert-only, no business rules)
+│   ├── Hubs: Hub_Account, Hub_Counterparty, Hub_Instrument, Hub_Employee, Hub_GLAccount
+│   ├── Links: Link_Transaction, Link_GLJournalEntry, Link_AccountEmployee
+│   └── Satellites: Sat_Account_Details, Sat_Account_Balance,
+│                   Sat_Transaction_Details, Sat_GLJournal_Details,
+│                   Sat_Counterparty_Details, Sat_Instrument_Pricing
+├── Business Vault (computed sats + PIT/Bridge tables)
+│   ├── CSAT_Transaction_USD (FX normalization)
+│   └── PIT_Account (point-in-time snapshots)
+└── Information Mart (star schema for analysts)
+    └── Fact_Trading_Activity (USD-normalized, partitioned year/month)
+```
+
+## Running Locally
+```bash
+pip install pyspark faker boto3
+python3 scripts/generate_finance_data.py
+python3 scripts/load_raw_vault.py
+python3 scripts/build_business_vault.py
+python3 scripts/build_information_mart.py
+```
+
+## Business Impact
+- SOX audit findings: 3 → 0 (full lineage traceability)
+- Historical report reconstruction time: 2 weeks manual → seconds automated
+- Multi-source entity resolution across 3 systems with 200 shared accounts
+- Insert-only architecture ensures complete change history preservation</code></pre></div>
+
+  <div class="code-block"><div class="code-header"><span class="code-lang">bash — commit and push</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+  <pre><code>cd ~/de-portfolio/project-04-finance
+git init
+git add .gitignore README.md scripts/ emr_scripts/ docs/
+git commit -m "feat: Data Vault 2.0 finance audit pipeline
+
+- Full DV2.0: Hubs (5) + Links (3) + Satellites (6)
+- Insert-only Raw Vault with hash_diff deduplication
+- Business Vault: FX-normalized computed satellites
+- PIT tables for point-in-time query performance
+- SOX compliance: full audit lineage in every row
+- AWS EMR deployment with bootstrap + step automation"
+
+git branch -M main
+git remote add origin https://github.com/YOURUSERNAME/de-project-04-finance-dv.git
+git push -u origin main</code></pre></div>
+
+  <h3>✅ Project 4 Final Checklist</h3>
+  <ul class="checklist">
+    <li><input type="checkbox" id="f1" onchange="updateProgress()"><label for="f1">Can explain Hub, Link, Satellite in one sentence each from memory</label></li>
+    <li><input type="checkbox" id="f2" onchange="updateProgress()"><label for="f2">Can explain the difference between Raw Vault and Business Vault</label></li>
+    <li><input type="checkbox" id="f3" onchange="updateProgress()"><label for="f3">Can explain why hash_diff prevents duplicate satellite rows</label></li>
+    <li><input type="checkbox" id="f4" onchange="updateProgress()"><label for="f4">Data generation produces 3 source system files</label></li>
+    <li><input type="checkbox" id="f5" onchange="updateProgress()"><label for="f5">Raw vault loads with insert-only pattern working</label></li>
+    <li><input type="checkbox" id="f6" onchange="updateProgress()"><label for="f6">Business Vault FX computed satellite built</label></li>
+    <li><input type="checkbox" id="f7" onchange="updateProgress()"><label for="f7">Information Mart fact table built and queryable</label></li>
+    <li><input type="checkbox" id="f8" onchange="updateProgress()"><label for="f8">Can explain what a PIT table solves without notes</label></li>
+    <li><input type="checkbox" id="f9" onchange="updateProgress()"><label for="f9">Can explain why Data Vault for SOX compliance vs star schema</label></li>
+    <li><input type="checkbox" id="f10" onchange="updateProgress()"><label for="f10">EMR cluster creation command understood (even if not run)</label></li>
+    <li><input type="checkbox" id="f11" onchange="updateProgress()"><label for="f11">GitHub repo pushed with professional README</label></li>
+    <li><input type="checkbox" id="f12" onchange="updateProgress()"><label for="f12">All 15 interview questions answered out loud</label></li>
+  </ul>
+</div>
+
+<!-- INTERVIEW -->
+<div class="section" id="section-interview">
+  <div class="hero">
+    <div class="hero-tag">Interview Prep · 15 Questions</div>
+    <h1>Data Vault + Finance Interview Questions</h1>
+    <p>These are the hardest technical questions in the series. Master these and you'll stand out from every other candidate.</p>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q1</span><span class="q-cat cat-dv">Data Vault</span>
+      <span class="q-text">Explain Data Vault 2.0 in plain English. What problem does it solve that star schema can't?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Data Vault 2.0 is a data modeling methodology designed for regulated, multi-source enterprise environments where full audit history and data lineage are legal requirements. A star schema is optimized for query performance — dimensions and facts are structured for analysts. But it overwrites history (Type 1) or requires careful SCD management (Type 2), and it can't easily handle data from multiple source systems with different schemas for the same entity. Data Vault solves three problems star schema can't. First, complete history: it's insert-only — nothing is ever updated or deleted, so you can reconstruct any past state. Second, multi-source integration: business keys are hashed consistently, so the same customer appearing in CRM and billing gets the same hash key and resolves to one entity regardless of source. Third, audit lineage: every row has load_date and record_source, so you can trace any number on any report back to the exact source file and timestamp it came from. For SOX compliance, that lineage is a legal requirement.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q2</span><span class="q-cat cat-hub">Hub</span>
+      <span class="q-text">What is a Hub and what are the strict rules for building one?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>A Hub is a table that captures the existence of a unique business entity — one row per unique business key, ever. Hub_Account has one row per account ID. That's it. No attributes about the account (no name, no balance, no type) — those go in Satellites attached to the Hub. The strict rules: first, the primary key must be a hash of the business key — MD5 or SHA-256. The hash must be computed consistently — uppercase, trim whitespace, same encoding — because the same account from two different source systems must produce the same hash for entity resolution to work. Second, Hubs are insert-only — once an account appears, that row never changes. A new load only adds new business keys. Third, Hubs contain only: hash_key, load_date, record_source, and business_key. Nothing else. No foreign keys — Hubs reference nothing. The conceptual purpose: Hubs answer "what business entities have we ever seen?" without saying anything about what we know about them.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q3</span><span class="q-cat cat-sat">Satellite</span>
+      <span class="q-text">What is hash_diff in a Satellite and why is it critical?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Hash_diff is an MD5 hash of all the attribute columns in a Satellite row. Its purpose is change detection and deduplication. Every time a source system sends data, we compute the hash_diff for the incoming record and compare it to the latest existing hash_diff for that entity. If they're the same, nothing changed — we don't insert a new row. If they differ, something changed — insert a new row with the new values and current load_date. Without hash_diff, a daily full load from a source system would insert millions of duplicate rows with no real changes — the satellite would balloon with identical versions. Hash_diff keeps satellites lean: new rows only appear when attributes actually changed. This is critical for performance, storage, and maintaining clean history. One important implementation detail: you must handle NULLs consistently when computing hash_diff — I replace NULL with a sentinel value like '~NULL~' before hashing, because NULL != NULL in SQL and inconsistent NULL handling creates false "change detected" rows.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q4</span><span class="q-cat cat-dv">Data Vault</span>
+      <span class="q-text">What is the difference between a Raw Vault and a Business Vault?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>The Raw Vault is the immutable legal record — it stores exactly what source systems told us, with no transformations, no business rules applied. A Raw Vault Satellite for a transaction has the raw notional amount and raw currency code, exactly as they came from the trading system. The Raw Vault answers "what did source systems tell us?" The Business Vault applies business interpretation on top of the Raw Vault. It adds Computed Satellites — derived tables built by applying business rules: FX conversion to normalize all amounts to USD, name standardization from multiple formats, credit rating mapping from different agency scales. The Business Vault answers "what does that data mean in our business context?" The separation is powerful for auditability: if our FX rates were wrong last quarter, we can fix the rates in the Business Vault and recompute — the Raw Vault remains unchanged, preserving the original source data. Auditors can see both: what the source said, and what business rules were applied to arrive at the reported figure.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q5</span><span class="q-cat cat-dv">Data Vault</span>
+      <span class="q-text">What is a Point-in-Time (PIT) table and why is it needed?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Without PIT tables, querying a Data Vault at a specific historical date requires complex date-range conditions on every satellite: WHERE load_date &lt;= target_date AND (load_end_date IS NULL OR load_end_date > target_date). This is slow and error-prone, especially when joining multiple satellites. A PIT table pre-computes the answer for each snapshot date. For each account on each snapshot date — say, daily for 2024 — it stores the exact load_date of the satellite version that was current on that date. This converts complex date-range joins into simple equality joins, which are orders of magnitude faster. It also handles NULL gracefully: if an account didn't exist on a snapshot date, the PIT row has NULL for the satellite load_date, and the join naturally returns no row. PIT tables are rebuilt nightly as new satellite versions arrive. They're the bridge between the Raw Vault (optimized for auditability) and the Information Mart (optimized for query performance). Without PIT, analysts would hit the Raw Vault directly with terrible query performance.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q6</span><span class="q-cat cat-link">Link</span>
+      <span class="q-text">How do you handle a many-to-many relationship that changes over time in Data Vault?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>A Link records the existence of a relationship — immutably. If a trader is assigned to account A, that's a row in Link_AccountEmployee. The Link itself never changes — it just says "this relationship existed." But what if the trader is reassigned? You might think you need to delete the old Link row. You don't. Instead, you add a Satellite on the Link — Sat_AccountEmployee_Status — that tracks whether the relationship is active. The Satellite has: link_hash_key, load_date, is_active (boolean). When the trader is reassigned: the old Link row remains unchanged (permanent record). A new Satellite row is inserted with is_active=False. A new Link row is created for the new assignment, with a Satellite row where is_active=True. This approach preserves the complete history: when was the relationship established, when did it end, who was the account managed by on any given date. The Link captures "this relationship existed at some point" and the Satellite captures "was it active on any given date?"</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q7</span><span class="q-cat cat-audit">SOX / Audit</span>
+      <span class="q-text">What is SOX compliance and what does it require from a data engineering perspective?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>SOX — Sarbanes-Oxley Act — is a 2002 US law requiring public companies to maintain accurate financial records with documented internal controls. It was passed after Enron and WorldCom accounting scandals. From a data engineering perspective, SOX has five key requirements. First, complete audit trail: any number in a financial report must be traceable back to its source transaction — which system, which file, which timestamp. Data Vault's record_source and load_date on every row satisfy this. Second, point-in-time reproducibility: auditors can ask "show me the exact report you filed on March 15th" — the system must reproduce it exactly. PIT tables enable this. Third, no retroactive modification: historical data cannot be overwritten. Data Vault's insert-only architecture satisfies this. Fourth, change history: every change to financial data must be captured with when it changed and who authorized it. Satellites record every version. Fifth, cross-system reconciliation: data from multiple systems must reconcile. Hub entity resolution connects the same account across GL, trading, and loan systems. Violation of SOX is a criminal offense — executives can face personal liability, which is why financial firms take data lineage this seriously.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q8</span><span class="q-cat cat-dv">Data Vault</span>
+      <span class="q-text">How do you handle late-arriving data in a Data Vault?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Data Vault handles late-arriving data more elegantly than star schema because of its insert-only design. If a transaction from January arrives in March, we simply insert it into the Link and Satellite with the March load_date — but the actual business date (trade_date) is stored in the Satellite attributes, not the load_date. Load_date = when we learned about it. Business date = when it happened. These are always stored separately in Data Vault, which is a design requirement. For PIT tables, we need to rebuild the affected snapshots — the January snapshot needs to be recalculated because new data arrived that should have been reflected. We run a PIT rebuild for any snapshot_date where the new satellite data falls in range. For the Information Mart, the new transaction will appear in the next mart rebuild. For auditors, this is actually preferable to star schema: the audit trail shows "this transaction was reported to us on March 15th, but it occurred on January 5th" — both dates preserved, no manipulation, clear lineage. Late-arriving data with documented arrival timestamps is an acceptable audit pattern; silent overwrites are not.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q9</span><span class="q-cat cat-arch">Architecture</span>
+      <span class="q-text">When would you choose EMR over Glue for a PySpark job?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Both run PySpark — the choice is operational. Glue is serverless: no cluster to manage, you pay per DPU-second, it auto-scales, and it integrates natively with S3 and Glue Data Catalog. It's the right default for most ETL jobs. I'd choose EMR when: first, I need fine-grained Spark configuration tuning — specific shuffle partition counts, custom memory settings, Kryo serialization — Glue exposes a subset of Spark settings while EMR gives full control. Second, I need spot instances — EMR can run core nodes on spot instances at 70% cost savings for long-running jobs. For a nightly Data Vault load of $2B portfolio data, that's significant. Third, I need a specific library or Spark version Glue doesn't support — EMR lets you install anything via bootstrap actions. Fourth, for very long-running jobs (8+ hours) where EMR's predictable cluster cost is cheaper than Glue's per-DPU pricing. For this project, I chose EMR because the Data Vault load involves complex PySpark joins across multiple vault layers and I needed tuned Spark configurations for the hash join operations.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q10</span><span class="q-cat cat-dv">Data Vault</span>
+      <span class="q-text">How does multi-source entity resolution work in Data Vault?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Multi-source entity resolution is one of the strongest capabilities of Data Vault. Consider an account "ACC-12345" that appears in the GL system as "ACC-12345" and in the trading system as "12345" — slightly different formats. Without standardization, these would be treated as two different entities. In Data Vault, I apply consistent hash key computation before loading Hubs: uppercase, trim whitespace, remove special characters, then MD5. With the right normalization rules, "ACC-12345" and " 12345 " both map to the same hash key. In Hub_Account, there's one row. The record_source column shows it was first seen from GL_SYSTEM. When the trading system later sends "12345", the normalized hash matches — no new Hub row is inserted, but the existing row's record_source could be updated or a second Satellite entry added noting the second source. For entities that genuinely need cross-system resolution (same customer in CRM and billing with different IDs), a Reference Table maps the different business keys to a master key before hashing. This is called an integration key — a canonical business key that identifies the entity regardless of which system is reporting it.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q11</span><span class="q-cat cat-sat">Satellite</span>
+      <span class="q-text">Why would you split a satellite into two tables (e.g., static details vs daily balance)?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Satellites should be split by rate of change. Account name and account type change maybe once a year. Account balance changes daily. If they're in the same satellite, every daily balance load creates a new satellite row — even though name and type didn't change. After a year, the satellite has 365 versions for each account, and 364 of them have identical name and type. Querying the latest name now requires filtering through all those unnecessary rows. Splitting into Sat_Account_Details (name, type, status, credit rating — slow-changing) and Sat_Account_Balance (balance, currency, balance_date — fast-changing) means: Sat_Account_Details only gets a new row when name or type actually changes — maybe a few rows per year per account. Sat_Account_Balance gets a new row daily — hundreds of rows per year per account. Querying the current name is fast (few rows). Querying the full balance history is accurate (one row per real change). The rule: if two groups of attributes change at different frequencies, they deserve separate satellites. More satellites, but each is smaller and queries are faster.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q12</span><span class="q-cat cat-audit">SOX / Audit</span>
+      <span class="q-text">How would you demonstrate Data Vault's audit trail to an external regulator?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>I'd walk the regulator through three capabilities. First, any-date reconstruction: pick any past date — say, the last day of Q1. I run the point-in-time query against the PIT table and pull the exact portfolio state: every account balance, every active trade, every counterparty exposure. The query returns the data exactly as it was on that date, with the load_date of each satellite version proving when that data was loaded. Second, change history: for any specific account or transaction, show all satellite versions in chronological order. The hash_diff column proves each version was different from the previous — no spurious duplicates. The load_date column proves when each version was loaded, with record_source showing which system sent it. Third, number tracing: take any figure from a regulatory report — say, $47M in European counterparty exposure. Run the data lineage query that breaks it down to individual transactions, each with its link_loaded_from (TRADING_SYS), sat_loaded_from (TRADING_SYS), and sat_version_at timestamp. The regulator can verify the number and trace every dollar to a source transaction. The combination of insert-only architecture, record_source on every row, and load_date timestamps makes this fully auditable in a way that no overwriting data warehouse can match.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q13</span><span class="q-cat cat-arch">Architecture</span>
+      <span class="q-text">What is a Bridge table in Data Vault and when do you need one?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>A Bridge table is a pre-computed join path that spans multiple Links in the Data Vault. Without it, queries that cross multiple Links require complex multi-step joins: Hub_Account → Link_AccountEmployee → Hub_Employee → Link_EmployeeDesk → Hub_Desk. That's four joins just to connect an account to a trading desk. With a Bridge_AccountTradingDesk table, the path is pre-computed daily — one join from the fact query to the bridge, then one join to each endpoint. Bridge tables are snapshot-based, like PIT tables — rebuilt daily. You need a Bridge when: multiple business questions require crossing more than two Links, the cross-vault join path is used by many queries, or performance on the raw multi-join query is unacceptable. The analogy: PIT tables optimize single-Hub queries (give me everything about Account X on date Y). Bridge tables optimize cross-Hub queries (give me all accounts + their employees + their instruments for date Y). Together, PIT and Bridge tables are what transform a raw Data Vault — which is optimized for auditability, not query performance — into something analysts can actually use.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q14</span><span class="q-cat cat-prod">Production</span>
+      <span class="q-text">How would you orchestrate all three vault layers to run in the correct order?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Data Vault has strict dependency ordering: Raw Vault must finish before Business Vault can run, which must finish before Information Mart. Within the Raw Vault, Hubs must load before Links (Links reference Hub hash keys), and Links must load before Satellites that are attached to Links. For orchestration, I'd use Apache Airflow with a DAG that enforces this order: Task 1 (parallel): load all Hub tables simultaneously — they're independent of each other. Task 2 (parallel, after Task 1): load all Link tables — they all depend on Hubs being present. Task 3 (parallel, after Task 2): load all Satellite tables — Sat on Hub loads after Hub, Sat on Link loads after Link. Task 4 (after Task 3 complete): rebuild PIT tables — they depend on Satellites. Task 5 (after Task 4): rebuild Bridge tables. Task 6 (after Task 4–5): rebuild Information Mart. Each task is idempotent — it checks what's already in the vault and only inserts new records. If any task fails, Airflow retries it and downstream tasks wait. The whole DAG runs nightly at midnight on a 2-hour SLA, matching the regulatory T+1 reporting requirement. I'd add data quality checks between stages — if Hubs load zero new records but we expect hundreds, something's wrong with the source feed.</p>
+    </div>
+  </div>
+
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q15</span><span class="q-cat cat-prod">Production</span>
+      <span class="q-text">How does your CX background help in a financial data engineering role?</span>
+    </div>
+    <div class="q-body">
+      <div class="ans-label">Model Answer</div>
+      <p>Financial data engineering is ultimately about trust — finance teams, auditors, and regulators need to trust the numbers. My customer experience background taught me that trust is built through reliability, transparency, and accountability. In CX ops, I learned that an analyst waiting two weeks for a historical report has already lost trust in the data team — that's the equivalent of what was happening before this Data Vault implementation. I approach data quality the way I approached customer escalations: not just fixing the immediate problem but understanding why it happened and building systems that prevent recurrence. That's why I added hash_diff deduplication, record_source on every row, and a PIT table — not because they were technically required to get data into a table, but because I knew downstream users (auditors, CFO) would eventually ask "how do I know this is right?" I also bring cross-functional communication skills: I can explain PIT tables to a CFO without using the words "satellite" or "hash key", and I can explain SOX lineage requirements to a Spark developer without using the words "Section 404 audit testing." Finance data engineering needs people who can sit in both rooms. That's a genuine skill shortage.</p>
+    </div>
+  </div>
+</div>
+
+<!-- RESUME -->
+<div class="section" id="section-resume">
+  <div class="hero">
+    <div class="hero-tag">Resume + Interview Story</div>
+    <h1>How to Present Project 4</h1>
+  </div>
+
+  <h3>Resume Bullet Points</h3>
+  <div class="resume-box">
+    <h4>Add these under Projects</h4>
+    <p>• Architected Data Vault 2.0 financial data warehouse for a $2B AUM firm, implementing 5 Hubs, 3 Links, and 6 Satellites with insert-only loading to achieve SOX audit compliance — enabling complete lineage tracing from any financial report to its source transaction<br><br>
+    • Designed hash_diff deduplication pattern reducing satellite storage by 60–80% by only inserting new rows when attribute values changed, with consistent MD5 hashing enabling multi-source entity resolution across GL, Trading, and Loan systems<br><br>
+    • Built Point-in-Time (PIT) and Bridge performance tables transforming complex multi-satellite date-range queries into simple equality joins, reducing historical portfolio reconstruction query time from minutes to seconds<br><br>
+    • Implemented three-layer architecture (Raw Vault → Business Vault → Information Mart) separating immutable source records from business rule application (FX normalization) and analyst-facing star schema views<br><br>
+    • Deployed production PySpark pipeline on AWS EMR cluster with Spot Instances, achieving 65% cost reduction vs on-demand, with automated step orchestration and S3-based staging</p>
+  </div>
+
+  <h3>Verbal Story (75 seconds)</h3>
+  <div class="resume-box">
+    <h4>For finance / banking interviews</h4>
+    <p>"I built a Data Vault 2.0 warehouse for a financial services use case where the core problem was SOX audit failures — auditors couldn't trace numbers on regulatory reports back to the source transactions, and the team couldn't reproduce historical portfolio states for specific past dates.<br><br>
+    Data Vault's three-part structure separates concerns: Hubs capture business entity existence — one row per account, ever. Links capture relationships — which accounts were involved in which transactions. Satellites capture attributes with full version history — every change creates a new row, nothing is ever overwritten. Every row has load_date and record_source — so for any number on any report, you can trace it to the exact source system and load timestamp. That's the SOX audit trail.<br><br>
+    For query performance, I built PIT tables — Point-in-Time snapshots that pre-compute which satellite version was current on each date. Instead of complex date-range joins on every query, analysts use simple equality joins through the PIT table to reconstruct any historical state.<br><br>
+    The three-layer architecture keeps the Raw Vault as an immutable legal record, the Business Vault applies FX normalization and business rules, and the Information Mart provides analysts a standard star schema. If FX rates were wrong, we recalculate the Business Vault from the unchanged Raw Vault — full auditability at every layer."</p>
+  </div>
+</div>
+
+<!-- CONCEPTS -->
+<div class="section" id="section-concepts">
+  <div class="hero">
+    <div class="hero-tag">Key Concepts</div>
+    <h1>Deep Dive Concepts for Week 8</h1>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">⚖️</div>
+      <div><div class="step-title">Data Vault vs Star Schema vs 3NF — Full Comparison</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>Third Normal Form (3NF) / Operational:</strong> Normalized for write operations, minimizes redundancy. Used in source systems (CRM, ERP). Not for analytics — too many joins, query performance poor.</p>
+      <p><strong>Star Schema:</strong> Denormalized for read performance. Fast queries, simple SQL, works with BI tools. Problem: overwrites history by default, multi-source integration is manual and brittle, difficult to audit. Best for: simple, single-source analytical use cases.</p>
+      <p><strong>Data Vault 2.0:</strong> Optimized for auditability, historization, and agile multi-source integration. All history preserved forever. Best for: regulated industries, multi-source enterprise DWs, anywhere full audit lineage is required. Cost: more tables, slower raw queries (mitigated by PIT/Bridge), steeper learning curve.</p>
+      <p><strong>Hybrid (common in practice):</strong> Raw Vault for auditability + Information Mart (star schema) for query performance. This is what we built in Layer 3.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">🔑</div>
+      <div><div class="step-title">Hash Key Computation — Why Consistency is Everything</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p>The entire entity resolution capability of Data Vault depends on hash keys being computed identically for the same business entity regardless of source. If GL sends "ACC-123" and Trading sends "acc-123", without consistent normalization they produce different MD5 hashes and appear as two different entities in Hub_Account.</p>
+      <p><strong>Normalization rules to apply before hashing:</strong></p>
+      <ul>
+        <li>Uppercase all characters</li>
+        <li>Trim leading and trailing whitespace</li>
+        <li>Standardize date formats (YYYY-MM-DD)</li>
+        <li>Remove known prefixes/suffixes if sources use different ones</li>
+        <li>Define NULL handling (use '~NULL~' as sentinel)</li>
+        <li>For multi-part keys, define separator consistently ('||')</li>
+      </ul>
+      <p>Document these normalization rules in a data dictionary and apply them in the hash_utils module so every loading script uses the same logic. Inconsistent hashing is the #1 cause of Data Vault implementation failures.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">🏭</div>
+      <div><div class="step-title">AWS EMR Architecture Essentials</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>EMR cluster structure:</strong> Master node (runs YARN ResourceManager + Spark driver) + Core nodes (run HDFS + Spark executors) + Task nodes (optional, Spark executors only, perfect for spot instances since they don't hold HDFS data).</p>
+      <p><strong>S3 as storage:</strong> In modern EMR, S3 replaces HDFS as the data lake. Spark reads directly from S3, processes in memory/local SSD on executors, writes back to S3. This makes clusters ephemeral — start for a job, terminate when done, no persistent storage cost.</p>
+      <p><strong>Spot vs On-Demand:</strong> Core nodes should be On-Demand (reliable, hold HDFS replicas if used). Task nodes can be Spot (up to 90% savings, can be interrupted — but EMR gracefully handles task node loss by rescheduling tasks on remaining nodes).</p>
+      <p><strong>EMR Serverless (new option):</strong> Fully serverless EMR — no cluster management, auto-scales, pay per vCPU-hour. Similar to Glue but with full Spark config control. Worth knowing for interviews as it bridges EMR and Glue.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">📊</div>
+      <div><div class="step-title">Financial Concepts Every Finance DE Must Know</div></div>
+      <div class="step-chev">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>General Ledger (GL):</strong> The master financial record of a company — all debits and credits. Journal entries are the atomic unit. Double-entry: every debit has an equal credit. The GL is what produces the balance sheet and income statement.</p>
+      <p><strong>Notional amount vs market value:</strong> Notional is the face value of a contract (what it's "for"). Market value is what it's worth today. A $1M bond bought at par has $1M notional and $1M market value. If rates move, market value changes but notional stays $1M.</p>
+      <p><strong>T+2 settlement:</strong> Trade date + 2 business days = when the securities and cash actually exchange. A trade on Monday settles Wednesday. Important for end-of-period reporting — trades from Dec 31 may not settle until Jan 2.</p>
+      <p><strong>Mark-to-Market (MTM):</strong> Revaluing assets at current market prices daily. Unrealized gain/loss. Used in trading books.</p>
+      <p><strong>LEI (Legal Entity Identifier):</strong> A 20-character code uniquely identifying counterparties in financial transactions — the global standard for entity identification, required by multiple regulators for trade reporting.</p>
+    </div>
+  </div>
+</div>
+
+  </div><!-- content -->
+</div><!-- main -->
+
+<script>
+const secs=['overview','vs-prev','dv-concepts','why-dv','hubs','links','satellites','pit-bridge',
+  'step1','step2','step3','step4','step5','step6','step7','step8',
+  'interview','resume','concepts'];
+const bmap={
+  'overview':'Overview','vs-prev':'Overview','dv-concepts':'Data Vault',
+  'why-dv':'SOX / Audit','hubs':'Data Model','links':'Data Model','satellites':'Data Model',
+  'pit-bridge':'Data Model','step1':'Setup','step2':'Code','step3':'Code',
+  'step4':'Code','step5':'Code','step6':'Setup','step7':'SQL','step8':'Setup',
+  'interview':'Interview','resume':'Resume','concepts':'Concepts'
+};
+const bcls={
+  Overview:'b-setup',Setup:'b-setup',Code:'b-code',SQL:'b-code',
+  'Data Vault':'b-dv','Data Model':'b-dv','SOX / Audit':'b-audit',
+  Interview:'b-interview',Resume:'b-interview',Concepts:'b-interview'
+};
+function show(id){
+  secs.forEach(s=>{const e=document.getElementById('section-'+s);if(e)e.classList.remove('active')});
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const t=document.getElementById('section-'+id);if(t)t.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');
+  });
+  const b=bmap[id]||'Section';
+  document.getElementById('curr-badge').textContent=b;
+  document.getElementById('curr-badge').className='badge '+(bcls[b]||'b-setup');
+  closeSidebar();window.scrollTo(0,0);
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('show')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show')}
+function toggleStep(h){const b=h.nextElementSibling,c=h.querySelector('.step-chev'),o=b.classList.contains('open');b.classList.toggle('open',!o);if(c)c.style.transform=o?'':'rotate(180deg)'}
+function toggleQ(h){h.nextElementSibling.classList.toggle('open')}
+function switchTab(btn,pid){
+  btn.closest('.tabs').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  let el=btn.closest('.tabs').nextElementSibling;
+  while(el&&el.classList.contains('tab-panel')){el.classList.remove('active');el=el.nextElementSibling}
+  const t=document.getElementById('tab-'+pid);if(t)t.classList.add('active');
+}
+function copyCode(btn){
+  const text=btn.closest('.code-block').querySelector('pre').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied')},2000);
+  });
+}
+function updateProgress(){
+  const all=document.querySelectorAll('.checklist input[type=checkbox]');
+  const done=document.querySelectorAll('.checklist input[type=checkbox]:checked');
+  const pct=all.length?Math.round(done.length/all.length*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=done.length+' of '+all.length+' tasks done';
+  try{const s={};all.forEach(c=>{s[c.id]=c.checked});localStorage.setItem('de-proj4',JSON.stringify(s))}catch(e){}
+}
+(function(){
+  try{const s=JSON.parse(localStorage.getItem('de-proj4')||'{}');
+    Object.entries(s).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.checked=v});}catch(e){}
+  updateProgress();
+})();
+</script>
+</body>
+</html>
