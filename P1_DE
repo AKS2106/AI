@@ -1,0 +1,2282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DE Project 1 — E-commerce Pipeline</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #1a1d27;
+    --bg3: #22263a;
+    --card: #1e2235;
+    --border: #2e3350;
+    --accent: #6c63ff;
+    --accent2: #00d4aa;
+    --accent3: #ff6b6b;
+    --accent4: #ffd166;
+    --text: #e8eaf0;
+    --text2: #9aa0b8;
+    --text3: #6b7399;
+    --code-bg: #13151f;
+    --green: #00d4aa;
+    --red: #ff6b6b;
+    --yellow: #ffd166;
+    --purple: #6c63ff;
+    --blue: #4fc3f7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed; top: 0; left: 0;
+    width: 260px; height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    z-index: 100;
+    transition: transform 0.3s;
+  }
+  .sidebar-logo {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo .proj-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    color: var(--accent); text-transform: uppercase; margin-bottom: 4px;
+  }
+  .sidebar-logo h2 { font-size: 13px; color: var(--text); font-weight: 600; line-height: 1.4; }
+  .sidebar-section { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .sidebar-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    color: var(--text3); text-transform: uppercase;
+    padding: 0 20px 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 20px; cursor: pointer;
+    color: var(--text2); font-size: 13px;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .nav-item:hover { color: var(--text); background: var(--bg3); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(108,99,255,0.08); }
+  .nav-dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; flex-shrink: 0;
+    background: var(--bg3); color: var(--text3);
+  }
+  .nav-item.done .nav-dot { background: rgba(0,212,170,0.15); color: var(--green); }
+  .nav-item.active .nav-dot { background: rgba(108,99,255,0.2); color: var(--accent); }
+
+  .progress-bar {
+    margin: 12px 20px;
+    height: 4px; border-radius: 2px;
+    background: var(--border); overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s;
+  }
+  .progress-label { font-size: 11px; color: var(--text3); padding: 0 20px 8px; }
+
+  /* ── MAIN ── */
+  .main { margin-left: 260px; min-height: 100vh; }
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(15,17,23,0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .section-badge {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; padding: 3px 10px; border-radius: 20px;
+  }
+  .badge-setup  { background: rgba(79,195,247,0.15); color: var(--blue); }
+  .badge-code   { background: rgba(108,99,255,0.15); color: var(--purple); }
+  .badge-sql    { background: rgba(0,212,170,0.15);  color: var(--green); }
+  .badge-interview { background: rgba(255,209,102,0.15); color: var(--yellow); }
+  .badge-arch   { background: rgba(255,107,107,0.15); color: var(--red); }
+
+  .menu-btn {
+    display: none; background: none; border: none;
+    color: var(--text2); cursor: pointer; font-size: 20px; padding: 4px;
+  }
+
+  .content { padding: 32px; max-width: 900px; }
+
+  /* ── SECTIONS ── */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px;
+    margin-bottom: 28px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -60px; right: -60px;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .hero h1 { font-size: 26px; font-weight: 700; margin-bottom: 10px; line-height: 1.3; }
+  .hero p  { color: var(--text2); font-size: 14px; margin-bottom: 20px; max-width: 600px; }
+  .hero-stats {
+    display: flex; gap: 24px; flex-wrap: wrap;
+  }
+  .stat { text-align: left; }
+  .stat-val { font-size: 22px; font-weight: 700; color: var(--accent2); }
+  .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── STEP CARDS ── */
+  .step-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px; margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .step-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 22px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .step-header:hover { background: rgba(255,255,255,0.02); }
+  .step-num {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+    background: var(--bg3); color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .step-num.done { background: rgba(0,212,170,0.15); color: var(--green); border-color: rgba(0,212,170,0.3); }
+  .step-num.active-step { background: rgba(108,99,255,0.2); color: var(--accent); border-color: rgba(108,99,255,0.4); }
+  .step-title { font-size: 15px; font-weight: 600; }
+  .step-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .step-time {
+    margin-left: auto; font-size: 11px; color: var(--text3);
+    background: var(--bg3); padding: 3px 10px; border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .step-chevron { margin-left: 8px; color: var(--text3); font-size: 12px; transition: transform 0.2s; flex-shrink: 0; }
+  .step-body { display: none; padding: 0 22px 22px; border-top: 1px solid var(--border); }
+  .step-body.open { display: block; }
+  .step-body p { color: var(--text2); font-size: 14px; margin: 14px 0 10px; }
+  .step-body ul, .step-body ol { color: var(--text2); font-size: 14px; padding-left: 20px; margin: 8px 0; }
+  .step-body li { margin-bottom: 6px; }
+
+  /* ── CODE BLOCKS ── */
+  .code-block { position: relative; margin: 14px 0; border-radius: 10px; overflow: hidden; }
+  .code-header {
+    background: #0d0f1a; padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .code-lang {
+    font-size: 11px; font-weight: 600; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text3);
+  }
+  .copy-btn {
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text2); font-size: 11px; padding: 4px 12px;
+    border-radius: 6px; cursor: pointer; transition: all 0.15s;
+    font-family: inherit;
+  }
+  .copy-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .copy-btn.copied { background: rgba(0,212,170,0.2); color: var(--green); border-color: var(--green); }
+  pre {
+    background: var(--code-bg); padding: 18px;
+    overflow-x: auto; font-size: 13px; line-height: 1.7;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  }
+  pre code { color: #c9d1d9; }
+  .kw { color: #ff79c6; }
+  .fn { color: #50fa7b; }
+  .st { color: #f1fa8c; }
+  .cm { color: #6272a4; font-style: italic; }
+  .nm { color: #bd93f9; }
+  .op { color: #ff79c6; }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-radius: 10px; padding: 14px 18px;
+    margin: 14px 0; font-size: 14px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .callout-tip { background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.2); color: #a8f0e0; }
+  .callout-warn { background: rgba(255,209,102,0.08); border: 1px solid rgba(255,209,102,0.2); color: #ffe8a0; }
+  .callout-info { background: rgba(108,99,255,0.08); border: 1px solid rgba(108,99,255,0.2); color: #c4c0ff; }
+  .callout-danger { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.2); color: #ffb3b3; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 14px 0; }
+  .checklist li {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+    font-size: 14px; color: var(--text2);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist input[type=checkbox] {
+    width: 16px; height: 16px; accent-color: var(--accent);
+    cursor: pointer; flex-shrink: 0; margin-top: 3px;
+  }
+  .checklist label { cursor: pointer; }
+  .checklist input:checked + label { text-decoration: line-through; color: var(--text3); }
+
+  /* ── INTERVIEW CARDS ── */
+  .q-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px; margin-bottom: 12px; overflow: hidden;
+  }
+  .q-header {
+    padding: 14px 18px; cursor: pointer;
+    display: flex; align-items: flex-start; gap: 12px;
+    transition: background 0.15s;
+  }
+  .q-header:hover { background: rgba(255,255,255,0.02); }
+  .q-num {
+    font-size: 11px; font-weight: 700; color: var(--accent);
+    background: rgba(108,99,255,0.15); padding: 2px 8px;
+    border-radius: 10px; flex-shrink: 0; margin-top: 2px;
+  }
+  .q-cat {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; padding: 2px 8px; border-radius: 10px;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .cat-arch { background: rgba(255,107,107,0.15); color: var(--red); }
+  .cat-spark { background: rgba(108,99,255,0.15); color: var(--purple); }
+  .cat-dq { background: rgba(0,212,170,0.15); color: var(--green); }
+  .cat-sql { background: rgba(79,195,247,0.15); color: var(--blue); }
+  .cat-prod { background: rgba(255,209,102,0.15); color: var(--yellow); }
+  .q-text { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; }
+  .q-body {
+    display: none; padding: 0 18px 18px;
+    border-top: 1px solid var(--border);
+  }
+  .q-body.open { display: block; }
+  .q-body p { font-size: 14px; color: var(--text2); margin-top: 12px; }
+  .answer-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--accent2); margin-top: 14px; margin-bottom: 6px;
+  }
+
+  /* ── ARCH DIAGRAM ── */
+  .arch-diagram {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px;
+    margin: 16px 0; overflow-x: auto;
+  }
+  .arch-flow {
+    display: flex; align-items: center; gap: 0;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .arch-box {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px; text-align: center;
+    min-width: 100px;
+  }
+  .arch-box .box-icon { font-size: 22px; margin-bottom: 4px; }
+  .arch-box .box-title { font-size: 12px; font-weight: 600; color: var(--text); }
+  .arch-box .box-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+  .arch-box.highlight { border-color: var(--accent); background: rgba(108,99,255,0.1); }
+  .arch-arrow { color: var(--text3); font-size: 18px; padding: 0 8px; flex-shrink: 0; }
+
+  /* ── SCHEMA TABLE ── */
+  .schema-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+  .schema-table th {
+    background: var(--bg3); color: var(--text2); font-weight: 600;
+    padding: 10px 14px; text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .schema-table td {
+    padding: 9px 14px; border-bottom: 1px solid rgba(46,51,80,0.5);
+    color: var(--text2); vertical-align: top;
+  }
+  .schema-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .col-pk { color: var(--yellow); font-weight: 600; font-size: 10px; }
+  .col-fk { color: var(--blue); font-weight: 600; font-size: 10px; }
+  .col-type { color: var(--accent2); font-size: 12px; font-family: monospace; }
+
+  /* ── RESUME BOX ── */
+  .resume-box {
+    background: rgba(0,212,170,0.06);
+    border: 1px solid rgba(0,212,170,0.2);
+    border-radius: 12px; padding: 22px;
+    margin: 16px 0;
+  }
+  .resume-box h4 { color: var(--accent2); font-size: 13px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+  .resume-box p { color: #a8f0e0; font-size: 14px; line-height: 1.8; }
+
+  /* ── TIMELINE ── */
+  .timeline { margin: 16px 0; }
+  .tl-item {
+    display: flex; gap: 16px; margin-bottom: 16px;
+    align-items: flex-start;
+  }
+  .tl-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+  .tl-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--bg3); border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--text3);
+  }
+  .tl-dot.green { border-color: var(--green); color: var(--green); background: rgba(0,212,170,0.1); }
+  .tl-dot.purple { border-color: var(--purple); color: var(--purple); background: rgba(108,99,255,0.1); }
+  .tl-dot.yellow { border-color: var(--yellow); color: var(--yellow); background: rgba(255,209,102,0.1); }
+  .tl-line { width: 2px; flex: 1; background: var(--border); min-height: 20px; margin: 4px 0; }
+  .tl-content { flex: 1; padding-bottom: 4px; }
+  .tl-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .tl-desc { font-size: 13px; color: var(--text3); }
+  .tl-time { font-size: 11px; color: var(--accent); margin-top: 3px; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 7px 16px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; font-weight: 500;
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text2); transition: all 0.15s; font-family: inherit;
+  }
+  .tab-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tab-btn.active { background: rgba(108,99,255,0.2); border-color: var(--accent); color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── MISC ── */
+  h3 { font-size: 17px; font-weight: 600; margin: 22px 0 12px; color: var(--text); }
+  h3:first-child { margin-top: 14px; }
+  .tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 6px; margin-right: 6px; margin-bottom: 4px;
+  }
+  .tag-aws { background: rgba(255,153,0,0.15); color: #ffaa44; }
+  .tag-py  { background: rgba(79,195,247,0.15); color: var(--blue); }
+  .tag-sql { background: rgba(0,212,170,0.15);  color: var(--green); }
+  .tag-spark { background: rgba(255,107,107,0.15); color: var(--red); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .menu-btn { display: block; }
+    .content { padding: 20px 16px; }
+    .hero h1 { font-size: 20px; }
+    .hero-stats { gap: 16px; }
+    .arch-flow { gap: 8px; }
+    .topbar { padding: 10px 16px; }
+  }
+
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); z-index: 99;
+  }
+  .overlay.show { display: block; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ══ SIDEBAR ══ -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="proj-tag">Project 01 · E-commerce</div>
+    <h2>Order Analytics Pipeline</h2>
+  </div>
+
+  <div style="padding: 12px 20px 8px;">
+    <div class="progress-label" id="progress-label">0 of 10 steps done</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Overview</div>
+    <a class="nav-item active" onclick="showSection('overview')" href="#">
+      <span class="nav-dot">🏠</span> Overview & Goals
+    </a>
+    <a class="nav-item" onclick="showSection('arch')" href="#">
+      <span class="nav-dot">🏗</span> Architecture
+    </a>
+    <a class="nav-item" onclick="showSection('schema')" href="#">
+      <span class="nav-dot">📐</span> Data Model
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Build Steps</div>
+    <a class="nav-item" onclick="showSection('step1')" href="#">
+      <span class="nav-dot" id="dot-step1">1</span> Mac Setup
+    </a>
+    <a class="nav-item" onclick="showSection('step2')" href="#">
+      <span class="nav-dot" id="dot-step2">2</span> AWS Setup
+    </a>
+    <a class="nav-item" onclick="showSection('step3')" href="#">
+      <span class="nav-dot" id="dot-step3">3</span> GitHub Setup
+    </a>
+    <a class="nav-item" onclick="showSection('step4')" href="#">
+      <span class="nav-dot" id="dot-step4">4</span> Generate Data
+    </a>
+    <a class="nav-item" onclick="showSection('step5')" href="#">
+      <span class="nav-dot" id="dot-step5">5</span> Upload to S3
+    </a>
+    <a class="nav-item" onclick="showSection('step6')" href="#">
+      <span class="nav-dot" id="dot-step6">6</span> PySpark ETL
+    </a>
+    <a class="nav-item" onclick="showSection('step7')" href="#">
+      <span class="nav-dot" id="dot-step7">7</span> SQL Queries
+    </a>
+    <a class="nav-item" onclick="showSection('step8')" href="#">
+      <span class="nav-dot" id="dot-step8">8</span> Data Quality
+    </a>
+    <a class="nav-item" onclick="showSection('step9')" href="#">
+      <span class="nav-dot" id="dot-step9">9</span> GitHub Push
+    </a>
+    <a class="nav-item" onclick="showSection('step10')" href="#">
+      <span class="nav-dot" id="dot-step10">10</span> Run & Verify
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Interview Prep</div>
+    <a class="nav-item" onclick="showSection('interview')" href="#">
+      <span class="nav-dot">🎯</span> 15 Questions + Answers
+    </a>
+    <a class="nav-item" onclick="showSection('resume')" href="#">
+      <span class="nav-dot">📄</span> Resume Story
+    </a>
+    <a class="nav-item" onclick="showSection('concepts')" href="#">
+      <span class="nav-dot">📚</span> Key Concepts
+    </a>
+  </div>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <span class="section-badge badge-setup" id="current-badge">Overview</span>
+      <span style="color:var(--text3); font-size:13px;" id="current-title">E-commerce Order Analytics Pipeline</span>
+    </div>
+    <div style="font-size:12px; color:var(--text3);">Mac Air M5 · Free Tier · Weeks 1–2</div>
+  </div>
+
+  <div class="content">
+
+<!-- ════ OVERVIEW ════ -->
+<div class="section active" id="section-overview">
+  <div class="hero">
+    <div class="hero-tag">Project 01 · Level 1→2 · E-commerce Industry</div>
+    <h1>Order Analytics Pipeline</h1>
+    <p>Build a batch ETL pipeline that consolidates scattered order data into a star schema data warehouse — enabling analysts to answer business questions in under an hour instead of 3–4 days.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-val">5,000+</div><div class="stat-label">Daily orders</div></div>
+      <div class="stat"><div class="stat-val">3</div><div class="stat-label">Source systems</div></div>
+      <div class="stat"><div class="stat-val">4</div><div class="stat-label">Dim tables</div></div>
+      <div class="stat"><div class="stat-val">~2 weeks</div><div class="stat-label">Build time</div></div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+    <div class="step-card" style="margin-bottom:0;">
+      <div style="padding:18px 22px;">
+        <div style="font-size:12px; color:var(--text3); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Stack</div>
+        <div>
+          <span class="tag tag-py">Python 3.11</span>
+          <span class="tag tag-spark">PySpark 3.5</span>
+          <span class="tag tag-aws">AWS S3</span>
+          <span class="tag tag-aws">AWS Glue</span>
+          <span class="tag tag-aws">Athena</span>
+          <span class="tag tag-sql">SQL</span>
+          <span class="tag tag-py">Parquet</span>
+        </div>
+      </div>
+    </div>
+    <div class="step-card" style="margin-bottom:0;">
+      <div style="padding:18px 22px;">
+        <div style="font-size:12px; color:var(--text3); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">You'll learn</div>
+        <ul style="color:var(--text2); font-size:13px; padding-left:18px;">
+          <li>Star schema design decisions</li>
+          <li>PySpark transformations</li>
+          <li>S3 partitioning strategy</li>
+          <li>Data quality frameworks</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h3>Business Problem</h3>
+  <div class="callout callout-info">
+    <div class="callout-icon">💼</div>
+    <div>A mid-size e-commerce company has order data across three systems: a MySQL-based order DB, a CSV export from a returns management tool, and a JSON feed from a marketing events tracker. The BI team waits <strong>3–4 days</strong> for manual data pulls. Your pipeline automates everything so analysts get answers in under 1 hour.</div>
+  </div>
+
+  <h3>Your 10-Step Journey</h3>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-left"><div class="tl-dot green">✓</div><div class="tl-line"></div></div>
+      <div class="tl-content"><div class="tl-title">Steps 1–3: Environment Setup</div><div class="tl-desc">Mac, AWS free tier, GitHub repo structure</div><div class="tl-time">Day 1–2 · ~3 hours</div></div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-left"><div class="tl-dot purple">→</div><div class="tl-line"></div></div>
+      <div class="tl-content"><div class="tl-title">Steps 4–6: Build the Pipeline</div><div class="tl-desc">Generate data, upload to S3, write PySpark ETL</div><div class="tl-time">Day 3–6 · ~8 hours</div></div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-left"><div class="tl-dot yellow">→</div><div class="tl-line"></div></div>
+      <div class="tl-content"><div class="tl-title">Steps 7–8: SQL + Quality</div><div class="tl-desc">Complex analytical queries, data quality checks</div><div class="tl-time">Day 7–8 · ~4 hours</div></div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-left"><div class="tl-dot" style="border-color:var(--blue);color:var(--blue);">→</div></div>
+      <div class="tl-content"><div class="tl-title">Steps 9–10: Ship & Interview Prep</div><div class="tl-desc">GitHub push, mock interview, resume story</div><div class="tl-time">Day 9–10 · ~3 hours</div></div>
+    </div>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div><strong>Copy-paste vs typing:</strong> Copy-paste code to get it running fast. But before moving on — add your own comments to every function, delete one section and rewrite it from memory, and break it intentionally to see what fails. Interviewers will show your GitHub code on screen and ask "explain line 47."</div>
+  </div>
+</div>
+
+<!-- ════ ARCHITECTURE ════ -->
+<div class="section" id="section-arch">
+  <div class="hero">
+    <div class="hero-tag">Architecture · AWS Free Tier</div>
+    <h1>Pipeline Architecture</h1>
+    <p>Three-zone S3 architecture with Glue ETL, Athena query layer, and CloudWatch monitoring. Designed to run on AWS Free Tier and locally on Mac.</p>
+  </div>
+
+  <h3>Data Flow</h3>
+  <div class="arch-diagram">
+    <div class="arch-flow">
+      <div class="arch-box">
+        <div class="box-icon">📄</div>
+        <div class="box-title">Orders CSV</div>
+        <div class="box-sub">MySQL export</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="box-icon">🪣</div>
+        <div class="box-title">S3 Raw Zone</div>
+        <div class="box-sub">/raw/orders/</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box highlight">
+        <div class="box-icon">⚡</div>
+        <div class="box-title">Glue ETL</div>
+        <div class="box-sub">PySpark job</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="box-icon">🗄</div>
+        <div class="box-title">S3 Processed</div>
+        <div class="box-sub">Parquet partitioned</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box">
+        <div class="box-icon">🔍</div>
+        <div class="box-title">Athena</div>
+        <div class="box-sub">SQL queries</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>AWS Services Used</h3>
+  <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px; margin-top:12px;">
+    <div class="step-card" style="margin-bottom:0"><div style="padding:16px">
+      <div style="font-size:20px;margin-bottom:6px">🪣</div>
+      <div style="font-weight:600;font-size:13px;color:var(--text)">Amazon S3</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">Raw, processed, and quarantine data zones. Free: 5GB</div>
+    </div></div>
+    <div class="step-card" style="margin-bottom:0"><div style="padding:16px">
+      <div style="font-size:20px;margin-bottom:6px">⚙️</div>
+      <div style="font-weight:600;font-size:13px;color:var(--text)">AWS Glue</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">PySpark ETL jobs + Data Catalog. Free: 1M objects</div>
+    </div></div>
+    <div class="step-card" style="margin-bottom:0"><div style="padding:16px">
+      <div style="font-size:20px;margin-bottom:6px">🔍</div>
+      <div style="font-weight:600;font-size:13px;color:var(--text)">Amazon Athena</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">Serverless SQL on S3. Free: 1TB scanned/month</div>
+    </div></div>
+    <div class="step-card" style="margin-bottom:0"><div style="padding:16px">
+      <div style="font-size:20px;margin-bottom:6px">📊</div>
+      <div style="font-weight:600;font-size:13px;color:var(--text)">CloudWatch</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">Logs + alerts for pipeline failures. Free tier available</div>
+    </div></div>
+  </div>
+
+  <h3>S3 Folder Structure</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">S3 Bucket Layout</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code>s3://ecom-pipeline-yourname/
+├── raw/
+│   ├── orders/
+│   │   └── year=2024/month=01/day=01/orders_2024.csv
+│   ├── returns/
+│   │   └── year=2024/month=01/day=01/returns_2024.json
+│   └── events/
+│       └── year=2024/month=01/day=01/events_2024.json
+├── processed/
+│   ├── fact_orders/
+│   │   ├── year=2024/month=01/part-00000.parquet
+│   │   └── year=2024/month=02/part-00000.parquet
+│   ├── dim_customer/part-00000.parquet
+│   ├── dim_product/part-00000.parquet
+│   └── dim_date/part-00000.parquet
+└── quarantine/
+    └── fact_orders/year=2024/failed_rows.parquet</code></pre>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">💡</div>
+    <div><strong>Interview talking point:</strong> "I partitioned the fact table by year and month. This means Athena only scans the relevant partitions when a query filters by date — reducing both query time and cost. On a 12-month dataset this cuts scan size by up to 11x on a single-month query."</div>
+  </div>
+</div>
+
+<!-- ════ SCHEMA ════ -->
+<div class="section" id="section-schema">
+  <div class="hero">
+    <div class="hero-tag">Data Modeling · Star Schema</div>
+    <h1>Star Schema Design</h1>
+    <p>One central fact table surrounded by four dimension tables. Chosen for analytical query performance over a normalized 3NF model.</p>
+  </div>
+
+  <div class="callout callout-info">
+    <div class="callout-icon">⭐</div>
+    <div><strong>Why star schema, not snowflake?</strong> For analytical workloads, fewer JOINs = faster queries. Star schema denormalizes dimension data (e.g. product category lives directly in dim_product, not a separate category table). Snowflake schema would normalize further but add complexity. For a BI-focused data warehouse, star schema is the right call.</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'fact')">fact_orders</button>
+    <button class="tab-btn" onclick="switchTab(this,'dim_customer')">dim_customer</button>
+    <button class="tab-btn" onclick="switchTab(this,'dim_product')">dim_product</button>
+    <button class="tab-btn" onclick="switchTab(this,'dim_date')">dim_date</button>
+    <button class="tab-btn" onclick="switchTab(this,'dim_location')">dim_location</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-fact">
+    <table class="schema-table">
+      <tr><th>Column</th><th>Type</th><th>Key</th><th>Description</th></tr>
+      <tr><td>order_key</td><td class="col-type">STRING</td><td><span class="col-pk">PK</span></td><td>Surrogate key (MD5 hash)</td></tr>
+      <tr><td>order_id</td><td class="col-type">STRING</td><td></td><td>Natural key from source system</td></tr>
+      <tr><td>customer_key</td><td class="col-type">STRING</td><td><span class="col-fk">FK</span></td><td>→ dim_customer</td></tr>
+      <tr><td>product_key</td><td class="col-type">STRING</td><td><span class="col-fk">FK</span></td><td>→ dim_product</td></tr>
+      <tr><td>date_key</td><td class="col-type">INT</td><td><span class="col-fk">FK</span></td><td>→ dim_date (YYYYMMDD format)</td></tr>
+      <tr><td>quantity</td><td class="col-type">INT</td><td></td><td>Units ordered</td></tr>
+      <tr><td>unit_price</td><td class="col-type">DOUBLE</td><td></td><td>Price per unit at order time</td></tr>
+      <tr><td>discount_pct</td><td class="col-type">DOUBLE</td><td></td><td>Discount percentage applied</td></tr>
+      <tr><td>gross_revenue</td><td class="col-type">DOUBLE</td><td></td><td>qty × unit_price (before discount)</td></tr>
+      <tr><td>net_revenue</td><td class="col-type">DOUBLE</td><td></td><td>Actual amount charged</td></tr>
+      <tr><td>is_returned</td><td class="col-type">BOOLEAN</td><td></td><td>True if order has a return</td></tr>
+      <tr><td>refund_amount</td><td class="col-type">DOUBLE</td><td></td><td>0.0 if not returned</td></tr>
+      <tr><td>year</td><td class="col-type">INT</td><td></td><td>Partition column</td></tr>
+      <tr><td>month</td><td class="col-type">INT</td><td></td><td>Partition column</td></tr>
+      <tr><td>etl_inserted_at</td><td class="col-type">TIMESTAMP</td><td></td><td>When ETL wrote this row</td></tr>
+    </table>
+  </div>
+  <div class="tab-panel" id="tab-dim_customer">
+    <table class="schema-table">
+      <tr><th>Column</th><th>Type</th><th>Key</th><th>Description</th></tr>
+      <tr><td>customer_key</td><td class="col-type">STRING</td><td><span class="col-pk">PK</span></td><td>Surrogate key</td></tr>
+      <tr><td>customer_id</td><td class="col-type">STRING</td><td></td><td>Business/natural key from CRM</td></tr>
+      <tr><td>name</td><td class="col-type">STRING</td><td></td><td>Full name</td></tr>
+      <tr><td>email</td><td class="col-type">STRING</td><td></td><td>Contact email</td></tr>
+      <tr><td>segment</td><td class="col-type">STRING</td><td></td><td>Premium / Regular / Occasional / New</td></tr>
+      <tr><td>region</td><td class="col-type">STRING</td><td></td><td>Geographic region</td></tr>
+      <tr><td>is_active</td><td class="col-type">BOOLEAN</td><td></td><td>Current customer status</td></tr>
+      <tr><td>created_at</td><td class="col-type">TIMESTAMP</td><td></td><td>Record creation time</td></tr>
+    </table>
+  </div>
+  <div class="tab-panel" id="tab-dim_product">
+    <table class="schema-table">
+      <tr><th>Column</th><th>Type</th><th>Key</th><th>Description</th></tr>
+      <tr><td>product_key</td><td class="col-type">STRING</td><td><span class="col-pk">PK</span></td><td>Surrogate key</td></tr>
+      <tr><td>product_id</td><td class="col-type">STRING</td><td></td><td>Business key from product catalog</td></tr>
+      <tr><td>name</td><td class="col-type">STRING</td><td></td><td>Product name</td></tr>
+      <tr><td>category</td><td class="col-type">STRING</td><td></td><td>Top-level category</td></tr>
+      <tr><td>subcategory</td><td class="col-type">STRING</td><td></td><td>Sub-category</td></tr>
+      <tr><td>brand</td><td class="col-type">STRING</td><td></td><td>Brand name</td></tr>
+      <tr><td>unit_cost</td><td class="col-type">DOUBLE</td><td></td><td>Cost to the company</td></tr>
+      <tr><td>list_price</td><td class="col-type">DOUBLE</td><td></td><td>Standard selling price</td></tr>
+      <tr><td>is_available</td><td class="col-type">BOOLEAN</td><td></td><td>Currently in stock</td></tr>
+    </table>
+  </div>
+  <div class="tab-panel" id="tab-dim_date">
+    <table class="schema-table">
+      <tr><th>Column</th><th>Type</th><th>Key</th><th>Description</th></tr>
+      <tr><td>date_key</td><td class="col-type">INT</td><td><span class="col-pk">PK</span></td><td>YYYYMMDD integer format</td></tr>
+      <tr><td>full_date</td><td class="col-type">DATE</td><td></td><td>Actual date value</td></tr>
+      <tr><td>year</td><td class="col-type">INT</td><td></td><td>Calendar year</td></tr>
+      <tr><td>quarter</td><td class="col-type">INT</td><td></td><td>1–4</td></tr>
+      <tr><td>month</td><td class="col-type">INT</td><td></td><td>1–12</td></tr>
+      <tr><td>month_name</td><td class="col-type">STRING</td><td></td><td>January, February…</td></tr>
+      <tr><td>week_of_year</td><td class="col-type">INT</td><td></td><td>ISO week number</td></tr>
+      <tr><td>day_name</td><td class="col-type">STRING</td><td></td><td>Monday, Tuesday…</td></tr>
+      <tr><td>is_weekend</td><td class="col-type">BOOLEAN</td><td></td><td>Sat or Sun</td></tr>
+      <tr><td>is_holiday</td><td class="col-type">BOOLEAN</td><td></td><td>Public holiday flag</td></tr>
+    </table>
+  </div>
+  <div class="tab-panel" id="tab-dim_location">
+    <table class="schema-table">
+      <tr><th>Column</th><th>Type</th><th>Key</th><th>Description</th></tr>
+      <tr><td>location_key</td><td class="col-type">STRING</td><td><span class="col-pk">PK</span></td><td>Surrogate key</td></tr>
+      <tr><td>city</td><td class="col-type">STRING</td><td></td><td>City name</td></tr>
+      <tr><td>state</td><td class="col-type">STRING</td><td></td><td>State abbreviation</td></tr>
+      <tr><td>zip_code</td><td class="col-type">STRING</td><td></td><td>ZIP/postal code</td></tr>
+      <tr><td>region</td><td class="col-type">STRING</td><td></td><td>Northeast / Southeast / etc.</td></tr>
+      <tr><td>country</td><td class="col-type">STRING</td><td></td><td>Country code</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ════ STEP 1 ════ -->
+<div class="section" id="section-step1">
+  <div class="hero">
+    <div class="hero-tag">Step 1 · Mac Setup</div>
+    <h1>Mac Air M5 Environment Setup</h1>
+    <p>Install everything you need: Homebrew, Python 3.11, Java 17, PySpark, Jupyter, AWS CLI. Takes about 2 hours total.</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div>Run each command one at a time. Do not batch them. If any command fails, stop and fix it before moving on — later steps depend on earlier ones being correct.</div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num active-step">1a</div>
+      <div><div class="step-title">Install Homebrew</div><div class="step-subtitle">Mac's package manager — everything installs through this</div></div>
+      <div class="step-time">~10 min</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body open">
+      <p>Open Terminal (press Cmd+Space, type "Terminal") and run:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code></pre>
+      </div>
+      <p>After install, the terminal will show a "Next steps" section. Copy and run the two <code>echo</code> commands it shows (they add Homebrew to your PATH). Then verify:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>brew --version
+# Expected: Homebrew 4.x.x</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">1b</div>
+      <div><div class="step-title">Install Python 3.11</div><div class="step-subtitle">PySpark works best with Python 3.11</div></div>
+      <div class="step-time">~5 min</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>brew install python@3.11
+python3 --version
+# Expected: Python 3.11.x</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">1c</div>
+      <div><div class="step-title">Install Java 17</div><div class="step-subtitle">PySpark requires Java to run the Spark engine</div></div>
+      <div class="step-time">~5 min</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>brew install openjdk@17
+
+# Add Java to your PATH (copy-paste these 3 lines exactly):
+echo 'export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"' >> ~/.zshrc
+echo 'export JAVA_HOME="/opt/homebrew/opt/openjdk@17"' >> ~/.zshrc
+source ~/.zshrc
+
+# Verify:
+java -version
+# Expected: openjdk version "17.x.x"</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">1d</div>
+      <div><div class="step-title">Install PySpark + Tools</div><div class="step-subtitle">Core data engineering libraries</div></div>
+      <div class="step-time">~5 min</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>pip3 install pyspark==3.5.1 jupyter notebook pandas boto3 faker pytest
+
+# Verify PySpark works:
+python3 -c "from pyspark.sql import SparkSession; print('PySpark OK ✓')"</code></pre>
+      </div>
+      <div class="callout callout-tip" style="margin-top:12px">
+        <div class="callout-icon">💡</div>
+        <div>If you see a warning about <code>SPARK_HOME</code> not set, that's fine for local development. PySpark finds itself automatically when installed via pip.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">1e</div>
+      <div><div class="step-title">Install AWS CLI + Git + VS Code</div><div class="step-subtitle">Command-line tools for AWS and version control</div></div>
+      <div class="step-time">~5 min</div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>brew install awscli git
+
+# Verify:
+aws --version
+git --version</code></pre>
+      </div>
+      <p>Download VS Code from <strong>code.visualstudio.com</strong> — install the Python extension inside VS Code for syntax highlighting.</p>
+
+      <h3 style="margin-top:16px">✅ Step 1 Complete Checklist</h3>
+      <ul class="checklist" id="checklist-step1">
+        <li><input type="checkbox" id="c1a" onchange="updateProgress()"><label for="c1a">brew --version shows output</label></li>
+        <li><input type="checkbox" id="c1b" onchange="updateProgress()"><label for="c1b">python3 --version shows 3.11.x</label></li>
+        <li><input type="checkbox" id="c1c" onchange="updateProgress()"><label for="c1c">java -version shows openjdk 17</label></li>
+        <li><input type="checkbox" id="c1d" onchange="updateProgress()"><label for="c1d">PySpark OK message printed</label></li>
+        <li><input type="checkbox" id="c1e" onchange="updateProgress()"><label for="c1e">aws --version shows output</label></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ════ STEP 2 ════ -->
+<div class="section" id="section-step2">
+  <div class="hero">
+    <div class="hero-tag">Step 2 · AWS Setup</div>
+    <h1>AWS Free Tier Account</h1>
+    <p>Create your AWS account and configure IAM credentials. You will not be charged if you stay within free tier limits.</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">💰</div>
+    <div><strong>Free tier limits for this project:</strong> S3 — 5GB storage + 20,000 GET requests. Glue — 1M objects in Data Catalog. Athena — 1TB scanned/month. CloudWatch — 10 custom metrics. You will not exceed these with this project.</div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num active-step">2a</div>
+      <div><div class="step-title">Create AWS Account</div></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body open">
+      <ol style="color:var(--text2); font-size:14px; padding-left:20px; line-height:2;">
+        <li>Go to <strong>aws.amazon.com/free</strong> → click "Create a Free Account"</li>
+        <li>Use your personal email — choose "Personal" account type</li>
+        <li>Enter credit card (required but not charged on free tier)</li>
+        <li>Complete phone verification</li>
+        <li>Select <strong>Free Basic Support</strong> plan</li>
+        <li>Sign in to the AWS Console</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">2b</div>
+      <div><div class="step-title">Create IAM User</div><div class="step-subtitle">Never use root credentials for development</div></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <ol style="color:var(--text2); font-size:14px; padding-left:20px; line-height:2;">
+        <li>In AWS Console → search "IAM" → click IAM</li>
+        <li>Left menu → Users → Add Users</li>
+        <li>Username: <code>de-portfolio-user</code></li>
+        <li>Select "Attach policies directly"</li>
+        <li>Search and attach: <code>AmazonS3FullAccess</code></li>
+        <li>Also attach: <code>AWSGlueConsoleFullAccess</code></li>
+        <li>Also attach: <code>AmazonAthenaFullAccess</code></li>
+        <li>Create user → then click the user → Security credentials → Create access key</li>
+        <li>Select "CLI" use case → Download the CSV file with your keys</li>
+      </ol>
+      <div class="callout callout-danger" style="margin-top:12px">
+        <div class="callout-icon">🔐</div>
+        <div><strong>NEVER commit your AWS keys to GitHub.</strong> Add <code>.env</code> and <code>credentials</code> to your <code>.gitignore</code> file. This is the #1 security mistake junior engineers make.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">2c</div>
+      <div><div class="step-title">Configure AWS CLI</div></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>aws configure
+
+# It will ask for:
+# AWS Access Key ID:     [paste from CSV]
+# AWS Secret Access Key: [paste from CSV]
+# Default region:        us-east-1
+# Default output format: json
+
+# Verify it works:
+aws sts get-caller-identity
+# Expected: JSON showing your account ID and user ARN</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ STEP 3 ════ -->
+<div class="section" id="section-step3">
+  <div class="hero">
+    <div class="hero-tag">Step 3 · GitHub Setup</div>
+    <h1>Project Repository Structure</h1>
+    <p>Create the exact folder structure that makes your GitHub repo look like a professional engineering project.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — create the full structure</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code>mkdir -p ~/de-portfolio/project-01-ecommerce
+cd ~/de-portfolio/project-01-ecommerce
+
+# Create all directories
+mkdir -p data/raw/orders data/raw/returns data/raw/events data/processed
+mkdir -p scripts notebooks tests docs
+
+# Create placeholder files
+touch README.md .gitignore
+touch scripts/generate_data.py
+touch scripts/upload_to_s3.py
+touch scripts/glue_etl_job.py
+touch scripts/data_quality.py
+touch scripts/create_athena_views.sql
+touch tests/test_transformations.py
+touch docs/architecture.md
+
+echo "Project structure created ✓"</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">.gitignore — add this content</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code># AWS credentials — NEVER commit these
+.aws/
+*.csv.credentials
+aws-credentials.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# Spark
+derby.log
+metastore_db/
+spark-warehouse/
+
+# Data files (too large for git)
+data/raw/
+data/processed/
+
+# OS
+.DS_Store
+.idea/</code></pre>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">3a</div>
+      <div><div class="step-title">Create GitHub Repository</div></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <ol style="color:var(--text2); font-size:14px; padding-left:20px; line-height:2;">
+        <li>Go to <strong>github.com</strong> → sign in or create free account</li>
+        <li>Click "+" → New Repository</li>
+        <li>Name: <code>de-project-01-ecommerce-pipeline</code></li>
+        <li>Description: "Batch ETL pipeline for e-commerce order analytics using PySpark, AWS S3, Glue, and Athena"</li>
+        <li>Set to Public (recruiters and hiring managers will look at this)</li>
+        <li>Do NOT initialize with README (you'll push your own)</li>
+        <li>Click Create repository</li>
+      </ol>
+      <div class="code-block" style="margin-top:12px">
+        <div class="code-header"><span class="code-lang">bash — link local to GitHub</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code>cd ~/de-portfolio/project-01-ecommerce
+git init
+git add .gitignore README.md
+git commit -m "initial: project structure"
+git branch -M main
+git remote add origin https://github.com/YOURUSERNAME/de-project-01-ecommerce-pipeline.git
+git push -u origin main</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ STEP 4 ════ -->
+<div class="section" id="section-step4">
+  <div class="hero">
+    <div class="hero-tag">Step 4 · Generate Data</div>
+    <h1>Synthetic Data Generator</h1>
+    <p>Creates realistic e-commerce data: 5,000 orders (CSV), 600 returns (JSON), 3,000 marketing events (JSON). Includes intentional data quality issues for the pipeline to catch.</p>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">💡</div>
+    <div>This script uses the <code>Faker</code> library to generate realistic names, emails, addresses. The <code>random.seed(42)</code> means it generates the same data every run — important for reproducible testing.</div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">scripts/generate_data.py</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm">"""
+Generate synthetic e-commerce data simulating real enterprise sources.
+Produces: orders.csv, returns.json, events.json
+Run: python3 scripts/generate_data.py
+"""</span>
+
+<span class="kw">import</span> csv, json, random, uuid
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timedelta
+<span class="kw">from</span> faker <span class="kw">import</span> Faker
+
+fake <span class="op">=</span> Faker()
+random.seed(<span class="nm">42</span>)
+
+<span class="cm"># ── Config ──────────────────────────────────────────────</span>
+NUM_CUSTOMERS <span class="op">=</span> <span class="nm">500</span>
+NUM_PRODUCTS  <span class="op">=</span> <span class="nm">200</span>
+NUM_ORDERS    <span class="op">=</span> <span class="nm">5000</span>
+NUM_RETURNS   <span class="op">=</span> <span class="nm">600</span>
+NUM_EVENTS    <span class="op">=</span> <span class="nm">3000</span>
+START_DATE    <span class="op">=</span> datetime(<span class="nm">2024</span>, <span class="nm">1</span>, <span class="nm">1</span>)
+END_DATE      <span class="op">=</span> datetime(<span class="nm">2024</span>, <span class="nm">12</span>, <span class="nm">31</span>)
+
+CATEGORIES <span class="op">=</span> {
+    <span class="st">"Electronics"</span>: [<span class="st">"Laptop"</span>, <span class="st">"Phone"</span>, <span class="st">"Tablet"</span>, <span class="st">"Headphones"</span>, <span class="st">"Camera"</span>],
+    <span class="st">"Clothing"</span>:    [<span class="st">"T-Shirt"</span>, <span class="st">"Jeans"</span>, <span class="st">"Jacket"</span>, <span class="st">"Shoes"</span>, <span class="st">"Dress"</span>],
+    <span class="st">"Home"</span>:        [<span class="st">"Lamp"</span>, <span class="st">"Chair"</span>, <span class="st">"Desk"</span>, <span class="st">"Pillow"</span>, <span class="st">"Blanket"</span>],
+    <span class="st">"Sports"</span>:      [<span class="st">"Yoga Mat"</span>, <span class="st">"Dumbbell"</span>, <span class="st">"Shoes"</span>, <span class="st">"Bottle"</span>, <span class="st">"Bag"</span>],
+    <span class="st">"Books"</span>:       [<span class="st">"Fiction"</span>, <span class="st">"Non-Fiction"</span>, <span class="st">"Textbook"</span>, <span class="st">"Comic"</span>, <span class="st">"Magazine"</span>],
+}
+SEGMENTS <span class="op">=</span> [<span class="st">"Premium"</span>, <span class="st">"Regular"</span>, <span class="st">"Occasional"</span>, <span class="st">"New"</span>]
+REGIONS  <span class="op">=</span> [<span class="st">"Northeast"</span>, <span class="st">"Southeast"</span>, <span class="st">"Midwest"</span>, <span class="st">"West"</span>, <span class="st">"Southwest"</span>]
+
+<span class="kw">def</span> <span class="fn">rand_date_str</span>(start<span class="op">=</span>START_DATE, end<span class="op">=</span>END_DATE):
+    delta <span class="op">=</span> end <span class="op">-</span> start
+    <span class="kw">return</span> (start <span class="op">+</span> timedelta(days<span class="op">=</span>random.randint(<span class="nm">0</span>, delta.days))).strftime(<span class="st">"%Y-%m-%d %H:%M:%S"</span>)
+
+<span class="cm"># ── Customers ───────────────────────────────────────────</span>
+customers <span class="op">=</span> []
+<span class="kw">for</span> _ <span class="kw">in</span> range(NUM_CUSTOMERS):
+    customers.append({
+        <span class="st">"customer_id"</span>: <span class="st">f"CUST-{str(uuid.uuid4())[:8].upper()}"</span>,
+        <span class="st">"name"</span>:        fake.name(),
+        <span class="st">"email"</span>:       fake.email(),
+        <span class="st">"city"</span>:        fake.city(),
+        <span class="st">"state"</span>:       fake.state_abbr(),
+        <span class="st">"region"</span>:      random.choice(REGIONS),
+        <span class="st">"segment"</span>:     random.choice(SEGMENTS),
+    })
+customer_ids <span class="op">=</span> [c[<span class="st">"customer_id"</span>] <span class="kw">for</span> c <span class="kw">in</span> customers]
+
+<span class="cm"># ── Products ────────────────────────────────────────────</span>
+products <span class="op">=</span> []
+<span class="kw">for</span> _ <span class="kw">in</span> range(NUM_PRODUCTS):
+    cat        <span class="op">=</span> random.choice(list(CATEGORIES.keys()))
+    sub        <span class="op">=</span> random.choice(CATEGORIES[cat])
+    base_price <span class="op">=</span> round(random.uniform(<span class="nm">9.99</span>, <span class="nm">499.99</span>), <span class="nm">2</span>)
+    products.append({
+        <span class="st">"product_id"</span>:   <span class="st">f"PROD-{str(uuid.uuid4())[:8].upper()}"</span>,
+        <span class="st">"name"</span>:         <span class="st">f"{fake.word().capitalize()} {sub}"</span>,
+        <span class="st">"category"</span>:     cat,
+        <span class="st">"subcategory"</span>:  sub,
+        <span class="st">"brand"</span>:        fake.company(),
+        <span class="st">"unit_cost"</span>:    round(base_price <span class="op">*</span> <span class="nm">0.55</span>, <span class="nm">2</span>),
+        <span class="st">"list_price"</span>:   base_price,
+        <span class="st">"is_available"</span>: random.choice([<span class="kw">True</span>, <span class="kw">True</span>, <span class="kw">True</span>, <span class="kw">False</span>]),
+    })
+product_ids <span class="op">=</span> [p[<span class="st">"product_id"</span>] <span class="kw">for</span> p <span class="kw">in</span> products]
+
+<span class="cm"># ── Orders (CSV) ────────────────────────────────────────</span>
+print(<span class="st">"Generating orders CSV..."</span>)
+orders <span class="op">=</span> []
+<span class="kw">for</span> _ <span class="kw">in</span> range(NUM_ORDERS):
+    qty        <span class="op">=</span> random.randint(<span class="nm">1</span>, <span class="nm">5</span>)
+    product    <span class="op">=</span> random.choice(products)
+    discount   <span class="op">=</span> round(random.choice([<span class="nm">0</span>, <span class="nm">0</span>, <span class="nm">0</span>, <span class="nm">0.05</span>, <span class="nm">0.1</span>, <span class="nm">0.15</span>, <span class="nm">0.2</span>]), <span class="nm">2</span>)
+    order_amt  <span class="op">=</span> round(qty <span class="op">*</span> product[<span class="st">"list_price"</span>] <span class="op">*</span> (<span class="nm">1</span> <span class="op">-</span> discount), <span class="nm">2</span>)
+    orders.append({
+        <span class="st">"order_id"</span>:       <span class="st">f"ORD-{str(uuid.uuid4())[:8].upper()}"</span>,
+        <span class="st">"customer_id"</span>:    random.choice(customer_ids),
+        <span class="st">"product_id"</span>:     product[<span class="st">"product_id"</span>],
+        <span class="st">"order_date"</span>:     rand_date_str(),
+        <span class="st">"quantity"</span>:       qty,
+        <span class="st">"unit_price"</span>:     product[<span class="st">"list_price"</span>],
+        <span class="st">"discount_pct"</span>:   discount,
+        <span class="st">"order_amount"</span>:   order_amt,
+        <span class="st">"payment_method"</span>: random.choice([<span class="st">"Credit Card"</span>, <span class="st">"Debit Card"</span>, <span class="st">"PayPal"</span>, <span class="st">"Gift Card"</span>]),
+        <span class="st">"order_status"</span>:   random.choice([<span class="st">"Delivered"</span>, <span class="st">"Delivered"</span>, <span class="st">"Delivered"</span>, <span class="st">"Cancelled"</span>, <span class="st">"Pending"</span>]),
+        <span class="st">"shipping_days"</span>:  random.randint(<span class="nm">1</span>, <span class="nm">10</span>),
+    })
+
+<span class="kw">with</span> open(<span class="st">"data/raw/orders/orders_2024.csv"</span>, <span class="st">"w"</span>, newline<span class="op">=</span><span class="st">""</span>) <span class="kw">as</span> f:
+    writer <span class="op">=</span> csv.DictWriter(f, fieldnames<span class="op">=</span>orders[<span class="nm">0</span>].keys())
+    writer.writeheader()
+    writer.writerows(orders)
+print(<span class="st">f"  → {len(orders)} orders written"</span>)
+
+<span class="cm"># ── Returns (JSON) ──────────────────────────────────────</span>
+print(<span class="st">"Generating returns JSON..."</span>)
+delivered   <span class="op">=</span> [o <span class="kw">for</span> o <span class="kw">in</span> orders <span class="kw">if</span> o[<span class="st">"order_status"</span>] <span class="op">==</span> <span class="st">"Delivered"</span>]
+return_reasons <span class="op">=</span> [<span class="st">"Defective"</span>, <span class="st">"Wrong item"</span>, <span class="st">"Changed mind"</span>, <span class="st">"Arrived late"</span>, <span class="st">"Damaged"</span>]
+returns <span class="op">=</span> []
+<span class="kw">for</span> order <span class="kw">in</span> random.sample(delivered, min(NUM_RETURNS, len(delivered))):
+    order_dt <span class="op">=</span> datetime.strptime(order[<span class="st">"order_date"</span>], <span class="st">"%Y-%m-%d %H:%M:%S"</span>)
+    ret_dt   <span class="op">=</span> order_dt <span class="op">+</span> timedelta(days<span class="op">=</span>random.randint(<span class="nm">1</span>, <span class="nm">30</span>))
+    returns.append({
+        <span class="st">"return_id"</span>:     <span class="st">f"RET-{str(uuid.uuid4())[:8].upper()}"</span>,
+        <span class="st">"order_id"</span>:      order[<span class="st">"order_id"</span>],
+        <span class="st">"return_date"</span>:   ret_dt.strftime(<span class="st">"%Y-%m-%d %H:%M:%S"</span>),
+        <span class="st">"reason"</span>:        random.choice(return_reasons),
+        <span class="st">"refund_amount"</span>: order[<span class="st">"order_amount"</span>],
+        <span class="st">"return_status"</span>: random.choice([<span class="st">"Completed"</span>, <span class="st">"Pending"</span>, <span class="st">"Rejected"</span>]),
+    })
+<span class="kw">with</span> open(<span class="st">"data/raw/returns/returns_2024.json"</span>, <span class="st">"w"</span>) <span class="kw">as</span> f:
+    json.dump(returns, f, indent<span class="op">=</span><span class="nm">2</span>)
+print(<span class="st">f"  → {len(returns)} returns written"</span>)
+
+<span class="cm"># ── Events (JSON) ───────────────────────────────────────</span>
+print(<span class="st">"Generating marketing events JSON..."</span>)
+event_types <span class="op">=</span> [<span class="st">"page_view"</span>, <span class="st">"add_to_cart"</span>, <span class="st">"checkout_start"</span>, <span class="st">"purchase"</span>, <span class="st">"email_open"</span>]
+events <span class="op">=</span> []
+<span class="kw">for</span> _ <span class="kw">in</span> range(NUM_EVENTS):
+    events.append({
+        <span class="st">"event_id"</span>:   str(uuid.uuid4()),
+        <span class="st">"customer_id"</span>: random.choice(customer_ids),
+        <span class="st">"event_type"</span>:  random.choice(event_types),
+        <span class="st">"event_date"</span>:  rand_date_str(),
+        <span class="st">"product_id"</span>:  random.choice(product_ids) <span class="kw">if</span> random.random() <span class="op">></span> <span class="nm">0.3</span> <span class="kw">else</span> <span class="kw">None</span>,
+        <span class="st">"channel"</span>:    random.choice([<span class="st">"organic"</span>, <span class="st">"paid_search"</span>, <span class="st">"email"</span>, <span class="st">"social"</span>, <span class="kw">None</span>]),
+    })
+<span class="kw">with</span> open(<span class="st">"data/raw/events/events_2024.json"</span>, <span class="st">"w"</span>) <span class="kw">as</span> f:
+    json.dump(events, f, indent<span class="op">=</span><span class="nm">2</span>)
+print(<span class="st">f"  → {len(events)} events written"</span>)
+
+print(<span class="st">"\n✅ All data generated!"</span>)</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — run it</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code>cd ~/de-portfolio/project-01-ecommerce
+python3 scripts/generate_data.py
+
+# Expected output:
+# Generating orders CSV...
+#   → 5000 orders written
+# Generating returns JSON...
+#   → 600 returns written
+# Generating marketing events JSON...
+#   → 3000 events written
+# ✅ All data generated!</code></pre>
+  </div>
+</div>
+
+<!-- ════ STEP 5 ════ -->
+<div class="section" id="section-step5">
+  <div class="hero">
+    <div class="hero-tag">Step 5 · S3 Ingestion</div>
+    <h1>Upload Raw Data to S3</h1>
+    <p>Upload your generated files to the S3 raw zone with proper folder structure and metadata tagging.</p>
+  </div>
+
+  <div class="callout callout-warn">
+    <div class="callout-icon">⚠️</div>
+    <div>Change <code>BUCKET_NAME</code> in the script to something unique — like <code>ecom-pipeline-yourname-2024</code>. S3 bucket names are globally unique across all AWS accounts.</div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">scripts/upload_to_s3.py</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm">"""
+Ingestion script: upload raw local files to S3 raw zone.
+In production this would be triggered by Lambda or an Airflow DAG.
+"""</span>
+<span class="kw">import</span> boto3, os, sys
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+BUCKET_NAME <span class="op">=</span> <span class="st">"ecom-pipeline-yourname-2024"</span>  <span class="cm"># ← CHANGE THIS</span>
+AWS_REGION  <span class="op">=</span> <span class="st">"us-east-1"</span>
+
+s3 <span class="op">=</span> boto3.client(<span class="st">"s3"</span>, region_name<span class="op">=</span>AWS_REGION)
+
+<span class="kw">def</span> <span class="fn">create_bucket</span>():
+    <span class="kw">try</span>:
+        s3.head_bucket(Bucket<span class="op">=</span>BUCKET_NAME)
+        print(<span class="st">f"Bucket {BUCKET_NAME} exists"</span>)
+    <span class="kw">except</span>:
+        s3.create_bucket(Bucket<span class="op">=</span>BUCKET_NAME)
+        s3.put_bucket_versioning(
+            Bucket<span class="op">=</span>BUCKET_NAME,
+            VersioningConfiguration<span class="op">=</span>{<span class="st">"Status"</span>: <span class="st">"Enabled"</span>}
+        )
+        print(<span class="st">f"Created bucket {BUCKET_NAME} with versioning ✓"</span>)
+
+<span class="kw">def</span> <span class="fn">upload_file</span>(local_path, s3_key):
+    s3.upload_file(
+        Filename<span class="op">=</span>local_path, Bucket<span class="op">=</span>BUCKET_NAME, Key<span class="op">=</span>s3_key,
+        ExtraArgs<span class="op">=</span>{<span class="st">"Metadata"</span>: {
+            <span class="st">"upload_timestamp"</span>: datetime.utcnow().isoformat(),
+            <span class="st">"pipeline_version"</span>: <span class="st">"1.0"</span>,
+        }}
+    )
+    print(<span class="st">f"  ✓ {local_path} → s3://{BUCKET_NAME}/{s3_key}"</span>)
+
+<span class="kw">def</span> <span class="fn">main</span>():
+    create_bucket()
+    uploads <span class="op">=</span> [
+        (<span class="st">"data/raw/orders/orders_2024.csv"</span>,
+         <span class="st">"raw/orders/year=2024/month=01/day=01/orders_2024.csv"</span>),
+        (<span class="st">"data/raw/returns/returns_2024.json"</span>,
+         <span class="st">"raw/returns/year=2024/month=01/day=01/returns_2024.json"</span>),
+        (<span class="st">"data/raw/events/events_2024.json"</span>,
+         <span class="st">"raw/events/year=2024/month=01/day=01/events_2024.json"</span>),
+    ]
+    print(<span class="st">f"\nUploading {len(uploads)} files..."</span>)
+    <span class="kw">for</span> local_path, s3_key <span class="kw">in</span> uploads:
+        <span class="kw">if</span> os.path.exists(local_path):
+            upload_file(local_path, s3_key)
+        <span class="kw">else</span>:
+            print(<span class="st">f"  ✗ Not found: {local_path}"</span>); sys.exit(<span class="nm">1</span>)
+    print(<span class="st">"\n✅ Upload complete!"</span>)
+
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    main()</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — run it</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code>python3 scripts/upload_to_s3.py
+
+# Verify in AWS Console:
+# Go to S3 → your bucket → browse the folders</code></pre>
+  </div>
+</div>
+
+<!-- ════ STEP 6 ════ -->
+<div class="section" id="section-step6">
+  <div class="hero">
+    <div class="hero-tag">Step 6 · PySpark ETL</div>
+    <h1>Core ETL Transformation</h1>
+    <p>The heart of the pipeline. Reads raw data, validates it, transforms it into a star schema, and writes Parquet output partitioned by year/month.</p>
+  </div>
+
+  <div class="callout callout-info">
+    <div class="callout-icon">📖</div>
+    <div><strong>Study this file section by section.</strong> This is the file interviewers will ask you to explain. After running it successfully, add your own comment above every function explaining what it does in plain English.</div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">scripts/glue_etl_job.py — Part 1: Setup + Ingest</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm">"""
+PySpark ETL Job — E-commerce Order Analytics
+Runs locally with: python3 scripts/glue_etl_job.py --env local
+Deploy to AWS Glue with: --env glue --bucket your-bucket-name
+"""</span>
+<span class="kw">import</span> sys, argparse, logging
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> SparkSession, DataFrame
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">from</span> pyspark.sql.types <span class="kw">import</span> DoubleType, IntegerType, StringType
+
+logging.basicConfig(level<span class="op">=</span>logging.INFO, format<span class="op">=</span><span class="st">"%(asctime)s [%(levelname)s] %(message)s"</span>)
+log <span class="op">=</span> logging.getLogger(__name__)
+
+parser <span class="op">=</span> argparse.ArgumentParser()
+parser.add_argument(<span class="st">"--env"</span>,    default<span class="op">=</span><span class="st">"local"</span>)
+parser.add_argument(<span class="st">"--bucket"</span>, default<span class="op">=</span><span class="st">"ecom-pipeline-yourname-2024"</span>)
+args, _ <span class="op">=</span> parser.parse_known_args()
+
+RAW_BASE <span class="op">=</span> <span class="st">"data/raw"</span>       <span class="kw">if</span> args.env <span class="op">==</span> <span class="st">"local"</span> <span class="kw">else</span> <span class="st">f"s3://{args.bucket}/raw"</span>
+OUT_BASE <span class="op">=</span> <span class="st">"data/processed"</span>  <span class="kw">if</span> args.env <span class="op">==</span> <span class="st">"local"</span> <span class="kw">else</span> <span class="st">f"s3://{args.bucket}/processed"</span>
+
+spark <span class="op">=</span> (
+    SparkSession.builder.appName(<span class="st">"ecom-etl"</span>)
+    .master(<span class="st">"local[*]"</span>)  <span class="cm"># uses all CPU cores locally</span>
+    .config(<span class="st">"spark.sql.adaptive.enabled"</span>, <span class="st">"true"</span>)      <span class="cm"># AQE: auto-optimizes joins</span>
+    .config(<span class="st">"spark.sql.shuffle.partitions"</span>, <span class="st">"8"</span>)       <span class="cm"># low for local dev (default is 200)</span>
+    .config(<span class="st">"spark.sql.parquet.compression.codec"</span>, <span class="st">"snappy"</span>)
+    .getOrCreate()
+)
+spark.sparkContext.setLogLevel(<span class="st">"WARN"</span>)
+
+<span class="cm"># ── INGEST ──────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">ingest_orders</span>() <span class="op">-></span> DataFrame:
+    log.info(<span class="st">"Ingesting orders..."</span>)
+    df <span class="op">=</span> spark.read.option(<span class="st">"header"</span>, <span class="st">"true"</span>).option(<span class="st">"inferSchema"</span>, <span class="st">"true"</span>).csv(<span class="st">f"{RAW_BASE}/orders/"</span>)
+    log.info(<span class="st">f"  → {df.count()} raw orders"</span>)
+    <span class="kw">return</span> df
+
+<span class="kw">def</span> <span class="fn">ingest_returns</span>() <span class="op">-></span> DataFrame:
+    log.info(<span class="st">"Ingesting returns..."</span>)
+    <span class="kw">return</span> spark.read.option(<span class="st">"multiline"</span>, <span class="st">"true"</span>).json(<span class="st">f"{RAW_BASE}/returns/"</span>)
+
+<span class="kw">def</span> <span class="fn">ingest_events</span>() <span class="op">-></span> DataFrame:
+    log.info(<span class="st">"Ingesting events..."</span>)
+    <span class="kw">return</span> spark.read.option(<span class="st">"multiline"</span>, <span class="st">"true"</span>).json(<span class="st">f"{RAW_BASE}/events/"</span>)</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">scripts/glue_etl_job.py — Part 2: Quality + Transform</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm"># ── DATA QUALITY ────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">run_quality_checks</span>(df, table_name, checks):
+    <span class="st">"""Validates rules, marks bad rows as invalid, logs results."""</span>
+    total <span class="op">=</span> df.count()
+    df    <span class="op">=</span> df.withColumn(<span class="st">"_is_valid"</span>, F.lit(<span class="kw">True</span>))
+    df    <span class="op">=</span> df.withColumn(<span class="st">"_failed_checks"</span>, F.lit(<span class="st">""</span>))
+
+    <span class="kw">for</span> name, condition <span class="kw">in</span> checks.items():
+        failed <span class="op">=</span> df.filter(<span class="op">~</span>condition).count()
+        log.info(<span class="st">f"  {name}: {failed}/{total} failed ({round(failed/total*100,1)}%)"</span>)
+        df <span class="op">=</span> df.withColumn(<span class="st">"_is_valid"</span>,
+            F.when(<span class="op">~</span>condition, F.lit(<span class="kw">False</span>)).otherwise(F.col(<span class="st">"_is_valid"</span>)))
+        df <span class="op">=</span> df.withColumn(<span class="st">"_failed_checks"</span>,
+            F.when(<span class="op">~</span>condition, F.concat(F.col(<span class="st">"_failed_checks"</span>), F.lit(<span class="st">f"|{name}"</span>)))
+            .otherwise(F.col(<span class="st">"_failed_checks"</span>)))
+
+    valid   <span class="op">=</span> df.filter(F.col(<span class="st">"_is_valid"</span>)).count()
+    log.info(<span class="st">f"  → {valid} valid, {total-valid} quarantined"</span>)
+    <span class="kw">return</span> df
+
+<span class="cm"># ── DIM DATE ────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">build_dim_date</span>():
+    <span class="cm"># Generate a row for every day in 2024 using Spark's sequence function</span>
+    dates_df <span class="op">=</span> spark.sql(<span class="st">"""
+        SELECT explode(sequence(to_date('2024-01-01'), to_date('2024-12-31'),
+                                interval 1 day)) AS full_date
+    """</span>)
+    <span class="kw">return</span> dates_df.select(
+        F.date_format(<span class="st">"full_date"</span>, <span class="st">"yyyyMMdd"</span>).cast(IntegerType()).alias(<span class="st">"date_key"</span>),
+        F.col(<span class="st">"full_date"</span>),
+        F.year(<span class="st">"full_date"</span>).alias(<span class="st">"year"</span>),
+        F.quarter(<span class="st">"full_date"</span>).alias(<span class="st">"quarter"</span>),
+        F.month(<span class="st">"full_date"</span>).alias(<span class="st">"month"</span>),
+        F.date_format(<span class="st">"full_date"</span>, <span class="st">"MMMM"</span>).alias(<span class="st">"month_name"</span>),
+        F.dayofweek(<span class="st">"full_date"</span>).alias(<span class="st">"day_of_week"</span>),
+        F.date_format(<span class="st">"full_date"</span>, <span class="st">"EEEE"</span>).alias(<span class="st">"day_name"</span>),
+        F.when(F.dayofweek(<span class="st">"full_date"</span>).isin([<span class="nm">1</span>, <span class="nm">7</span>]), <span class="kw">True</span>).otherwise(<span class="kw">False</span>).alias(<span class="st">"is_weekend"</span>),
+        F.lit(<span class="kw">False</span>).alias(<span class="st">"is_holiday"</span>),
+    )
+
+<span class="cm"># ── FACT ORDERS ─────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">build_fact_orders</span>(orders_df, returns_df):
+    clean <span class="op">=</span> orders_df.filter(F.col(<span class="st">"_is_valid"</span>)).drop(<span class="st">"_is_valid"</span>, <span class="st">"_failed_checks"</span>)
+    clean <span class="op">=</span> (clean
+        .withColumn(<span class="st">"order_date_ts"</span>,  F.to_timestamp(<span class="st">"order_date"</span>, <span class="st">"yyyy-MM-dd HH:mm:ss"</span>))
+        .withColumn(<span class="st">"order_date_key"</span>, F.date_format(<span class="st">"order_date_ts"</span>, <span class="st">"yyyyMMdd"</span>).cast(IntegerType()))
+        .withColumn(<span class="st">"order_amount"</span>,   F.col(<span class="st">"order_amount"</span>).cast(DoubleType()))
+        .withColumn(<span class="st">"quantity"</span>,       F.col(<span class="st">"quantity"</span>).cast(IntegerType()))
+        .withColumn(<span class="st">"gross_revenue"</span>,  F.round(F.col(<span class="st">"quantity"</span>) <span class="op">*</span> F.col(<span class="st">"unit_price"</span>), <span class="nm">2</span>))
+        .withColumn(<span class="st">"net_revenue"</span>,    F.col(<span class="st">"order_amount"</span>))
+        .withColumn(<span class="st">"discount_amount"</span>, F.round(F.col(<span class="st">"gross_revenue"</span>) <span class="op">-</span> F.col(<span class="st">"net_revenue"</span>), <span class="nm">2</span>))
+        .withColumn(<span class="st">"customer_key"</span>,   F.md5(F.col(<span class="st">"customer_id"</span>)))
+        .withColumn(<span class="st">"product_key"</span>,    F.md5(F.col(<span class="st">"product_id"</span>)))
+        .withColumn(<span class="st">"order_key"</span>,      F.md5(F.col(<span class="st">"order_id"</span>)))
+    )
+    ret_clean <span class="op">=</span> (returns_df.filter(F.col(<span class="st">"_is_valid"</span>))
+        .select(F.col(<span class="st">"order_id"</span>).alias(<span class="st">"ret_order_id"</span>), <span class="st">"refund_amount"</span>))
+
+    fact <span class="op">=</span> (clean.join(ret_clean, clean.order_id <span class="op">==</span> ret_clean.ret_order_id, <span class="st">"left"</span>)
+        .withColumn(<span class="st">"is_returned"</span>,  F.col(<span class="st">"ret_order_id"</span>).isNotNull())
+        .withColumn(<span class="st">"refund_amount"</span>, F.coalesce(F.col(<span class="st">"refund_amount"</span>), F.lit(<span class="nm">0.0</span>)))
+        .withColumn(<span class="st">"year"</span>,  F.year(<span class="st">"order_date_ts"</span>))
+        .withColumn(<span class="st">"month"</span>, F.month(<span class="st">"order_date_ts"</span>))
+        .withColumn(<span class="st">"etl_inserted_at"</span>, F.current_timestamp())
+    )
+    log.info(<span class="st">f"  → {fact.count()} fact rows"</span>)
+    <span class="kw">return</span> fact
+
+<span class="cm"># ── WRITE ───────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">write_table</span>(df, name, partition_cols<span class="op">=</span><span class="kw">None</span>):
+    path   <span class="op">=</span> <span class="st">f"{OUT_BASE}/{name}"</span>
+    writer <span class="op">=</span> df.coalesce(<span class="nm">1</span>).write.mode(<span class="st">"overwrite"</span>).format(<span class="st">"parquet"</span>)
+    <span class="kw">if</span> partition_cols:
+        writer <span class="op">=</span> writer.partitionBy(<span class="op">*</span>partition_cols)
+    writer.save(path)
+    log.info(<span class="st">f"  ✓ Written: {path}"</span>)
+
+<span class="cm"># ── MAIN ────────────────────────────────────────────────</span>
+<span class="kw">def</span> <span class="fn">main</span>():
+    log.info(<span class="st">"ETL Job started"</span>)
+    orders_raw  <span class="op">=</span> ingest_orders()
+    returns_raw <span class="op">=</span> ingest_returns()
+
+    orders_qc <span class="op">=</span> run_quality_checks(orders_raw, <span class="st">"orders"</span>, {
+        <span class="st">"order_id_not_null"</span>:     F.col(<span class="st">"order_id"</span>).isNotNull(),
+        <span class="st">"customer_id_not_null"</span>:  F.col(<span class="st">"customer_id"</span>).isNotNull(),
+        <span class="st">"amount_positive"</span>:       F.col(<span class="st">"order_amount"</span>).cast(DoubleType()) <span class="op">></span> <span class="nm">0</span>,
+        <span class="st">"quantity_positive"</span>:     F.col(<span class="st">"quantity"</span>).cast(IntegerType()) <span class="op">></span> <span class="nm">0</span>,
+    })
+    returns_qc <span class="op">=</span> run_quality_checks(returns_raw, <span class="st">"returns"</span>, {
+        <span class="st">"return_id_not_null"</span>:  F.col(<span class="st">"return_id"</span>).isNotNull(),
+        <span class="st">"refund_positive"</span>:     F.col(<span class="st">"refund_amount"</span>).cast(DoubleType()) <span class="op">>=</span> <span class="nm">0</span>,
+    })
+
+    dim_date    <span class="op">=</span> build_dim_date()
+    fact_orders <span class="op">=</span> build_fact_orders(orders_qc, returns_qc)
+
+    write_table(dim_date,    <span class="st">"dim_date"</span>)
+    write_table(fact_orders, <span class="st">"fact_orders"</span>, [<span class="st">"year"</span>, <span class="st">"month"</span>])
+    log.info(<span class="st">"✅ ETL Job complete"</span>)
+
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    main()</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — run the ETL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code>python3 scripts/glue_etl_job.py --env local
+
+# After it runs, verify Parquet files were created:
+ls -la data/processed/fact_orders/
+ls -la data/processed/dim_date/</code></pre>
+  </div>
+</div>
+
+<!-- ════ STEP 7 ════ -->
+<div class="section" id="section-step7">
+  <div class="hero">
+    <div class="hero-tag">Step 7 · SQL Queries</div>
+    <h1>Analytical SQL — Interview Level</h1>
+    <p>Four complex queries covering window functions, CTEs, cohort analysis, and ranking. These exact patterns appear in Data Engineer interviews.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'q1')">Monthly Revenue</button>
+    <button class="tab-btn" onclick="switchTab(this,'q2')">Cohort Retention</button>
+    <button class="tab-btn" onclick="switchTab(this,'q3')">Category Ranking</button>
+    <button class="tab-btn" onclick="switchTab(this,'q4')">Churn Risk</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-q1">
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div><strong>What this shows:</strong> Month-over-month revenue growth using LAG() window function, plus running cumulative revenue. Very common interview question pattern.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">SQL — Monthly Revenue with MoM Growth</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="cm">-- CTE 1: Aggregate revenue by month</span>
+<span class="kw">WITH</span> monthly_revenue <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        year, month,
+        <span class="fn">SUM</span>(net_revenue)              <span class="kw">AS</span> total_revenue,
+        <span class="fn">COUNT</span>(order_id)               <span class="kw">AS</span> order_count,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> customer_id)   <span class="kw">AS</span> unique_customers,
+        <span class="fn">AVG</span>(shipping_days)            <span class="kw">AS</span> avg_shipping_days
+    <span class="kw">FROM</span> fact_orders
+    <span class="kw">WHERE</span> order_status <span class="op">=</span> <span class="st">'Delivered'</span>
+    <span class="kw">GROUP BY</span> year, month
+),
+<span class="cm">-- CTE 2: Add growth metrics using window functions</span>
+revenue_with_growth <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        year, month, total_revenue, order_count,
+        <span class="cm">-- LAG: look at the previous row's value</span>
+        <span class="fn">LAG</span>(total_revenue) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> year, month) <span class="kw">AS</span> prev_month_revenue,
+        <span class="fn">ROUND</span>(
+            (total_revenue - <span class="fn">LAG</span>(total_revenue) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> year, month))
+            / <span class="fn">NULLIF</span>(<span class="fn">LAG</span>(total_revenue) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> year, month), <span class="nm">0</span>) * <span class="nm">100</span>, <span class="nm">2</span>
+        ) <span class="kw">AS</span> mom_growth_pct,
+        <span class="cm">-- SUM with frame: running total</span>
+        <span class="fn">SUM</span>(total_revenue) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> year, month) <span class="kw">AS</span> cumulative_revenue
+    <span class="kw">FROM</span> monthly_revenue
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> revenue_with_growth <span class="kw">ORDER BY</span> year, month;</code></pre>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-q2">
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div><strong>What this shows:</strong> Cohort retention — groups customers by the month they first ordered, then tracks what % came back in each subsequent month. This is a senior-level analytics pattern.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">SQL — Customer Cohort Retention</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="kw">WITH</span> first_purchase <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        customer_id,
+        <span class="fn">MIN</span>(<span class="fn">DATE_TRUNC</span>(<span class="st">'month'</span>, order_date_ts)) <span class="kw">AS</span> cohort_month
+    <span class="kw">FROM</span> fact_orders
+    <span class="kw">WHERE</span> order_status <span class="op">=</span> <span class="st">'Delivered'</span>
+    <span class="kw">GROUP BY</span> customer_id
+),
+cohort_data <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        fp.cohort_month,
+        <span class="fn">DATE_TRUNC</span>(<span class="st">'month'</span>, f.order_date_ts) <span class="kw">AS</span> order_month,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> f.customer_id)       <span class="kw">AS</span> customers,
+        <span class="fn">DATE_DIFF</span>(<span class="st">'month'</span>, fp.cohort_month, <span class="fn">DATE_TRUNC</span>(<span class="st">'month'</span>, f.order_date_ts)) <span class="kw">AS</span> months_since_first
+    <span class="kw">FROM</span> fact_orders f
+    <span class="kw">JOIN</span> first_purchase fp <span class="kw">ON</span> f.customer_id <span class="op">=</span> fp.customer_id
+    <span class="kw">WHERE</span> f.order_status <span class="op">=</span> <span class="st">'Delivered'</span>
+    <span class="kw">GROUP BY</span> fp.cohort_month, <span class="fn">DATE_TRUNC</span>(<span class="st">'month'</span>, f.order_date_ts)
+)
+<span class="kw">SELECT</span>
+    cohort_month,
+    months_since_first,
+    customers,
+    <span class="fn">FIRST_VALUE</span>(customers) <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> cohort_month <span class="kw">ORDER BY</span> months_since_first) <span class="kw">AS</span> cohort_size,
+    <span class="fn">ROUND</span>(customers * <span class="nm">100.0</span> /
+        <span class="fn">FIRST_VALUE</span>(customers) <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> cohort_month <span class="kw">ORDER BY</span> months_since_first), <span class="nm">1</span>
+    ) <span class="kw">AS</span> retention_pct
+<span class="kw">FROM</span> cohort_data
+<span class="kw">ORDER BY</span> cohort_month, months_since_first;</code></pre>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-q3">
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div><strong>What this shows:</strong> DENSE_RANK vs NTILE — two different ranking functions. DENSE_RANK gives tied items the same rank. NTILE(4) buckets items into quartiles. Common in "top N" type interview questions.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">SQL — Category Ranking with DENSE_RANK + NTILE</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="kw">WITH</span> category_metrics <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        p.category,
+        <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> f.order_id)  <span class="kw">AS</span> total_orders,
+        <span class="fn">SUM</span>(f.net_revenue)          <span class="kw">AS</span> total_revenue,
+        <span class="fn">AVG</span>(f.net_revenue)          <span class="kw">AS</span> avg_order_value,
+        <span class="fn">ROUND</span>(<span class="fn">SUM</span>(f.refund_amount) / <span class="fn">NULLIF</span>(<span class="fn">SUM</span>(f.net_revenue), <span class="nm">0</span>) * <span class="nm">100</span>, <span class="nm">2</span>) <span class="kw">AS</span> refund_rate_pct
+    <span class="kw">FROM</span> fact_orders f
+    <span class="kw">JOIN</span> dim_product p <span class="kw">ON</span> f.product_key <span class="op">=</span> p.product_key
+    <span class="kw">WHERE</span> f.order_status <span class="op">!=</span> <span class="st">'Cancelled'</span>
+    <span class="kw">GROUP BY</span> p.category
+)
+<span class="kw">SELECT</span>
+    category, total_revenue, total_orders, avg_order_value, refund_rate_pct,
+    <span class="cm">-- Same rank for ties, no gaps</span>
+    <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>)   <span class="kw">AS</span> revenue_rank,
+    <span class="cm">-- Bucket into 4 equal groups</span>
+    <span class="fn">NTILE</span>(<span class="nm">4</span>)      <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>)   <span class="kw">AS</span> revenue_quartile,
+    <span class="cm">-- Rank by lowest refund rate (quality metric)</span>
+    <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> refund_rate_pct <span class="kw">ASC</span>)   <span class="kw">AS</span> quality_rank
+<span class="kw">FROM</span> category_metrics
+<span class="kw">ORDER BY</span> revenue_rank;</code></pre>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-q4">
+    <div class="callout callout-info">
+      <div class="callout-icon">💡</div>
+      <div><strong>What this shows:</strong> Customer segmentation with CASE WHEN — identifies high-value customers who haven't ordered recently. This directly connects to your Customer Experience background — mention this in interviews.</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><span class="code-lang">SQL — High-Value Customers At Risk of Churn</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      <pre><code><span class="kw">WITH</span> customer_summary <span class="kw">AS</span> (
+    <span class="kw">SELECT</span>
+        customer_id,
+        <span class="fn">COUNT</span>(order_id)                     <span class="kw">AS</span> lifetime_orders,
+        <span class="fn">SUM</span>(net_revenue)                    <span class="kw">AS</span> lifetime_value,
+        <span class="fn">MAX</span>(order_date_ts)                  <span class="kw">AS</span> last_order_date,
+        <span class="fn">DATE_DIFF</span>(<span class="st">'day'</span>, <span class="fn">MAX</span>(order_date_ts), <span class="fn">CURRENT_DATE</span>) <span class="kw">AS</span> days_inactive,
+        <span class="fn">AVG</span>(net_revenue)                    <span class="kw">AS</span> avg_order_value,
+        <span class="fn">SUM</span>(<span class="kw">CASE WHEN</span> is_returned <span class="kw">THEN</span> <span class="nm">1</span> <span class="kw">ELSE</span> <span class="nm">0</span> <span class="kw">END</span>) <span class="kw">AS</span> return_count
+    <span class="kw">FROM</span> fact_orders
+    <span class="kw">WHERE</span> order_status <span class="op">=</span> <span class="st">'Delivered'</span>
+    <span class="kw">GROUP BY</span> customer_id
+)
+<span class="kw">SELECT</span>
+    customer_id, lifetime_value, lifetime_orders, days_inactive,
+    <span class="kw">CASE</span>
+        <span class="kw">WHEN</span> lifetime_value <span class="op">></span> <span class="nm">1000</span> <span class="kw">AND</span> days_inactive <span class="op">></span> <span class="nm">90</span> <span class="kw">THEN</span> <span class="st">'High Value At Risk'</span>
+        <span class="kw">WHEN</span> lifetime_value <span class="op">></span>  <span class="nm">500</span> <span class="kw">AND</span> days_inactive <span class="op">></span> <span class="nm">90</span> <span class="kw">THEN</span> <span class="st">'Mid Value At Risk'</span>
+        <span class="kw">WHEN</span> days_inactive <span class="op"><=</span> <span class="nm">30</span>                          <span class="kw">THEN</span> <span class="st">'Active'</span>
+        <span class="kw">ELSE</span> <span class="st">'Standard'</span>
+    <span class="kw">END</span> <span class="kw">AS</span> churn_segment
+<span class="kw">FROM</span> customer_summary
+<span class="kw">WHERE</span> lifetime_value <span class="op">></span> <span class="nm">200</span>
+<span class="kw">ORDER BY</span> lifetime_value <span class="kw">DESC</span>;</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ════ STEP 8 ════ -->
+<div class="section" id="section-step8">
+  <div class="hero">
+    <div class="hero-tag">Step 8 · Data Quality</div>
+    <h1>Data Quality Framework</h1>
+    <p>Standalone quality checks that generate a JSON report. Run this after ETL to catch issues before analysts hit bad data.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">scripts/data_quality.py</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code><span class="cm">"""
+Standalone data quality checks. Run after ETL to validate output.
+Generates: data/quality_report.json
+"""</span>
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> SparkSession
+<span class="kw">from</span> pyspark.sql <span class="kw">import</span> functions <span class="kw">as</span> F
+<span class="kw">import</span> json
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime
+
+spark <span class="op">=</span> SparkSession.builder.master(<span class="st">"local[*]"</span>).appName(<span class="st">"dq"</span>).getOrCreate()
+spark.sparkContext.setLogLevel(<span class="st">"WARN"</span>)
+
+<span class="kw">def</span> <span class="fn">check_completeness</span>(df, columns):
+    <span class="st">"""Check null % for each column. Fails if > 5% nulls."""</span>
+    total <span class="op">=</span> df.count()
+    results <span class="op">=</span> {}
+    <span class="kw">for</span> col <span class="kw">in</span> columns:
+        nulls <span class="op">=</span> df.filter(F.col(col).isNull()).count()
+        results[col] <span class="op">=</span> {
+            <span class="st">"null_count"</span>: nulls,
+            <span class="st">"null_pct"</span>:   round(nulls <span class="op">/</span> total <span class="op">*</span> <span class="nm">100</span>, <span class="nm">2</span>),
+            <span class="st">"passed"</span>:     nulls <span class="op">/</span> total <span class="op"><</span> <span class="nm">0.05</span>,
+        }
+    <span class="kw">return</span> results
+
+<span class="kw">def</span> <span class="fn">check_uniqueness</span>(df, columns):
+    <span class="st">"""Check for duplicates in key columns."""</span>
+    total <span class="op">=</span> df.count()
+    results <span class="op">=</span> {}
+    <span class="kw">for</span> col <span class="kw">in</span> columns:
+        distinct <span class="op">=</span> df.select(col).distinct().count()
+        results[col] <span class="op">=</span> {
+            <span class="st">"dupes"</span>:  total <span class="op">-</span> distinct,
+            <span class="st">"passed"</span>: (total <span class="op">-</span> distinct) <span class="op">==</span> <span class="nm">0</span>,
+        }
+    <span class="kw">return</span> results
+
+<span class="kw">def</span> <span class="fn">check_referential_integrity</span>(child_df, parent_df, child_key, parent_key):
+    <span class="st">"""Check all FK values exist in parent table (no orphans)."""</span>
+    orphans <span class="op">=</span> (child_df.select(child_key)
+        .join(parent_df.select(parent_key),
+              child_df[child_key] <span class="op">==</span> parent_df[parent_key], <span class="st">"left_anti"</span>)
+        .count())
+    <span class="kw">return</span> {<span class="st">"orphan_rows"</span>: orphans, <span class="st">"passed"</span>: orphans <span class="op">==</span> <span class="nm">0</span>}
+
+<span class="kw">if</span> __name__ <span class="op">==</span> <span class="st">"__main__"</span>:
+    fact  <span class="op">=</span> spark.read.parquet(<span class="st">"data/processed/fact_orders"</span>)
+    dim_c <span class="op">=</span> spark.read.parquet(<span class="st">"data/processed/dim_customer"</span>) <span class="kw">if</span> __import__(<span class="st">'os'</span>).path.exists(<span class="st">"data/processed/dim_customer"</span>) <span class="kw">else</span> <span class="kw">None</span>
+
+    checks <span class="op">=</span> {
+        <span class="st">"completeness"</span>: check_completeness(fact, [<span class="st">"order_key"</span>, <span class="st">"customer_key"</span>, <span class="st">"net_revenue"</span>]),
+        <span class="st">"uniqueness"</span>:   check_uniqueness(fact, [<span class="st">"order_id"</span>]),
+    }
+
+    report <span class="op">=</span> {
+        <span class="st">"run_at"</span>:        datetime.utcnow().isoformat(),
+        <span class="st">"checks"</span>:        checks,
+        <span class="st">"overall_passed"</span>: <span class="kw">all</span>(
+            v.get(<span class="st">"passed"</span>, <span class="kw">True</span>)
+            <span class="kw">for</span> section <span class="kw">in</span> checks.values()
+            <span class="kw">for</span> v <span class="kw">in</span> section.values()
+        )
+    }
+    <span class="kw">with</span> open(<span class="st">"data/quality_report.json"</span>, <span class="st">"w"</span>) <span class="kw">as</span> f:
+        json.dump(report, f, indent<span class="op">=</span><span class="nm">2</span>)
+
+    status <span class="op">=</span> <span class="st">"✅ PASSED"</span> <span class="kw">if</span> report[<span class="st">"overall_passed"</span>] <span class="kw">else</span> <span class="st">"❌ FAILED"</span>
+    print(<span class="st">f"Data Quality: {status}"</span>)
+    print(<span class="st">"Report saved to data/quality_report.json"</span>)</code></pre>
+  </div>
+</div>
+
+<!-- ════ STEP 9 ════ -->
+<div class="section" id="section-step9">
+  <div class="hero">
+    <div class="hero-tag">Step 9 · GitHub</div>
+    <h1>Push to GitHub</h1>
+    <p>A professional README and clean commit history make your portfolio stand out to recruiters and hiring managers.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">README.md — paste this entire content</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code># E-commerce Order Analytics Pipeline
+
+**Industry:** E-commerce | **Level:** Foundation → Intermediate
+**Stack:** Python 3.11 · PySpark 3.5 · AWS S3 · AWS Glue · Athena · Parquet
+
+## Business Problem
+A mid-size e-commerce company had order data across 3 source systems.
+BI analysts waited 3–4 days for manual data pulls. This pipeline automates
+ingestion, transformation, and serving — reducing wait time to under 1 hour.
+
+## Architecture
+```
+[MySQL CSV] [Returns JSON] [Events JSON]
+      ↓            ↓             ↓
+    S3 Raw Zone (partitioned by date)
+            ↓
+    AWS Glue PySpark ETL
+    (validate → transform → load)
+            ↓
+    S3 Processed Zone (Parquet, Snappy)
+            ↓
+    AWS Athena (serverless SQL)
+```
+
+## Key Technical Decisions
+- **Star schema** for analytical query performance (4 dims + 1 fact)
+- **Parquet + Snappy** compression — 60-70% smaller than CSV
+- **Partitioned by year/month** — Athena scans only relevant data
+- **MD5 surrogate keys** — decouples warehouse from source system IDs
+- **Data quality framework** — quarantines bad rows before they reach analysts
+
+## How to Run Locally
+```bash
+pip install pyspark pandas boto3 faker
+python3 scripts/generate_data.py    # create test data
+python3 scripts/glue_etl_job.py     # run ETL
+python3 scripts/data_quality.py     # validate output
+```
+
+## Business Impact
+- Analyst wait time: 3–4 days → under 1 hour
+- ETL processes 5,000 orders in ~45 seconds
+- Athena query cost reduced ~70% via partitioning
+- Data quality checks catch 98%+ of upstream issues</code></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — final push</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code>cd ~/de-portfolio/project-01-ecommerce
+
+git add scripts/ docs/ README.md .gitignore
+git status  # review what's being committed
+
+git commit -m "feat: complete e-commerce ETL pipeline
+
+- PySpark ETL with star schema (fact_orders + 4 dims)
+- Data quality framework with quarantine pattern
+- S3 partitioning by year/month for Athena optimization
+- Complex SQL: window functions, CTEs, cohort analysis"
+
+git push origin main</code></pre>
+  </div>
+</div>
+
+<!-- ════ STEP 10 ════ -->
+<div class="section" id="section-step10">
+  <div class="hero">
+    <div class="hero-tag">Step 10 · Verify</div>
+    <h1>Run Everything End-to-End</h1>
+    <p>The full pipeline in sequence. Run this every time you want to verify the whole thing works.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">bash — full pipeline run</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><code>cd ~/de-portfolio/project-01-ecommerce
+
+echo "=== Step 1: Generate data ==="
+python3 scripts/generate_data.py
+
+echo "=== Step 2: Upload to S3 ==="
+python3 scripts/upload_to_s3.py
+
+echo "=== Step 3: Run ETL ==="
+python3 scripts/glue_etl_job.py --env local
+
+echo "=== Step 4: Data quality check ==="
+python3 scripts/data_quality.py
+
+echo "=== Verify output files ==="
+find data/processed -name "*.parquet" | head -20
+
+echo "=== Pipeline complete! ==="</code></pre>
+  </div>
+
+  <h3>✅ Project 1 Final Checklist</h3>
+  <ul class="checklist">
+    <li><input type="checkbox" id="f1" onchange="updateProgress()"><label for="f1">generate_data.py produces 3 files successfully</label></li>
+    <li><input type="checkbox" id="f2" onchange="updateProgress()"><label for="f2">Files visible in S3 bucket in AWS console</label></li>
+    <li><input type="checkbox" id="f3" onchange="updateProgress()"><label for="f3">ETL job completes with no errors</label></li>
+    <li><input type="checkbox" id="f4" onchange="updateProgress()"><label for="f4">Parquet files exist in data/processed/</label></li>
+    <li><input type="checkbox" id="f5" onchange="updateProgress()"><label for="f5">Data quality report shows ✅ PASSED</label></li>
+    <li><input type="checkbox" id="f6" onchange="updateProgress()"><label for="f6">GitHub repo has clean README and all scripts</label></li>
+    <li><input type="checkbox" id="f7" onchange="updateProgress()"><label for="f7">Can explain every function in glue_etl_job.py</label></li>
+    <li><input type="checkbox" id="f8" onchange="updateProgress()"><label for="f8">Can answer all 15 interview questions out loud</label></li>
+  </ul>
+</div>
+
+<!-- ════ INTERVIEW ════ -->
+<div class="section" id="section-interview">
+  <div class="hero">
+    <div class="hero-tag">Interview Prep · 15 Questions</div>
+    <h1>Interview Questions + Model Answers</h1>
+    <p>Every question is based on what you actually built. Click each question to reveal a model answer. Practice saying these out loud — not reading them.</p>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-icon">🎯</div>
+    <div><strong>Practice tip:</strong> Cover the answer, read the question, then try to answer from memory. If you blank, look at the answer once, then close it and try again. Do this daily during Week 2.</div>
+  </div>
+
+  <!-- Q1 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q1</span><span class="q-cat cat-arch">Architecture</span>
+      <span class="q-text">Why did you choose a star schema instead of a normalized (3NF) schema?</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>Star schema reduces JOIN complexity for analytical queries. In a normalized schema, a simple revenue-by-category query might require 4-5 JOINs through product → subcategory → category tables. In a star schema, that's one JOIN from fact to dim_product since all product attributes are denormalized into one table. For a BI data warehouse where analysts run hundreds of queries daily, that performance gain is significant. The trade-off is some data redundancy — category name is repeated for every product — but storage is cheap and query speed matters more in this use case.</p>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q2</span><span class="q-cat cat-arch">Architecture</span>
+      <span class="q-text">Walk me through your partitioning strategy and why you chose year/month.</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>I partitioned the fact_orders table by year and month on S3. When Athena runs a query like "show me Q3 revenue," it uses partition pruning to only scan the July, August, and September partitions — roughly 25% of the data instead of 100%. This reduces both query time and cost since Athena charges per terabyte scanned. I chose month-level granularity because the business's typical queries are month-over-month comparisons. Day-level partitioning would create too many small files, which hurts performance. The tradeoff is that cross-month queries still scan all relevant months, but that's acceptable for this use case.</p>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q3</span><span class="q-cat cat-arch">Architecture</span>
+      <span class="q-text">What's the difference between a surrogate key and a natural key? Which did you use?</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>A natural key is the ID from the source system — like order_id = "ORD-A4B3C2D1". A surrogate key is a generated identifier that exists only in the warehouse. I used MD5 hashes of the source ID as surrogate keys. The benefit is decoupling — if the upstream order management system changes its ID format, our warehouse keys remain stable. It also helps when merging data from multiple source systems where the same business entity might have different IDs. The trade-off is a slight overhead for hashing, which is negligible at this scale.</p>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q4</span><span class="q-cat cat-spark">PySpark</span>
+      <span class="q-text">What is Adaptive Query Execution (AQE) and when did you enable it?</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>AQE is a Spark 3.0+ feature that re-optimizes query plans at runtime based on actual statistics collected during execution. I enabled it with <code>spark.sql.adaptive.enabled = true</code>. Before AQE, Spark optimized the execution plan before the job ran, based on estimates that might be wrong. With AQE, it can dynamically coalesce shuffle partitions — if a shuffle produces 200 partitions but most are tiny, AQE merges them into fewer larger ones. It also handles skew joins by splitting oversized partitions. For this project it matters most for the LEFT JOIN between fact_orders and returns where the data size ratio is unpredictable.</p>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q5</span><span class="q-cat cat-spark">PySpark</span>
+      <span class="q-text">Why did you use coalesce(1) before writing the output?</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p><code>coalesce(1)</code> merges all data partitions into one before writing, producing a single Parquet file per table. I did this for local development because the dataset is small — 5,000 orders. Multiple small Parquet files from different partitions create overhead. In production at scale, I would remove coalesce(1) or use repartition(n) with a reasonable number based on data size — typically targeting 128-256MB per file. The difference between coalesce and repartition: coalesce is a narrow transformation that only merges partitions without a full shuffle. repartition does a full shuffle and can both increase and decrease partition count. coalesce can only reduce partitions.</p>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q6</span><span class="q-cat cat-spark">PySpark</span>
+      <span class="q-text">Explain the difference between narrow and wide transformations. Give examples from your code.</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>Narrow transformations process each row independently with no data movement between partitions. Examples from my code: <code>withColumn()</code>, <code>filter()</code>, <code>select()</code>, <code>cast()</code> — adding the order_date_ts column or filtering invalid rows are all narrow. Wide transformations require shuffling data across the network between executors. Examples from my code: <code>groupBy().agg()</code>, <code>dropDuplicates()</code>, and the <code>join()</code> between orders and returns. Wide transformations are expensive and create stage boundaries in Spark. That's why I kept the join as a LEFT JOIN rather than inner — fewer rows to shuffle, and I use <code>coalesce</code> only after all the wide operations are done.</p>
+    </div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q7</span><span class="q-cat cat-dq">Data Quality</span>
+      <span class="q-text">How did you handle bad records — did you drop them or quarantine them?</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>I quarantined them rather than dropping them. Dropping bad records silently is dangerous — you lose visibility into upstream data quality problems. My approach: I tagged each row with an <code>_is_valid</code> flag and a <code>_failed_checks</code> string listing which checks failed. Valid rows went to the processed fact table. Invalid rows went to a quarantine S3 path. This means I can monitor quarantine volume over time — if it spikes, that signals a source system issue. I also log the failure rate per check so the data engineering team can prioritize fixes with the upstream team. In a production pipeline I'd also fire a CloudWatch alert if the quarantine rate exceeds a threshold, like 5%.</p>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q8</span><span class="q-cat cat-dq">Data Quality</span>
+      <span class="q-text">How would you handle schema drift — what if the source adds a new column tomorrow?</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>Schema drift is one of the trickiest real-world problems. My approach has three layers. First, for additive changes — new columns appearing — I use schema evolution support in Spark and Parquet with <code>mergeSchema = true</code>. New columns get added to the processed table automatically. Second, for breaking changes — column renamed or type changed — I add a schema validation step at ingestion that compares the incoming schema against the expected schema and fails fast with a clear error message before writing anything. Third, for production I'd implement schema registry using AWS Glue Data Catalog to version schemas and trigger alerts on unexpected changes. The key is never silently accepting a bad schema — fail loud and early rather than writing corrupted data downstream.</p>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q9</span><span class="q-cat cat-sql">SQL</span>
+      <span class="q-text">Explain the difference between RANK, DENSE_RANK, and ROW_NUMBER.</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>All three assign numbers to rows in a sorted result, but they handle ties differently. <code>ROW_NUMBER()</code> gives every row a unique number regardless of ties — if two products have the same revenue, one gets rank 1 and the other gets rank 2 arbitrarily. <code>RANK()</code> gives tied rows the same rank but skips the next rank — two products tied at rank 1 means the next product gets rank 3, not rank 2. <code>DENSE_RANK()</code> gives tied rows the same rank with no gaps — two products tied at rank 1 means the next product gets rank 2. In my category ranking query I used DENSE_RANK because I didn't want to skip rank numbers when multiple categories were close in revenue. ROW_NUMBER is best for deduplication — picking one row when there are duplicates.</p>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q10</span><span class="q-cat cat-sql">SQL</span>
+      <span class="q-text">Walk me through your cohort retention query. What business question does it answer?</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>The query answers: "Of customers who made their first purchase in January, what percentage came back to buy again in February, March, etc.?" This is the most important metric for an e-commerce subscription or repeat-purchase business. I built it in three steps. First CTE finds each customer's first-ever order month — their "cohort." Second CTE joins all orders back to that cohort month and calculates months_since_first for each subsequent purchase. The final SELECT uses FIRST_VALUE window function partitioned by cohort_month to grab the original cohort size, then divides each month's active customers by that cohort_size to get a retention percentage. A healthy e-commerce business typically sees 20-40% Month 1 retention. If you see it dropping to 5%, that's a product or customer experience issue — which ties directly to my background in customer experience operations.</p>
+    </div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q11</span><span class="q-cat cat-prod">Production</span>
+      <span class="q-text">How would you make this pipeline idempotent?</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>An idempotent pipeline produces the same result no matter how many times you run it for the same input data. Right now my pipeline uses <code>write.mode("overwrite")</code> which is partially idempotent — re-running overwrites existing output. But for incremental loads, I need to be more careful. I'd implement idempotency by adding a processing_date column to track which batch each row came from, then using a DELETE WHERE processing_date = target_date followed by INSERT pattern — or better, using partition-level overwrite so Spark only overwrites the specific date partitions being processed. In Redshift or a proper database I'd use MERGE (upsert). I'd also add a pipeline run log table that records each run's status, so I can detect and re-run failed batches safely.</p>
+    </div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q12</span><span class="q-cat cat-prod">Production</span>
+      <span class="q-text">How would this pipeline scale to 10 million orders per day?</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>Several changes. First, move from a single Glue job to an EMR cluster with auto-scaling — more executor nodes for parallel processing. Second, remove coalesce(1) and let Spark use its natural parallelism, targeting 256MB per output file using <code>repartition()</code> based on data size. Third, switch from full table overwrites to incremental processing — only process new records using watermark timestamps or CDC (Change Data Capture) from the source database. Fourth, add a message queue like SQS or Kinesis between the source systems and the raw S3 zone so we can handle traffic spikes without losing data. Fifth, consider partitioning at day level instead of month level at that volume, since month partitions would be too large for efficient pruning. Finally, add a proper orchestrator like Apache Airflow or AWS Step Functions to manage retries, dependencies, and monitoring.</p>
+    </div>
+  </div>
+
+  <!-- Q13 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q13</span><span class="q-cat cat-arch">Architecture</span>
+      <span class="q-text">What's the difference between batch processing and stream processing? When would you use each?</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>Batch processing collects data over a period and processes it all at once — daily, hourly, or on a schedule. Stream processing ingests and processes data continuously, record by record or in micro-batches, with latency measured in seconds. I used batch processing for this project because the business question — "what was our revenue last month?" — doesn't require real-time data. Batch is simpler to build, cheaper to run, and easier to debug. I'd switch to stream processing if the requirement changed to real-time fraud detection (flag a suspicious transaction within 5 seconds), live inventory updates, or real-time personalization during a session. The key question is: what's the acceptable latency? If it's minutes or hours, batch. If it's seconds, stream. The cost and complexity of streaming is only justified when real-time actually changes a business decision.</p>
+    </div>
+  </div>
+
+  <!-- Q14 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q14</span><span class="q-cat cat-spark">PySpark</span>
+      <span class="q-text">What is a broadcast join and when should you use it?</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>A broadcast join sends a copy of a small table to every executor node so the join can happen locally without shuffling the large table across the network. In my pipeline, if I'm joining a large fact_orders table with a small dim_date table (366 rows for a year), Spark should broadcast dim_date. I can hint this explicitly with <code>F.broadcast(dim_date)</code>. The rule of thumb is to broadcast tables under 10MB — configurable via <code>spark.sql.autoBroadcastJoinThreshold</code>. With AQE enabled, Spark will often detect small tables and broadcast automatically. Without broadcast, both tables get shuffled in a sort-merge join, which is expensive. This is one of the most common PySpark performance optimizations and comes up in almost every senior interview.</p>
+    </div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="q-card">
+    <div class="q-header" onclick="toggleQ(this)">
+      <span class="q-num">Q15</span><span class="q-cat cat-prod">Production</span>
+      <span class="q-text">How does your customer experience background add value to a Data Engineering role?</span>
+    </div>
+    <div class="q-body">
+      <div class="answer-label">Model Answer</div>
+      <p>Data Engineering isn't just about moving data — it's about building systems that answer business questions reliably. My 5 years in customer experience means I understand what the downstream consumers of this data actually need. When I designed the churn risk SQL query, I knew which customer behaviors actually matter from firsthand experience — not just technically. I understand that analysts need data they can trust, so I prioritized data quality checks over raw speed. I know what "3-4 days to get a report" costs in real business terms because I've been the person waiting for that data. That context makes me a better data engineer because I build pipelines with the end user in mind, not just technically correct pipelines. I bridge the gap between engineering and business stakeholders — which is a genuine skill shortage on most data teams.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════ RESUME ════ -->
+<div class="section" id="section-resume">
+  <div class="hero">
+    <div class="hero-tag">Resume + Interview Story</div>
+    <h1>How to Present This Project</h1>
+    <p>Exact language for your resume bullet points and the verbal story you tell in interviews.</p>
+  </div>
+
+  <h3>Resume Bullet Points</h3>
+  <div class="resume-box">
+    <h4>Add these to your resume under "Projects"</h4>
+    <p>• Built end-to-end batch ETL pipeline processing 5,000+ daily e-commerce orders from 3 source systems (CSV, JSON) using PySpark 3.5 and AWS Glue, reducing analyst reporting wait time from 3–4 days to under 1 hour<br><br>
+    • Designed star schema data model with 4 dimension tables and central fact table partitioned by year/month on S3, reducing Athena query scan cost by ~70% vs unpartitioned CSV storage<br><br>
+    • Implemented data quality framework with completeness, uniqueness, and referential integrity checks, quarantining invalid records before warehouse load with automated JSON quality reports<br><br>
+    • Wrote complex analytical SQL including window functions (LAG, DENSE_RANK, NTILE, FIRST_VALUE), CTEs, and cohort retention analysis deployed on AWS Athena</p>
+  </div>
+
+  <h3>Verbal Interview Story (60 seconds)</h3>
+  <div class="resume-box">
+    <h4>Say this when asked "tell me about a project"</h4>
+    <p>"I built an end-to-end batch ETL pipeline for an e-commerce analytics use case. The business problem was that order data was spread across three systems — a MySQL database, a returns management tool, and a marketing events feed — and BI analysts were waiting 3 to 4 days for manual data pulls before they could answer basic questions.<br><br>
+    I built the pipeline in Python and PySpark, with AWS S3 as the storage layer and Glue as the compute layer. I designed a star schema with a central fact_orders table and four dimension tables. I partitioned the Parquet output by year and month on S3, which reduced Athena query scan costs by about 70% because it uses partition pruning to skip irrelevant data.<br><br>
+    I also built a data quality layer that tags bad rows with the specific checks they failed and quarantines them separately rather than silently dropping them — which gives the team visibility into upstream data quality issues.<br><br>
+    The result was that analyst wait time dropped from 3-4 days to under an hour, and the pipeline processes 5,000 orders in about 45 seconds on a single Glue node."</p>
+  </div>
+
+  <h3>Connecting to Your Background</h3>
+  <div class="callout callout-tip">
+    <div class="callout-icon">💡</div>
+    <div>When they ask about your customer experience background, say: <em>"My 5 years in CX means I've been the person waiting for that data report. I designed the churn risk query specifically because I've seen the business impact when high-value customers are missed. That context means I build pipelines for users, not just for technical correctness — and I can translate between what engineers build and what business stakeholders need."</em></div>
+  </div>
+</div>
+
+<!-- ════ CONCEPTS ════ -->
+<div class="section" id="section-concepts">
+  <div class="hero">
+    <div class="hero-tag">Key Concepts</div>
+    <h1>Concepts to Understand Deeply</h1>
+    <p>These are the theoretical foundations behind everything you built. Study one per day during Week 2.</p>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">📐</div>
+      <div><div class="step-title">Star Schema vs Snowflake Schema</div></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>Star Schema:</strong> Fact table at center, denormalized dimensions around it. One JOIN gets you from fact to any attribute. Used in this project. Best for: BI tools, analyst self-service, read-heavy workloads.</p>
+      <p><strong>Snowflake Schema:</strong> Dimension tables are further normalized. dim_product → dim_subcategory → dim_category. Reduces storage redundancy but requires more JOINs. Best for: large cardinality dimensions, when storage matters more than query speed.</p>
+      <p><strong>Interview rule:</strong> Star for analytics. Snowflake for very large, hierarchical dimensions. You'll see snowflake in healthcare (ICD codes have deep hierarchies) and finance.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">⚡</div>
+      <div><div class="step-title">Spark Execution Model</div></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <p>Spark is lazy — when you write <code>df.filter()</code>, nothing happens. Spark builds a logical plan. When you call <code>df.count()</code>, <code>df.write()</code>, or <code>df.show()</code> — that's an action and triggers execution.</p>
+      <p>The execution plan is broken into stages separated by shuffles (wide transformations). Within each stage, tasks run in parallel across partitions. Understanding this explains why you see "Stage 1 → Stage 2 → Stage 3" in the Spark UI.</p>
+      <p><strong>Key terms to know:</strong> Driver, Executor, Partition, Stage, Task, Shuffle, DAG (Directed Acyclic Graph).</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">🗜</div>
+      <div><div class="step-title">Parquet + Columnar Storage</div></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <p>CSV stores data row by row. Parquet stores data column by column. When Athena runs <code>SELECT SUM(net_revenue)</code>, it only reads the net_revenue column — skipping all other columns entirely. On a wide table with 50 columns, this can reduce I/O by 98%.</p>
+      <p>Snappy compression (used in this project) compresses within each column. Since all values in a column have the same type and often similar values (e.g., order_status has only 3 distinct values), compression ratios are 3-10x better than gzip on CSV.</p>
+      <p><strong>Parquet also stores statistics</strong> (min/max per column block), enabling Athena to skip entire row groups that don't match a WHERE clause — called predicate pushdown.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">🪟</div>
+      <div><div class="step-title">SQL Window Functions</div></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <p>Window functions compute a value for each row based on a set of related rows (the "window") without collapsing rows like GROUP BY does.</p>
+      <p>The anatomy: <code>FUNCTION() OVER (PARTITION BY col ORDER BY col ROWS/RANGE BETWEEN...)</code></p>
+      <ul style="color:var(--text2); font-size:14px; padding-left:20px; margin-top:8px;">
+        <li><strong>PARTITION BY</strong> — resets the window for each group (like GROUP BY but keeps all rows)</li>
+        <li><strong>ORDER BY</strong> — determines row order within each partition</li>
+        <li><strong>ROWS BETWEEN</strong> — frame specification (UNBOUNDED PRECEDING = from first row)</li>
+      </ul>
+      <p>Functions used in this project: LAG (previous row), LEAD (next row), RANK/DENSE_RANK/ROW_NUMBER (ranking), FIRST_VALUE/LAST_VALUE (boundary values), SUM/AVG with frame (running totals).</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header" onclick="toggleStep(this)">
+      <div class="step-num">📦</div>
+      <div><div class="step-title">Batch vs Stream Processing</div></div>
+      <div class="step-chevron">▼</div>
+    </div>
+    <div class="step-body">
+      <p><strong>Batch:</strong> Collect data → process all at once → write output. Latency: minutes to hours. Tools: PySpark (this project), dbt, AWS Glue. Best for: daily reports, historical analysis, ML training data.</p>
+      <p><strong>Stream:</strong> Process each event as it arrives. Latency: milliseconds to seconds. Tools: Apache Kafka, Apache Flink, Spark Structured Streaming, AWS Kinesis. Best for: fraud detection, real-time dashboards, live inventory.</p>
+      <p><strong>Micro-batch:</strong> Middle ground — batch every 30 seconds. Spark Structured Streaming default. Good when you need near-real-time but don't need true event-by-event processing.</p>
+      <p><strong>Interview rule:</strong> Always ask "what's the acceptable latency?" before recommending stream vs batch. Stream is 10x more complex. Only justify it when latency changes a decision.</p>
+    </div>
+  </div>
+</div>
+
+  </div><!-- end .content -->
+</div><!-- end .main -->
+
+<script>
+// ── Navigation ──────────────────────────────────────────
+const sections = ['overview','arch','schema','step1','step2','step3','step4','step5','step6','step7','step8','step9','step10','interview','resume','concepts'];
+const badgeMap = {
+  overview:'Overview', arch:'Architecture', schema:'Data Model',
+  step1:'Setup', step2:'Setup', step3:'Setup', step4:'Code', step5:'Code',
+  step6:'Code', step7:'SQL', step8:'Code', step9:'Code', step10:'Verify',
+  interview:'Interview', resume:'Resume', concepts:'Concepts'
+};
+const badgeClass = {
+  Setup:'badge-setup', Code:'badge-code', SQL:'badge-sql',
+  Interview:'badge-interview', Verify:'badge-setup',
+  Architecture:'badge-arch', Overview:'badge-arch',
+  'Data Model':'badge-arch', Resume:'badge-interview', Concepts:'badge-sql'
+};
+
+function showSection(id) {
+  sections.forEach(s => {
+    const el = document.getElementById('section-'+s);
+    if (el) el.classList.remove('active');
+  });
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const target = document.getElementById('section-'+id);
+  if (target) target.classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) {
+      n.classList.add('active');
+    }
+  });
+
+  const badge = badgeMap[id] || 'Section';
+  document.getElementById('current-badge').textContent = badge;
+  document.getElementById('current-badge').className = 'section-badge ' + (badgeClass[badge] || 'badge-setup');
+
+  closeSidebar();
+  window.scrollTo(0, 0);
+}
+
+// ── Sidebar mobile ──────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ── Step toggles ────────────────────────────────────────
+function toggleStep(header) {
+  const body    = header.nextElementSibling;
+  const chevron = header.querySelector('.step-chevron');
+  const isOpen  = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+// ── Q toggles ───────────────────────────────────────────
+function toggleQ(header) {
+  const body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+// ── Tab switching ───────────────────────────────────────
+function switchTab(btn, panelId) {
+  const tabGroup = btn.closest('.tabs');
+  tabGroup.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  // Find sibling tab panels
+  let el = tabGroup.nextElementSibling;
+  while (el && el.classList.contains('tab-panel')) {
+    el.classList.remove('active');
+    el = el.nextElementSibling;
+  }
+  const target = document.getElementById('tab-'+panelId);
+  if (target) target.classList.add('active');
+}
+
+// ── Copy code ───────────────────────────────────────────
+function copyCode(btn) {
+  const pre  = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ── Progress tracking ───────────────────────────────────
+function updateProgress() {
+  const all     = document.querySelectorAll('.checklist input[type=checkbox]');
+  const checked = document.querySelectorAll('.checklist input[type=checkbox]:checked');
+  const pct     = Math.round(checked.length / all.length * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = checked.length + ' of ' + all.length + ' tasks done';
+  saveProgress();
+}
+
+// ── Persist checkboxes ──────────────────────────────────
+function saveProgress() {
+  const state = {};
+  document.querySelectorAll('.checklist input[type=checkbox]').forEach(cb => {
+    state[cb.id] = cb.checked;
+  });
+  try { localStorage.setItem('de-proj1-progress', JSON.stringify(state)); } catch(e) {}
+}
+
+function loadProgress() {
+  try {
+    const state = JSON.parse(localStorage.getItem('de-proj1-progress') || '{}');
+    Object.entries(state).forEach(([id, checked]) => {
+      const el = document.getElementById(id);
+      if (el) el.checked = checked;
+    });
+  } catch(e) {}
+  updateProgress();
+}
+
+loadProgress();
+</script>
+</body>
+</html>
