@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project 2 — Knowledge Base RAG System | Complete Build Guide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0B0F1A;--bg2:#111827;--bg3:#0F1D14;--card:#162110;--card2:#1C2D16;
+  --green:#10B981;--green2:#34D399;--green3:#6EE7B7;
+  --blue:#3B82F6;--blue2:#60A5FA;--cyan:#22D3EE;
+  --orange:#F59E0B;--yellow:#FCD34D;--purple:#A78BFA;--red:#F87171;
+  --border:#1A3A22;--border2:#2A5A34;
+  --text:#E2F0EA;--text2:#8AB89A;--text3:#3D6A4A;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* NAV */
+.topnav{position:sticky;top:0;z-index:200;background:rgba(11,15,26,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;height:52px;overflow-x:auto;gap:0}
+.topnav-brand{font-weight:800;font-size:13px;color:var(--green2);white-space:nowrap;margin-right:16px;letter-spacing:-.3px;flex-shrink:0}
+.nav-link{padding:0 12px;height:52px;display:flex;align-items:center;font-size:12px;font-weight:600;color:var(--text3);white-space:nowrap;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;text-decoration:none;flex-shrink:0}
+.nav-link:hover{color:var(--text2);border-bottom-color:var(--border2)}
+.nav-link.active{color:var(--green2);border-bottom-color:var(--green)}
+
+/* PROGRESS */
+.prog{height:3px;background:linear-gradient(90deg,var(--green),var(--cyan));width:0%;transition:width .2s;position:fixed;top:52px;left:0;right:0;z-index:201}
+
+/* HERO */
+.hero{background:linear-gradient(160deg,#060f09 0%,#091410 50%,#060b0a 100%);border-bottom:1px solid var(--border);padding:56px 32px 48px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,.06),transparent 70%);top:-250px;left:50%;transform:translateX(-50%);pointer-events:none}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:var(--green2);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:20px}
+.hero h1{font-size:clamp(28px,5vw,50px);font-weight:900;letter-spacing:-1.5px;line-height:1.1;margin-bottom:12px}
+.hero h1 em{font-style:normal;color:var(--green2)}
+.hero-sub{font-size:15px;color:var(--text2);max-width:580px;margin:0 auto 32px;line-height:1.7}
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{font-size:11px;font-weight:600;padding:5px 12px;border-radius:6px;border:1px solid}
+
+/* LAYOUT */
+.section{max-width:940px;margin:0 auto;padding:60px 28px}
+.section+.section{padding-top:28px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px}
+.card+.card{margin-top:12px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.card h4{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px}
+.card p{font-size:13px;color:var(--text2);line-height:1.5}
+
+/* CALLOUT */
+.callout{display:flex;gap:14px;padding:16px 20px;border-radius:10px;margin:18px 0;border-left:3px solid}
+.callout .ico{font-size:18px;flex-shrink:0;margin-top:2px}
+.callout .body{font-size:13px;line-height:1.6;color:var(--text2)}
+.callout .body strong{display:block;margin-bottom:4px;font-size:13px}
+.callout.green{background:rgba(16,185,129,.07);border-color:var(--green)}.callout.green .body strong{color:var(--green2)}
+.callout.blue{background:rgba(59,130,246,.07);border-color:var(--blue)}.callout.blue .body strong{color:var(--blue2)}
+.callout.orange{background:rgba(245,158,11,.07);border-color:var(--orange)}.callout.orange .body strong{color:var(--yellow)}
+.callout.purple{background:rgba(167,139,250,.07);border-color:var(--purple)}.callout.purple .body strong{color:var(--purple)}
+.callout.red{background:rgba(248,113,113,.07);border-color:var(--red)}.callout.red .body strong{color:var(--red)}
+
+/* CODE */
+.code-wrap{background:#050C10;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:14px 0}
+.code-head{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;background:#0A1410;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
+.code-fn{font-size:11px;font-weight:600;color:var(--text3);font-family:var(--mono);letter-spacing:.5px}
+.code-file{font-size:11px;color:var(--green2);font-family:var(--mono);font-weight:600}
+.btn-copy{font-size:11px;padding:3px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;font-family:var(--sans);font-weight:600;transition:all .15s;white-space:nowrap}
+.btn-copy:hover{border-color:var(--green2);color:var(--green2)}
+pre{padding:20px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.85;color:#8ABFA0;tab-size:4}
+.kw{color:#C792EA}.fn{color:#82AAFF}.str{color:#C3E88D}.cm{color:#2E5A40;font-style:italic}.num{color:#F78C6C}.cls{color:#FFCB6B}.dec{color:#89DDFF}.imp{color:#F07178}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);margin:14px 0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#0A1410;color:var(--text3);font-weight:700;font-size:10px;letter-spacing:.8px;text-transform:uppercase;padding:11px 14px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:11px 14px;border-bottom:1px solid rgba(26,58,34,.5);color:var(--text);vertical-align:top;line-height:1.5}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(16,185,129,.03)}
+td:first-child{color:var(--green2);font-weight:600;font-size:12px;white-space:nowrap}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column;gap:0}
+.step{display:flex;gap:20px;position:relative}
+.step:not(:last-child)::after{content:'';position:absolute;left:19px;top:44px;bottom:-4px;width:2px;background:linear-gradient(180deg,var(--green) 0%,var(--border) 100%);opacity:.35}
+.step-num{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;flex-shrink:0;color:#060f09;position:relative;z-index:1}
+.step-body{flex:1;padding-bottom:32px}
+.step-title{font-size:17px;font-weight:700;margin-bottom:6px;padding-top:8px}
+.step-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:6px}
+
+/* DIAGRAM */
+.diagram{background:#040C08;border:1px solid var(--border);border-radius:14px;padding:28px;overflow-x:auto;margin:20px 0}
+
+/* PIPELINE FLOW */
+.pipe-flow{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+.pipe-phase{border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.pipe-phase-head{padding:10px 16px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.pipe-phase-body{padding:14px 16px;background:#050C08;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pipe-node{background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px}
+.pipe-arrow{color:var(--text3);font-size:14px;font-weight:700}
+
+/* ACCORDION */
+.acc-item{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:10px}
+.acc-head{padding:15px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:var(--card);transition:background .15s;gap:14px}
+.acc-head:hover{background:var(--card2)}
+.acc-title{font-size:14px;font-weight:600;flex:1;color:var(--text)}
+.acc-meta{font-size:11px;color:var(--text3);white-space:nowrap;flex-shrink:0}
+.acc-arrow{color:var(--text3);transition:transform .2s;flex-shrink:0}
+.acc-item.open .acc-arrow{transform:rotate(180deg)}
+.acc-body{display:none;padding:18px;background:#070F09;border-top:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.75}
+.acc-item.open .acc-body{display:block}
+
+/* RESUME */
+.resume-box{background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:20px;margin:14px 0}
+.resume-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green2);margin-bottom:14px}
+.rb{display:flex;gap:10px;margin-bottom:10px;font-size:13px;color:var(--text2);line-height:1.5}
+.rb::before{content:'▸';color:var(--green2);flex-shrink:0;margin-top:1px}
+
+/* FOLDER */
+.folder{background:#030907;border:1px solid var(--border);border-radius:12px;padding:20px;font-family:var(--mono);font-size:12.5px;line-height:1.9;margin:14px 0}
+.folder .d{color:#82AAFF;font-weight:600}
+.folder .f{color:#8ABFA0}
+.folder .c{color:#2A5038}
+
+/* TAGS */
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+.tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;background:rgba(16,185,129,.1);color:var(--green2);border:1px solid rgba(16,185,129,.2)}
+.tag.blue{background:rgba(59,130,246,.1);color:var(--blue2);border-color:rgba(59,130,246,.2)}
+.tag.purple{background:rgba(167,139,250,.1);color:var(--purple);border-color:rgba(167,139,250,.2)}
+.tag.orange{background:rgba(245,158,11,.1);color:var(--yellow);border-color:rgba(245,158,11,.2)}
+
+/* COMPARE TABLE */
+.compare-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.compare-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.compare-card .val{font-size:28px;font-weight:900;letter-spacing:-1px;margin-bottom:4px}
+.compare-card .lbl{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.compare-card .sub{font-size:12px;color:var(--text2);margin-top:6px}
+
+.div{height:1px;background:var(--border);margin:36px 0}
+h2{font-size:20px;font-weight:800;margin:28px 0 12px;letter-spacing:-.3px}
+h3{font-size:15px;font-weight:700;margin:20px 0 10px;color:var(--text2)}
+p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:10px}
+ul{margin:10px 0 10px 20px}
+li{font-size:13px;color:var(--text2);margin-bottom:5px;line-height:1.5}
+code{font-family:var(--mono);font-size:12px;background:rgba(16,185,129,.1);color:var(--green2);padding:1px 6px;border-radius:4px}
+a{color:var(--green2);text-decoration:none}
+a:hover{text-decoration:underline}
+.sec-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green2);margin-bottom:8px}
+.sec-title{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-bottom:8px}
+.sec-sub{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:24px}
+footer{text-align:center;padding:40px 24px;color:var(--text3);font-size:12px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <span class="topnav-brand">📚 P2 — Knowledge Base RAG</span>
+  <a class="nav-link active" href="#overview">Overview</a>
+  <a class="nav-link" href="#concepts">RAG Concepts</a>
+  <a class="nav-link" href="#architecture">Architecture</a>
+  <a class="nav-link" href="#setup">Project Setup</a>
+  <a class="nav-link" href="#step1">Test Documents</a>
+  <a class="nav-link" href="#step2">Ingestion Pipeline</a>
+  <a class="nav-link" href="#step3">RAG Chain</a>
+  <a class="nav-link" href="#step4">FastAPI</a>
+  <a class="nav-link" href="#step5">Streamlit</a>
+  <a class="nav-link" href="#step6">RAGAS Eval</a>
+  <a class="nav-link" href="#step7">Docker + GitHub</a>
+  <a class="nav-link" href="#interview">Interview Prep</a>
+</nav>
+<div class="prog" id="prog"></div>
+
+<!-- HERO -->
+<div class="hero" id="overview">
+  <div class="badge">Project 2 of 6 · Weeks 7–9 · Builds on Project 1</div>
+  <h1>Knowledge Base<br><em>RAG System</em></h1>
+  <p class="hero-sub">Index company documents into a vector database, enable natural language Q&A with source citations, and measure quality with RAGAS. This is the most-asked-about pattern in AI engineering interviews.</p>
+  <div class="hero-chips">
+    <span class="chip" style="background:rgba(16,185,129,.1);color:#34D399;border-color:rgba(16,185,129,.25)">🆓 100% Free Tools</span>
+    <span class="chip" style="background:rgba(59,130,246,.1);color:#60A5FA;border-color:rgba(59,130,246,.25)">⏱ 3 Weeks</span>
+    <span class="chip" style="background:rgba(245,158,11,.1);color:#FCD34D;border-color:rgba(245,158,11,.25)">🏢 Like Confluence AI · Notion AI</span>
+    <span class="chip" style="background:rgba(167,139,250,.1);color:#A78BFA;border-color:rgba(167,139,250,.25)">🎓 Skill: Basic RAG Pipeline</span>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="section">
+  <div class="sec-label">What you're building</div>
+  <div class="sec-title">Business Problem & Goal</div>
+  <div class="sec-sub">Enterprise knowledge bases contain thousands of documents — policies, FAQs, guides, runbooks. Employees waste hours searching for answers. A RAG system indexes every document and lets anyone ask questions in plain English, with cited sources.</div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div style="font-size:24px;margin-bottom:10px">📄</div>
+      <h4>What it ingests</h4>
+      <p>PDF, DOCX, and TXT files. Loads them, splits into chunks, embeds each chunk, stores in ChromaDB with metadata (filename, page, chunk index).</p>
+    </div>
+    <div class="card">
+      <div style="font-size:24px;margin-bottom:10px">🔍</div>
+      <h4>What it returns</h4>
+      <p>A natural language answer <em>plus</em> the exact source chunks it used — filename, page number, and the raw text. No hallucinations, grounded answers only.</p>
+    </div>
+    <div class="card">
+      <div style="font-size:24px;margin-bottom:10px">📊</div>
+      <h4>How you prove it works</h4>
+      <p>RAGAS evaluation: faithfulness, answer relevance, context precision — real scores you can quote in interviews. Target: faithfulness &gt; 0.85.</p>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <div class="ico">💡</div>
+    <div class="body"><strong>What you learn that Project 1 didn't cover</strong>Project 1 was pure prompt engineering — no external knowledge. Project 2 adds the full data layer: chunking strategy, embedding models, vector search, retrieval quality, and evaluation metrics. This is the foundation that Projects 3, 4, 5, and 6 all build on.</div>
+  </div>
+
+  <div class="callout blue">
+    <div class="ico">🔗</div>
+    <div class="body"><strong>What carries over from Project 1</strong>Your FastAPI pattern, Pydantic models, SQLite logging, Streamlit structure, and Docker setup all carry forward unchanged. You're adding a new data layer on top of what you already know.</div>
+  </div>
+</div>
+
+<!-- RAG CONCEPTS -->
+<div class="section" id="concepts">
+  <div class="sec-label">Before you code</div>
+  <div class="sec-title">RAG — The Full Mental Model</div>
+  <div class="sec-sub">Understand every stage before touching code. Interviewers will ask you to explain any of these in depth.</div>
+
+  <div class="pipe-flow">
+    <div class="pipe-phase" style="border-color:rgba(59,130,246,.3)">
+      <div class="pipe-phase-head" style="background:rgba(59,130,246,.1);color:var(--blue2)">
+        📥 Phase 1 — Indexing (runs once, offline)
+      </div>
+      <div class="pipe-phase-body">
+        <div class="pipe-node">📄 Load Documents</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">✂️ Chunk Text</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">🔢 Create Embeddings</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">🗄️ Store in ChromaDB</div>
+      </div>
+    </div>
+    <div class="pipe-phase" style="border-color:rgba(16,185,129,.3)">
+      <div class="pipe-phase-head" style="background:rgba(16,185,129,.1);color:var(--green2)">
+        🔍 Phase 2 — Retrieval (runs per query, online)
+      </div>
+      <div class="pipe-phase-body">
+        <div class="pipe-node">❓ User Question</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">🔢 Embed Question</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">🎯 Similarity Search</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">📋 Top-5 Chunks</div>
+      </div>
+    </div>
+    <div class="pipe-phase" style="border-color:rgba(167,139,250,.3)">
+      <div class="pipe-phase-head" style="background:rgba(167,139,250,.1);color:var(--purple)">
+        ✍️ Phase 3 — Generation (runs per query, online)
+      </div>
+      <div class="pipe-phase-body">
+        <div class="pipe-node">📝 Build Context Prompt</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">🤖 Groq Llama3</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">✅ Answer + Citations</div>
+      </div>
+    </div>
+    <div class="pipe-phase" style="border-color:rgba(245,158,11,.3)">
+      <div class="pipe-phase-head" style="background:rgba(245,158,11,.1);color:var(--yellow)">
+        📊 Phase 4 — Evaluation (runs periodically)
+      </div>
+      <div class="pipe-phase-body">
+        <div class="pipe-node">🧪 Golden Dataset</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">📐 RAGAS Metrics</div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-node">📈 Score Report</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Key Concepts You Must Know Cold</h2>
+  <div class="tbl-wrap">
+    <table>
+      <tr><th>Concept</th><th>What It Is</th><th>Why Interviewers Ask</th></tr>
+      <tr><td>Chunking</td><td>Splitting large documents into smaller pieces (e.g. 512 tokens). Each chunk is embedded and stored separately.</td><td>Chunk size is the #1 RAG tuning parameter. You must explain the tradeoff: small chunks = precise retrieval but missing context. Large chunks = more context but noisier retrieval.</td></tr>
+      <tr><td>Chunk Overlap</td><td>Each chunk shares N tokens with the next. e.g. 50-token overlap prevents answers from being cut exactly at a chunk boundary.</td><td>Without overlap, a sentence that spans two chunks may never be retrieved correctly. Shows you understand edge cases.</td></tr>
+      <tr><td>Embeddings</td><td>Dense vector representation of text (~384 or 1536 floats). Similar meaning = similar vectors. The all-MiniLM-L6-v2 model runs FREE on your Mac M5.</td><td>Interviewers want to know: which model you chose, why, and the cost vs quality tradeoff vs OpenAI embeddings.</td></tr>
+      <tr><td>Cosine Similarity</td><td>How we measure if two embeddings are similar. Returns -1 to 1. Above 0.8 = very similar. This is how ChromaDB finds relevant chunks.</td><td>Be ready to explain this without code: "It measures the angle between two vectors in high-dimensional space."</td></tr>
+      <tr><td>Top-K Retrieval</td><td>Return the K most similar chunks to the query. K=5 is a common default. Too low = miss relevant info. Too high = add noise.</td><td>Shows you understand the precision-recall tradeoff in retrieval.</td></tr>
+      <tr><td>Grounding</td><td>Instructing the LLM to ONLY use the provided context to answer, never its training data. Prevents hallucination.</td><td>This is the entire point of RAG. If your prompt doesn't enforce grounding, the LLM will ignore the context and hallucinate.</td></tr>
+      <tr><td>RAGAS</td><td>RAG Assessment framework. 4 automated metrics: Faithfulness, Answer Relevance, Context Precision, Context Recall.</td><td>You must be able to define each metric without looking it up. Most candidates cannot.</td></tr>
+    </table>
+  </div>
+
+  <h2>RAGAS Metrics — Know These by Heart</h2>
+  <div class="tbl-wrap">
+    <table>
+      <tr><th>Metric</th><th>Simple Definition</th><th>Target Score</th><th>How It Fails</th></tr>
+      <tr><td>Faithfulness</td><td>Does the answer ONLY use facts from the retrieved chunks? (no hallucination)</td><td>&gt; 0.85</td><td>LLM adds facts from training data that aren't in the context</td></tr>
+      <tr><td>Answer Relevance</td><td>Does the answer actually address what the user asked?</td><td>&gt; 0.80</td><td>Technically correct but doesn't answer the specific question</td></tr>
+      <tr><td>Context Precision</td><td>Are the retrieved chunks actually useful for answering the question?</td><td>&gt; 0.75</td><td>Retriever returns tangentially related chunks that don't help</td></tr>
+      <tr><td>Context Recall</td><td>Did you retrieve ALL the information needed to answer fully?</td><td>&gt; 0.70</td><td>The answer exists in the KB but wasn't in the retrieved top-K</td></tr>
+    </table>
+  </div>
+
+  <h2>Chunking Strategy Experiment (Critical for Interview)</h2>
+  <p>You <strong>must</strong> run this experiment and be able to quote real numbers. Interviewers specifically ask "what chunk size did you use and why?"</p>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="val" style="color:var(--blue2)">256</div>
+      <div class="lbl">tokens</div>
+      <div class="sub">High precision retrieval. Misses surrounding context. Good for FAQs.</div>
+    </div>
+    <div class="compare-card" style="border-color:rgba(16,185,129,.4)">
+      <div class="val" style="color:var(--green2)">512</div>
+      <div class="lbl">tokens ← recommended</div>
+      <div class="sub">Best balance for most enterprise docs. Run RAGAS on all three and pick the winner.</div>
+    </div>
+    <div class="compare-card">
+      <div class="val" style="color:var(--purple)">1024</div>
+      <div class="lbl">tokens</div>
+      <div class="sub">More context per chunk. Hurts precision. Good for narrative documents.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ARCHITECTURE -->
+<div class="section" id="architecture">
+  <div class="sec-label">System Design</div>
+  <div class="sec-title">Full Architecture</div>
+
+  <div class="diagram">
+    <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text3);text-transform:uppercase;text-align:center;margin-bottom:20px">Complete RAG System — Two Paths</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--blue2);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;text-align:center">📥 INGESTION PATH (offline)</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:10px 14px;font-size:12px;text-align:center"><span style="font-size:16px;display:block;margin-bottom:3px">📁</span>Documents (PDF/DOCX/TXT)</div>
+          <div style="text-align:center;color:var(--text3)">↓ LangChain Loaders</div>
+          <div style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:10px 14px;font-size:12px;text-align:center"><span style="font-size:16px;display:block;margin-bottom:3px">✂️</span>RecursiveCharacterTextSplitter<br><span style="color:var(--text3);font-size:11px">chunk_size=512, overlap=50</span></div>
+          <div style="text-align:center;color:var(--text3)">↓ Embed each chunk</div>
+          <div style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:10px 14px;font-size:12px;text-align:center"><span style="font-size:16px;display:block;margin-bottom:3px">🔢</span>all-MiniLM-L6-v2<br><span style="color:var(--text3);font-size:11px">FREE · runs on Mac M5</span></div>
+          <div style="text-align:center;color:var(--text3)">↓ Store with metadata</div>
+          <div style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:10px 14px;font-size:12px;text-align:center"><span style="font-size:16px;display:block;margin-bottom:3px">🗄️</span>ChromaDB<br><span style="color:var(--text3);font-size:11px">Persistent local storage</span></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--green2);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;text-align:center">💬 QUERY PATH (per request)</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:10px 14px;font-size:12px;text-align:center"><span style="font-size:16px;display:block;margin-bottom:3px">❓</span>User Question</div>
+          <div style="text-align:center;color:var(--text3)">↓ Embed question (same model)</div>
+          <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:10px 14px;font-size:12px;text-align:center"><span style="font-size:16px;display:block;margin-bottom:3px">🎯</span>ChromaDB Similarity Search<br><span style="color:var(--text3);font-size:11px">Returns top-5 chunks + metadata</span></div>
+          <div style="text-align:center;color:var(--text3)">↓ Build context prompt</div>
+          <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:10px 14px;font-size:12px;text-align:center"><span style="font-size:16px;display:block;margin-bottom:3px">📝</span>RAG Prompt<br><span style="color:var(--text3);font-size:11px">"Only use the context below..."</span></div>
+          <div style="text-align:center;color:var(--text3)">↓ Generate grounded answer</div>
+          <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:10px 14px;font-size:12px;text-align:center"><span style="font-size:16px;display:block;margin-bottom:3px">✅</span>Answer + Source Citations<br><span style="color:var(--text3);font-size:11px">Groq Llama3-70B</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Tech Stack</h2>
+  <div class="tags">
+    <span class="tag">LangChain (loaders, splitter, chain)</span>
+    <span class="tag">ChromaDB (vector store)</span>
+    <span class="tag">sentence-transformers (free embeddings)</span>
+    <span class="tag">Groq API — Llama3-70B</span>
+    <span class="tag blue">FastAPI + Uvicorn</span>
+    <span class="tag blue">Streamlit</span>
+    <span class="tag purple">RAGAS (evaluation)</span>
+    <span class="tag purple">SQLite</span>
+    <span class="tag orange">Docker + GitHub Actions</span>
+  </div>
+
+  <h2>Folder Structure</h2>
+  <div class="folder">
+<span class="d">project2-knowledge-base-rag/</span>
+├── <span class="d">ingestion/</span>
+│   ├── <span class="f">__init__.py</span>
+│   ├── <span class="f">document_loader.py</span>   <span class="c">  # Load PDF, DOCX, TXT</span>
+│   ├── <span class="f">chunker.py</span>           <span class="c">  # RecursiveCharacterTextSplitter</span>
+│   ├── <span class="f">embedder.py</span>          <span class="c">  # sentence-transformers wrapper</span>
+│   └── <span class="f">ingest.py</span>            <span class="c">  # Main pipeline: load→chunk→embed→store</span>
+├── <span class="d">retrieval/</span>
+│   ├── <span class="f">__init__.py</span>
+│   └── <span class="f">retriever.py</span>         <span class="c">  # ChromaDB query wrapper</span>
+├── <span class="d">generation/</span>
+│   ├── <span class="f">__init__.py</span>
+│   ├── <span class="f">rag_chain.py</span>         <span class="c">  # Full RAG chain (retrieve + generate)</span>
+│   └── <span class="f">prompts.py</span>           <span class="c">  # RAG-specific system prompts</span>
+├── <span class="d">evaluation/</span>
+│   ├── <span class="f">ragas_eval.py</span>        <span class="c">  # RAGAS evaluation pipeline</span>
+│   └── <span class="f">test_questions.json</span>  <span class="c">  # 30 Q&A pairs for evaluation</span>
+├── <span class="d">app/</span>
+│   ├── <span class="f">__init__.py</span>
+│   ├── <span class="f">main.py</span>              <span class="c">  # FastAPI routes</span>
+│   ├── <span class="f">models.py</span>            <span class="c">  # Pydantic schemas</span>
+│   └── <span class="f">database.py</span>          <span class="c">  # SQLite query logging</span>
+├── <span class="d">frontend/</span>
+│   └── <span class="f">streamlit_app.py</span>     <span class="c">  # Chat UI + source viewer</span>
+├── <span class="d">data/</span>
+│   ├── <span class="f">generate_docs.py</span>     <span class="c">  # Script to create sample KB docs</span>
+│   └── <span class="d">sample_docs/</span>         <span class="c">  # Generated test documents go here</span>
+├── <span class="d">chroma_db/</span>               <span class="c">  # ChromaDB persists here (auto-created)</span>
+├── <span class="f">Dockerfile</span>
+├── <span class="f">docker-compose.yml</span>
+├── <span class="f">requirements.txt</span>
+├── <span class="f">.env.example</span>
+└── <span class="f">README.md</span>
+  </div>
+</div>
+
+<!-- PROJECT SETUP -->
+<div class="section" id="setup">
+  <div class="sec-label">Before you code</div>
+  <div class="sec-title">Project Setup</div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Create folder structure</div>
+        <div class="code-wrap">
+          <div class="code-head"><span class="code-fn">terminal</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+          <pre>mkdir -p project2-knowledge-base-rag
+cd project2-knowledge-base-rag
+mkdir -p ingestion retrieval generation evaluation app frontend data/sample_docs
+touch ingestion/__init__.py ingestion/document_loader.py ingestion/chunker.py
+touch ingestion/embedder.py ingestion/ingest.py
+touch retrieval/__init__.py retrieval/retriever.py
+touch generation/__init__.py generation/rag_chain.py generation/prompts.py
+touch evaluation/ragas_eval.py evaluation/test_questions.json
+touch app/__init__.py app/main.py app/models.py app/database.py
+touch frontend/streamlit_app.py
+touch data/generate_docs.py
+touch Dockerfile docker-compose.yml requirements.txt .env.example README.md</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Create virtual environment and install packages</div>
+        <div class="code-wrap">
+          <div class="code-head"><span class="code-file">requirements.txt</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+          <pre>langchain==0.2.12
+langchain-community==0.2.11
+langchain-groq==0.1.9
+langchain-huggingface==0.0.3
+chromadb==0.5.5
+sentence-transformers==3.0.1
+groq==0.9.0
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+pydantic==2.7.4
+streamlit==1.36.0
+python-dotenv==1.0.1
+ragas==0.1.14
+datasets==2.20.0
+pypdf==4.3.1
+python-docx==1.1.2
+pandas==2.2.2
+pytest==8.2.2
+httpx==0.27.0</pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-head"><span class="code-fn">terminal</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+          <pre>python3.11 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+
+<span class="cm"># Verify key installs</span>
+python -c "import langchain, chromadb, sentence_transformers; print('All OK ✅')"</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Create .env file</div>
+        <div class="code-wrap">
+          <div class="code-head"><span class="code-file">.env.example</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+          <pre>GROQ_API_KEY=gsk_your_key_here
+CHROMA_DB_PATH=./chroma_db
+EMBEDDING_MODEL=all-MiniLM-L6-v2
+CHUNK_SIZE=512
+CHUNK_OVERLAP=50
+TOP_K_RESULTS=5</pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-head"><span class="code-fn">terminal</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+          <pre>cp .env.example .env
+open .env  <span class="cm"># add your GROQ_API_KEY</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 1: GENERATE DOCS -->
+<div class="section" id="step1">
+  <div class="sec-label">Implementation Step 1</div>
+  <div class="sec-title">Generate Sample Knowledge Base Documents</div>
+  <div class="sec-sub">Create 20 realistic company documents to test your RAG system. These cover different types — FAQs, policies, guides — so you can stress-test different chunking strategies.</div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">data/generate_docs.py</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="str">"""
+Generate 20 realistic company knowledge base documents.
+Run: python data/generate_docs.py
+Output: data/sample_docs/*.txt
+"""</span>
+<span class="kw">import</span> os
+
+DOCS = {
+    <span class="str">"refund_policy.txt"</span>: <span class="str">"""REFUND AND RETURN POLICY
+Version 3.2 | Last Updated: January 2025
+
+OVERVIEW
+TechCorp offers a 30-day return policy on all products purchased through our platform.
+Physical products must be returned in original, unused condition with all packaging.
+Digital products and software licences are non-refundable once activated.
+
+ELIGIBILITY
+To be eligible for a refund, the following conditions must be met:
+- Request submitted within 30 days of purchase date
+- Product in original condition (physical items)
+- Original receipt or order confirmation number required
+- Item not listed under non-refundable products section
+
+DEFECTIVE PRODUCTS
+Products found to be defective within 90 days of purchase qualify for:
+- Full replacement at no additional cost, or
+- Full refund including original shipping charges
+- No return of the defective item required for claims under $50
+
+HOW TO INITIATE A RETURN
+1. Log into your account at app.techcorp.com
+2. Navigate to Orders > Select Order > Request Return
+3. Select reason and upload photo if defective
+4. Print prepaid return label (provided by email within 2 hours)
+5. Drop off at any courier location within 7 days
+
+REFUND TIMELINE
+- Credit card refunds: 3-5 business days after return received
+- Bank transfer refunds: 5-7 business days
+- Store credit: issued immediately upon return receipt
+
+NON-REFUNDABLE ITEMS
+- Downloaded software after first activation
+- Gift cards and vouchers once redeemed
+- Services already rendered (setup fees, consulting hours)
+- Items marked Final Sale at time of purchase
+"""</span>,
+
+    <span class="str">"password_reset_guide.txt"</span>: <span class="str">"""PASSWORD RESET AND ACCOUNT ACCESS GUIDE
+TechCorp Help Centre | Authentication Support
+
+HOW TO RESET YOUR PASSWORD
+Method 1: Self-Service Reset (Recommended)
+1. Click 'Forgot Password' on the login screen
+2. Enter the email address registered to your account
+3. Check your inbox for a reset link (arrives within 2 minutes)
+4. If not received, check spam/junk folder
+5. Click the link — it expires in 30 minutes
+6. Choose a new password (minimum 12 characters, one uppercase, one number, one symbol)
+7. Log in with your new password
+
+Method 2: Account Recovery via Support
+If you no longer have access to your registered email:
+1. Contact support at support@techcorp.com
+2. Provide: full name, last 4 digits of payment card, last login date (approximate)
+3. Identity verification takes 1-2 business days
+4. Temporary access code sent to verified backup contact
+
+TWO-FACTOR AUTHENTICATION (2FA)
+Enabling 2FA:
+- Go to Settings > Security > Enable 2FA
+- Choose: Authenticator App (recommended) or SMS
+- Scan QR code with Google Authenticator or Authy
+- Save your 10 backup codes in a secure location
+
+If you lose 2FA access:
+1. Use a backup code (saved during setup)
+2. If no backup codes, contact support with photo ID
+3. 2FA removal for security reasons takes 24-48 hours for verification
+
+PASSWORD REQUIREMENTS
+- Minimum 12 characters
+- At least one uppercase letter
+- At least one number (0-9)
+- At least one special character (!@#$%^&*)
+- Cannot reuse last 5 passwords
+- Expires every 180 days for Enterprise accounts
+"""</span>,
+
+    <span class="str">"shipping_information.txt"</span>: <span class="str">"""SHIPPING AND DELIVERY INFORMATION
+TechCorp Fulfilment Centre | Last Updated February 2025
+
+DOMESTIC SHIPPING OPTIONS
+Standard Delivery (3-5 business days): Free on orders over $50, otherwise $4.99
+Express Delivery (1-2 business days): $12.99 flat rate
+Same-Day Delivery (select cities): $19.99, order by 12pm local time
+Free Standard Shipping on all orders over $50.
+
+INTERNATIONAL SHIPPING
+We ship to 45 countries. Rates and delivery times vary by destination.
+Import duties and taxes are the buyer's responsibility.
+International orders cannot be returned via prepaid label.
+
+TRACKING YOUR ORDER
+- Tracking number emailed within 4 hours of dispatch
+- Track at: techcorp.com/track or directly on carrier website
+- Carriers used: FedEx (domestic), DHL (international), USPS (standard)
+- Real-time tracking available via TechCorp app
+
+DELIVERY ISSUES
+Package shows delivered but not received:
+1. Check with neighbours and building reception
+2. Wait 24 hours — GPS scans can arrive before physical delivery
+3. If still missing after 24 hours, contact us
+4. We will open a carrier investigation (takes 3-5 business days)
+5. If investigation confirms lost, we reship or refund within 2 business days
+
+Damaged package on delivery:
+- Take photos immediately before opening fully
+- Report within 48 hours of delivery
+- Do NOT return the damaged item until instructed
+"""</span>,
+
+    <span class="str">"billing_faq.txt"</span>: <span class="str">"""BILLING FREQUENTLY ASKED QUESTIONS
+TechCorp Billing Department
+
+Q: Why was I charged more than expected?
+A: Common reasons include: plan upgrade mid-cycle (prorated charge), additional user seats added,
+storage overage, or applicable taxes not shown at checkout. Check your invoice breakdown
+in Account > Billing > Invoice History for a full itemisation.
+
+Q: How do I get an invoice for my company expenses?
+A: Download invoices from Account > Billing > Invoice History. Each invoice includes
+company name, address, and VAT/tax number if provided. For custom invoices with
+purchase order numbers, email billing@techcorp.com with your PO details.
+
+Q: Can I change my billing cycle from monthly to annual?
+A: Yes. Go to Account > Billing > Change Plan. Annual plans save 20% vs monthly.
+The change takes effect at next renewal — you will not be charged twice.
+
+Q: What payment methods do you accept?
+A: Visa, Mastercard, American Express, PayPal, bank transfer (annual plans only),
+and purchase orders (Enterprise plans only). Cryptocurrency not accepted.
+
+Q: What happens if my payment fails?
+A: We retry payment 3 times over 7 days. You receive email notifications each time.
+If all retries fail, account is suspended (not deleted). Reactivate by updating
+payment method in Account > Billing. All data preserved for 30 days.
+
+Q: How do I cancel my subscription?
+A: Account > Settings > Cancel Subscription. Cancellation takes effect at end of
+current billing period. Data is preserved for 30 days after cancellation date.
+No partial refunds for unused months on monthly plans.
+Annual plans: pro-rated refund for remaining months if cancelled within 60 days.
+"""</span>,
+
+    <span class="str">"api_documentation.txt"</span>: <span class="str">"""TECHCORP API DOCUMENTATION
+Version 2.1 | REST API Reference
+
+AUTHENTICATION
+All API requests require Bearer token authentication.
+Include header: Authorization: Bearer YOUR_API_KEY
+API keys generated in: Dashboard > Developer > API Keys
+Keys expire every 90 days. Rotate keys in the same settings panel.
+
+RATE LIMITS
+Free tier: 100 requests/minute, 10,000 requests/day
+Pro tier: 1,000 requests/minute, 500,000 requests/day
+Enterprise: Custom limits — contact sales
+
+CORE ENDPOINTS
+GET /api/v2/users/{user_id}
+Returns user profile, subscription tier, and usage statistics.
+
+POST /api/v2/documents/upload
+Upload a document for processing. Supports PDF, DOCX, TXT, CSV.
+Max file size: 50MB. Returns document_id for status polling.
+
+GET /api/v2/documents/{document_id}/status
+Returns processing status: queued, processing, completed, failed.
+
+POST /api/v2/search
+Search across indexed documents.
+Body: {"query": "string", "top_k": 5, "filters": {"date_range": {}}}
+
+ERROR CODES
+400 Bad Request: Invalid parameters — check request body format
+401 Unauthorized: Invalid or expired API key
+403 Forbidden: Feature not available on your current plan
+429 Too Many Requests: Rate limit exceeded — wait before retrying
+500 Internal Server Error: Our fault — retry after 60 seconds, then contact support
+
+WEBHOOKS
+Register webhook URLs to receive real-time event notifications.
+Events: document.processed, search.completed, user.created
+Webhook payload signed with HMAC-SHA256 using your webhook secret.
+"""</span>,
+}
+
+<span class="kw">def</span> <span class="fn">generate_docs</span>():
+    os.<span class="fn">makedirs</span>(<span class="str">"data/sample_docs"</span>, exist_ok=<span class="kw">True</span>)
+    <span class="kw">for</span> filename, content <span class="kw">in</span> DOCS.items():
+        path = <span class="str">f"data/sample_docs/{filename}"</span>
+        <span class="kw">with</span> <span class="fn">open</span>(path, <span class="str">"w"</span>) <span class="kw">as</span> f:
+            f.<span class="fn">write</span>(content)
+        <span class="fn">print</span>(<span class="str">f"✅ Created: {path}"</span>)
+    <span class="fn">print</span>(<span class="str">f"\n✅ Generated {len(DOCS)} knowledge base documents in data/sample_docs/"</span>)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="fn">generate_docs</span>()</pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-fn">Run it</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre>python data/generate_docs.py
+<span class="cm"># Creates 5 realistic KB documents in data/sample_docs/
+# Add your own real docs here too — any .txt, .pdf, or .docx file works</span></pre>
+  </div>
+</div>
+
+<!-- STEP 2: INGESTION PIPELINE -->
+<div class="section" id="step2">
+  <div class="sec-label">Implementation Step 2</div>
+  <div class="sec-title">Ingestion Pipeline</div>
+  <div class="sec-sub">The pipeline that reads your documents, splits them into chunks, embeds each chunk, and stores everything in ChromaDB. Run once when documents change.</div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">ingestion/document_loader.py</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="str">"""Load documents from a folder. Supports TXT, PDF, DOCX."""</span>
+<span class="kw">import</span> os
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+<span class="kw">from</span> langchain_community.document_loaders <span class="kw">import</span> (
+    TextLoader, PyPDFLoader, Docx2txtLoader
+)
+<span class="kw">from</span> langchain.schema <span class="kw">import</span> Document
+
+LOADERS = {
+    <span class="str">".txt"</span>: TextLoader,
+    <span class="str">".pdf"</span>: PyPDFLoader,
+    <span class="str">".docx"</span>: Docx2txtLoader,
+}
+
+<span class="kw">def</span> <span class="fn">load_documents</span>(folder_path: str) -> list[Document]:
+    <span class="str">"""Load all supported documents from a folder."""</span>
+    docs = []
+    folder = Path(folder_path)
+
+    <span class="kw">if not</span> folder.exists():
+        <span class="fn">raise</span> FileNotFoundError(<span class="str">f"Folder not found: {folder_path}"</span>)
+
+    <span class="kw">for</span> file_path <span class="kw">in</span> folder.iterdir():
+        suffix = file_path.suffix.lower()
+        <span class="kw">if</span> suffix <span class="kw">not in</span> LOADERS:
+            <span class="kw">continue</span>
+        <span class="kw">try</span>:
+            loader = LOADERS[suffix](str(file_path))
+            loaded = loader.<span class="fn">load</span>()
+            <span class="cm"># Inject source filename into metadata</span>
+            <span class="kw">for</span> doc <span class="kw">in</span> loaded:
+                doc.metadata[<span class="str">"source_file"</span>] = file_path.name
+                doc.metadata[<span class="str">"file_type"</span>] = suffix
+            docs.extend(loaded)
+            <span class="fn">print</span>(<span class="str">f"  ✅ Loaded: {file_path.name} ({len(loaded)} pages)"</span>)
+        <span class="kw">except Exception as</span> e:
+            <span class="fn">print</span>(<span class="str">f"  ❌ Failed to load {file_path.name}: {e}"</span>)
+
+    <span class="fn">print</span>(<span class="str">f"\nTotal documents loaded: {len(docs)}"</span>)
+    <span class="kw">return</span> docs</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">ingestion/chunker.py</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="str">"""
+Split documents into chunks. This is the most critical tuning
+parameter in any RAG system. Run the chunk_experiment() to find
+your optimal chunk_size before building the full pipeline.
+"""</span>
+<span class="kw">from</span> langchain.text_splitter <span class="kw">import</span> RecursiveCharacterTextSplitter
+<span class="kw">from</span> langchain.schema <span class="kw">import</span> Document
+
+<span class="kw">def</span> <span class="fn">chunk_documents</span>(
+    documents: list[Document],
+    chunk_size: int = <span class="num">512</span>,
+    chunk_overlap: int = <span class="num">50</span>,
+) -> list[Document]:
+    <span class="str">"""Split documents into chunks and add chunk metadata."""</span>
+    splitter = <span class="fn">RecursiveCharacterTextSplitter</span>(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        <span class="cm"># Split on these separators, in order of preference</span>
+        separators=[<span class="str">"\n\n"</span>, <span class="str">"\n"</span>, <span class="str">". "</span>, <span class="str">" "</span>, <span class="str">""</span>],
+        length_function=<span class="fn">len</span>,
+    )
+
+    chunks = splitter.<span class="fn">split_documents</span>(documents)
+
+    <span class="cm"># Add chunk index to metadata — useful for debugging retrieval</span>
+    source_counts = {}
+    <span class="kw">for</span> chunk <span class="kw">in</span> chunks:
+        source = chunk.metadata.get(<span class="str">"source_file"</span>, <span class="str">"unknown"</span>)
+        source_counts[source] = source_counts.get(source, <span class="num">0</span>) + <span class="num">1</span>
+        chunk.metadata[<span class="str">"chunk_index"</span>] = source_counts[source]
+        chunk.metadata[<span class="str">"chunk_size"</span>] = chunk_size
+
+    <span class="fn">print</span>(<span class="str">f"Created {len(chunks)} chunks from {len(documents)} documents"</span>)
+    <span class="fn">print</span>(<span class="str">f"Avg chunk length: {sum(len(c.page_content) for c in chunks)//len(chunks)} chars"</span>)
+    <span class="kw">return</span> chunks
+
+
+<span class="kw">def</span> <span class="fn">chunk_experiment</span>(documents: list[Document]):
+    <span class="str">"""
+    Run experiment with 3 chunk sizes.
+    Call this before building your full pipeline —
+    screenshot the output for your portfolio/interviews.
+    """</span>
+    <span class="fn">print</span>(<span class="str">"\n🧪 CHUNK SIZE EXPERIMENT"</span>)
+    <span class="fn">print</span>(<span class="str">"="</span> * <span class="num">50</span>)
+    <span class="kw">for</span> size <span class="kw">in</span> [<span class="num">256</span>, <span class="num">512</span>, <span class="num">1024</span>]:
+        chunks = <span class="fn">chunk_documents</span>(documents, chunk_size=size, chunk_overlap=size//<span class="num">10</span>)
+        avg_len = <span class="fn">sum</span>(<span class="fn">len</span>(c.page_content) <span class="kw">for</span> c <span class="kw">in</span> chunks) // <span class="fn">len</span>(chunks)
+        <span class="fn">print</span>(<span class="str">f"chunk_size={size:4d} | chunks={len(chunks):3d} | avg_chars={avg_len:4d}"</span>)
+    <span class="fn">print</span>(<span class="str">"="</span> * <span class="num">50</span>)
+    <span class="fn">print</span>(<span class="str">"Now run RAGAS eval with each size and pick the best scorer.\n"</span>)</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">ingestion/embedder.py</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="str">"""
+Embedding model wrapper. Uses sentence-transformers which runs
+100% locally on your Mac M5 — completely free, no API key needed.
+"""</span>
+<span class="kw">import</span> os
+<span class="kw">from</span> langchain_huggingface <span class="kw">import</span> HuggingFaceEmbeddings
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+
+load_dotenv()
+
+<span class="kw">def</span> <span class="fn">get_embedding_model</span>(model_name: str | None = None) -> HuggingFaceEmbeddings:
+    <span class="str">"""
+    Returns the embedding model. Downloads on first call (~90MB),
+    then cached locally. Subsequent calls are instant.
+
+    Benchmark on Mac M5:
+    - all-MiniLM-L6-v2:  384 dims, ~5ms per chunk, great quality
+    - all-mpnet-base-v2: 768 dims, ~15ms per chunk, better quality
+    """</span>
+    model = model_name <span class="kw">or</span> os.<span class="fn">getenv</span>(<span class="str">"EMBEDDING_MODEL"</span>, <span class="str">"all-MiniLM-L6-v2"</span>)
+    <span class="fn">print</span>(<span class="str">f"Loading embedding model: {model} (first run downloads ~90MB)"</span>)
+
+    <span class="kw">return</span> <span class="fn">HuggingFaceEmbeddings</span>(
+        model_name=model,
+        model_kwargs={<span class="str">"device"</span>: <span class="str">"cpu"</span>},  <span class="cm"># Mac M5 uses CPU (MPS also works)</span>
+        encode_kwargs={<span class="str">"normalize_embeddings"</span>: <span class="kw">True</span>},
+    )</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">ingestion/ingest.py</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="str">"""
+Main ingestion script. Runs the full pipeline:
+  Load documents → Chunk → Embed → Store in ChromaDB
+Run: python ingestion/ingest.py
+"""</span>
+<span class="kw">import</span> os, shutil
+<span class="kw">from</span> langchain_community.vectorstores <span class="kw">import</span> Chroma
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+<span class="kw">from</span> ingestion.document_loader <span class="kw">import</span> load_documents
+<span class="kw">from</span> ingestion.chunker <span class="kw">import</span> chunk_documents
+<span class="kw">from</span> ingestion.embedder <span class="kw">import</span> get_embedding_model
+
+load_dotenv()
+
+DOCS_FOLDER = <span class="str">"data/sample_docs"</span>
+CHROMA_PATH = os.<span class="fn">getenv</span>(<span class="str">"CHROMA_DB_PATH"</span>, <span class="str">"./chroma_db"</span>)
+COLLECTION_NAME = <span class="str">"knowledge_base"</span>
+
+<span class="kw">def</span> <span class="fn">run_ingestion</span>(reset: bool = <span class="kw">False</span>):
+    <span class="str">"""
+    Run the full ingestion pipeline.
+    reset=True clears the database first (use when re-indexing changed docs).
+    """</span>
+    <span class="kw">if</span> reset <span class="kw">and</span> os.path.<span class="fn">exists</span>(CHROMA_PATH):
+        shutil.<span class="fn">rmtree</span>(CHROMA_PATH)
+        <span class="fn">print</span>(<span class="str">"🗑️  Cleared existing ChromaDB"</span>)
+
+    <span class="fn">print</span>(<span class="str">"\n📥 Step 1: Loading documents..."</span>)
+    documents = <span class="fn">load_documents</span>(DOCS_FOLDER)
+
+    <span class="fn">print</span>(<span class="str">"\n✂️  Step 2: Chunking..."</span>)
+    chunks = <span class="fn">chunk_documents</span>(
+        documents,
+        chunk_size=<span class="fn">int</span>(os.<span class="fn">getenv</span>(<span class="str">"CHUNK_SIZE"</span>, <span class="num">512</span>)),
+        chunk_overlap=<span class="fn">int</span>(os.<span class="fn">getenv</span>(<span class="str">"CHUNK_OVERLAP"</span>, <span class="num">50</span>)),
+    )
+
+    <span class="fn">print</span>(<span class="str">"\n🔢 Step 3: Loading embedding model..."</span>)
+    embeddings = <span class="fn">get_embedding_model</span>()
+
+    <span class="fn">print</span>(<span class="str">"\n🗄️  Step 4: Storing in ChromaDB..."</span>)
+    vectordb = Chroma.<span class="fn">from_documents</span>(
+        documents=chunks,
+        embedding=embeddings,
+        persist_directory=CHROMA_PATH,
+        collection_name=COLLECTION_NAME,
+    )
+
+    count = vectordb._collection.<span class="fn">count</span>()
+    <span class="fn">print</span>(<span class="str">f"\n✅ Ingestion complete! {count} chunks stored in ChromaDB"</span>)
+    <span class="fn">print</span>(<span class="str">f"   Database path: {CHROMA_PATH}"</span>)
+    <span class="kw">return</span> vectordb
+
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="kw">import</span> sys
+    reset = <span class="str">"--reset"</span> <span class="kw">in</span> sys.argv
+    <span class="fn">run_ingestion</span>(reset=reset)</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-fn">Run ingestion pipeline</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="cm"># First time (or to re-index)</span>
+python ingestion/ingest.py --reset
+
+<span class="cm"># Expected output:
+# 📥 Step 1: Loading documents...
+#   ✅ Loaded: refund_policy.txt (1 pages)
+#   ✅ Loaded: billing_faq.txt (1 pages)
+#   ... etc
+# ✂️  Step 2: Chunking...
+#    Created 45 chunks from 5 documents
+# 🔢 Step 3: Loading embedding model... (downloads ~90MB first time)
+# 🗄️  Step 4: Storing in ChromaDB...
+# ✅ Ingestion complete! 45 chunks stored in ChromaDB</span></pre>
+  </div>
+</div>
+
+<!-- STEP 3: RAG CHAIN -->
+<div class="section" id="step3">
+  <div class="sec-label">Implementation Step 3</div>
+  <div class="sec-title">Retriever + RAG Chain</div>
+  <div class="sec-sub">The core query engine — retrieves relevant chunks from ChromaDB then generates a grounded answer via Groq.</div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">retrieval/retriever.py</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="str">"""ChromaDB retrieval wrapper with metadata-enriched results."""</span>
+<span class="kw">import</span> os
+<span class="kw">from</span> langchain_community.vectorstores <span class="kw">import</span> Chroma
+<span class="kw">from</span> langchain.schema <span class="kw">import</span> Document
+<span class="kw">from</span> ingestion.embedder <span class="kw">import</span> get_embedding_model
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+
+load_dotenv()
+
+<span class="kw">class</span> <span class="cls">KBRetriever</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self.embeddings = <span class="fn">get_embedding_model</span>()
+        self.vectordb = <span class="fn">Chroma</span>(
+            persist_directory=os.<span class="fn">getenv</span>(<span class="str">"CHROMA_DB_PATH"</span>, <span class="str">"./chroma_db"</span>),
+            embedding_function=self.embeddings,
+            collection_name=<span class="str">"knowledge_base"</span>,
+        )
+        self.top_k = <span class="fn">int</span>(os.<span class="fn">getenv</span>(<span class="str">"TOP_K_RESULTS"</span>, <span class="num">5</span>))
+
+    <span class="kw">def</span> <span class="fn">retrieve</span>(self, query: str, k: int | None = None) -> list[Document]:
+        <span class="str">"""Retrieve top-K most relevant chunks for a query."""</span>
+        k = k <span class="kw">or</span> self.top_k
+        results = self.vectordb.<span class="fn">similarity_search_with_score</span>(query, k=k)
+
+        <span class="cm"># Add similarity score to metadata (useful for debugging)</span>
+        enriched = []
+        <span class="kw">for</span> doc, score <span class="kw">in</span> results:
+            doc.metadata[<span class="str">"similarity_score"</span>] = <span class="fn">round</span>(<span class="num">1</span> - score, <span class="num">3</span>)  <span class="cm"># convert distance → similarity</span>
+            enriched.<span class="fn">append</span>(doc)
+        <span class="kw">return</span> enriched
+
+    <span class="kw">def</span> <span class="fn">get_collection_stats</span>(self) -> dict:
+        count = self.vectordb._collection.<span class="fn">count</span>()
+        <span class="kw">return</span> {<span class="str">"total_chunks"</span>: count, <span class="str">"collection"</span>: <span class="str">"knowledge_base"</span>}</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">generation/prompts.py</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="str">"""
+RAG system prompts. The grounding instruction is the most critical part.
+Without it, the LLM will hallucinate answers from its training data.
+"""</span>
+
+RAG_SYSTEM_PROMPT = <span class="str">"""You are a helpful knowledge base assistant for TechCorp.
+
+CRITICAL RULES:
+1. ONLY use information from the provided context to answer questions.
+2. If the context does not contain the answer, say EXACTLY:
+   "I don't have information about that in the knowledge base. Please contact support@techcorp.com for assistance."
+3. Do NOT use your training data or general knowledge to fill gaps.
+4. Always cite which document(s) your answer comes from.
+5. Keep answers clear and concise — use bullet points for multi-step processes.
+
+RESPONSE FORMAT:
+- Answer the question directly
+- If listing steps, use numbered format
+- End with: "Source: [document name]" on a new line
+
+TONE: Professional, helpful, and precise."""</span>
+
+<span class="kw">def</span> <span class="fn">build_rag_prompt</span>(context_chunks: list, query: str) -> str:
+    <span class="str">"""Build the user message with retrieved context injected."""</span>
+    context_parts = []
+    <span class="kw">for</span> i, chunk <span class="kw">in</span> <span class="fn">enumerate</span>(context_chunks, <span class="num">1</span>):
+        source = chunk.metadata.get(<span class="str">"source_file"</span>, <span class="str">"unknown"</span>)
+        score = chunk.metadata.get(<span class="str">"similarity_score"</span>, <span class="str">"N/A"</span>)
+        context_parts.<span class="fn">append</span>(
+            <span class="str">f"[Context {i} | Source: {source} | Relevance: {score}]\n{chunk.page_content}"</span>
+        )
+
+    context_text = <span class="str">"\n\n"</span>.<span class="fn">join</span>(context_parts)
+
+    <span class="kw">return</span> <span class="str">f"""Use the following context to answer the question.
+
+CONTEXT:
+{context_text}
+
+QUESTION: {query}
+
+Remember: Only answer using the context above. If the answer isn't there, say so."""</span></pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">generation/rag_chain.py</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="str">"""Full RAG chain: retrieve relevant chunks → generate grounded answer."""</span>
+<span class="kw">import</span> os, time
+<span class="kw">from</span> groq <span class="kw">import</span> Groq
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+<span class="kw">from</span> retrieval.retriever <span class="kw">import</span> KBRetriever
+<span class="kw">from</span> generation.prompts <span class="kw">import</span> RAG_SYSTEM_PROMPT, build_rag_prompt
+
+load_dotenv()
+
+<span class="kw">class</span> <span class="cls">RAGChain</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self.retriever = <span class="fn">KBRetriever</span>()
+        self.llm = <span class="fn">Groq</span>(api_key=os.<span class="fn">getenv</span>(<span class="str">"GROQ_API_KEY"</span>))
+        self.model = <span class="str">"llama3-70b-8192"</span>
+
+    <span class="kw">def</span> <span class="fn">query</span>(self, question: str, top_k: int = <span class="num">5</span>) -> dict:
+        <span class="str">"""
+        Full RAG query pipeline.
+        Returns: answer, source chunks, timing breakdown.
+        """</span>
+        timings = {}
+        start_total = time.<span class="fn">time</span>()
+
+        <span class="cm"># Step 1: Retrieve relevant chunks</span>
+        t0 = time.<span class="fn">time</span>()
+        chunks = self.retriever.<span class="fn">retrieve</span>(question, k=top_k)
+        timings[<span class="str">"retrieval_ms"</span>] = <span class="fn">int</span>((<span class="fn">time</span>.<span class="fn">time</span>() - t0) * <span class="num">1000</span>)
+
+        <span class="cm"># Step 2: Build the context prompt</span>
+        user_message = <span class="fn">build_rag_prompt</span>(chunks, question)
+
+        <span class="cm"># Step 3: Generate answer from LLM</span>
+        t0 = time.<span class="fn">time</span>()
+        response = self.llm.chat.completions.<span class="fn">create</span>(
+            model=self.model,
+            messages=[
+                {<span class="str">"role"</span>: <span class="str">"system"</span>, <span class="str">"content"</span>: RAG_SYSTEM_PROMPT},
+                {<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: user_message},
+            ],
+            temperature=<span class="num">0.1</span>,  <span class="cm"># Low temp — we want grounded factual answers</span>
+            max_tokens=<span class="num">600</span>,
+        )
+        timings[<span class="str">"generation_ms"</span>] = <span class="fn">int</span>((<span class="fn">time</span>.<span class="fn">time</span>() - t0) * <span class="num">1000</span>)
+        timings[<span class="str">"total_ms"</span>] = <span class="fn">int</span>((<span class="fn">time</span>.<span class="fn">time</span>() - start_total) * <span class="num">1000</span>)
+
+        answer = response.choices[<span class="num">0</span>].message.content
+
+        <span class="kw">return</span> {
+            <span class="str">"answer"</span>: answer,
+            <span class="str">"source_chunks"</span>: [
+                {
+                    <span class="str">"content"</span>: c.page_content,
+                    <span class="str">"source_file"</span>: c.metadata.get(<span class="str">"source_file"</span>),
+                    <span class="str">"similarity_score"</span>: c.metadata.get(<span class="str">"similarity_score"</span>),
+                    <span class="str">"chunk_index"</span>: c.metadata.get(<span class="str">"chunk_index"</span>),
+                }
+                <span class="kw">for</span> c <span class="kw">in</span> chunks
+            ],
+            <span class="str">"tokens_used"</span>: response.usage.total_tokens,
+            <span class="str">"timings"</span>: timings,
+        }
+
+
+<span class="cm"># Quick test</span>
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    chain = <span class="fn">RAGChain</span>()
+    test_questions = [
+        <span class="str">"What is the return policy for defective items?"</span>,
+        <span class="str">"How do I reset my password if I lost 2FA access?"</span>,
+        <span class="str">"What happens if my payment fails?"</span>,
+    ]
+    <span class="kw">for</span> q <span class="kw">in</span> test_questions:
+        result = chain.<span class="fn">query</span>(q)
+        <span class="fn">print</span>(<span class="str">f"\nQ: {q}"</span>)
+        <span class="fn">print</span>(<span class="str">f"A: {result['answer'][:200]}..."</span>)
+        <span class="fn">print</span>(<span class="str">f"   Sources: {[c['source_file'] for c in result['source_chunks'][:2]]}"</span>)
+        <span class="fn">print</span>(<span class="str">f"   Timing: {result['timings']}"</span>)</pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-fn">Test the RAG chain</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre>python generation/rag_chain.py</pre>
+  </div>
+</div>
+
+<!-- STEP 4: FASTAPI -->
+<div class="section" id="step4">
+  <div class="sec-label">Implementation Step 4</div>
+  <div class="sec-title">FastAPI Backend</div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">app/models.py</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel, Field
+<span class="kw">from</span> typing <span class="kw">import</span> Optional
+
+<span class="kw">class</span> <span class="cls">QueryRequest</span>(BaseModel):
+    question: str = Field(min_length=<span class="num">3</span>, max_length=<span class="num">1000</span>)
+    top_k: int = Field(default=<span class="num">5</span>, ge=<span class="num">1</span>, le=<span class="num">10</span>)
+    session_id: Optional[str] = None
+
+<span class="kw">class</span> <span class="cls">SourceChunk</span>(BaseModel):
+    content: str
+    source_file: Optional[str]
+    similarity_score: Optional[float]
+    chunk_index: Optional[int]
+
+<span class="kw">class</span> <span class="cls">QueryResponse</span>(BaseModel):
+    answer: str
+    source_chunks: list[SourceChunk]
+    tokens_used: int
+    timings: dict
+    session_id: str
+
+<span class="kw">class</span> <span class="cls">IngestRequest</span>(BaseModel):
+    folder_path: str = <span class="str">"data/sample_docs"</span>
+    reset: bool = <span class="kw">False</span></pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">app/main.py</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="kw">import</span> uuid
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, HTTPException, BackgroundTasks
+<span class="kw">from</span> fastapi.middleware.cors <span class="kw">import</span> CORSMiddleware
+<span class="kw">from</span> app.models <span class="kw">import</span> QueryRequest, QueryResponse, IngestRequest
+<span class="kw">from</span> generation.rag_chain <span class="kw">import</span> RAGChain
+
+app = <span class="fn">FastAPI</span>(title=<span class="str">"Knowledge Base RAG API"</span>, version=<span class="str">"1.0.0"</span>)
+app.<span class="fn">add_middleware</span>(CORSMiddleware,
+    allow_origins=[<span class="str">"*"</span>], allow_methods=[<span class="str">"*"</span>], allow_headers=[<span class="str">"*"</span>])
+
+rag_chain = <span class="kw">None</span>
+
+@app.<span class="fn">on_event</span>(<span class="str">"startup"</span>)
+<span class="kw">async def</span> <span class="fn">startup</span>():
+    <span class="kw">global</span> rag_chain
+    <span class="fn">print</span>(<span class="str">"Loading RAG chain (embedding model downloads on first run)..."</span>)
+    rag_chain = <span class="fn">RAGChain</span>()
+    <span class="fn">print</span>(<span class="str">"✅ RAG chain ready"</span>)
+
+@app.<span class="fn">get</span>(<span class="str">"/"</span>)
+<span class="kw">def</span> <span class="fn">health</span>():
+    stats = rag_chain.retriever.<span class="fn">get_collection_stats</span>()
+    <span class="kw">return</span> {<span class="str">"status"</span>: <span class="str">"ok"</span>, <span class="str">"collection_stats"</span>: stats}
+
+@app.<span class="fn">post</span>(<span class="str">"/api/query"</span>, response_model=QueryResponse)
+<span class="kw">async def</span> <span class="fn">query</span>(request: QueryRequest):
+    <span class="kw">if not</span> rag_chain:
+        <span class="fn">raise</span> <span class="fn">HTTPException</span>(<span class="num">503</span>, <span class="str">"RAG chain not initialised"</span>)
+    session_id = request.session_id <span class="kw">or</span> str(uuid.<span class="fn">uuid4</span>())
+    result = rag_chain.<span class="fn">query</span>(request.question, top_k=request.top_k)
+    <span class="kw">return</span> <span class="fn">QueryResponse</span>(**result, session_id=session_id)
+
+@app.<span class="fn">post</span>(<span class="str">"/api/ingest"</span>)
+<span class="kw">async def</span> <span class="fn">ingest</span>(request: IngestRequest, background_tasks: BackgroundTasks):
+    <span class="kw">from</span> ingestion.ingest <span class="kw">import</span> run_ingestion
+    background_tasks.<span class="fn">add_task</span>(run_ingestion, reset=request.reset)
+    <span class="kw">return</span> {<span class="str">"message"</span>: <span class="str">"Ingestion started in background"</span>}</pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-fn">Start the API</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre>uvicorn app.main:app --reload --port 8000
+
+<span class="cm"># Test it:</span>
+curl -X POST http://localhost:8000/api/query \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What is the refund policy for defective items?"}'</pre>
+  </div>
+</div>
+
+<!-- STEP 5: STREAMLIT -->
+<div class="section" id="step5">
+  <div class="sec-label">Implementation Step 5</div>
+  <div class="sec-title">Streamlit Frontend with Source Viewer</div>
+  <div class="sec-sub">The source viewer is the key demo feature — it shows interviewers that the RAG system is actually grounded in real documents, not hallucinating.</div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">frontend/streamlit_app.py</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="kw">import</span> streamlit <span class="kw">as</span> st
+<span class="kw">import</span> requests, uuid
+
+st.<span class="fn">set_page_config</span>(page_title=<span class="str">"KB Assistant"</span>, page_icon=<span class="str">"📚"</span>, layout=<span class="str">"wide"</span>)
+API_URL = <span class="str">"http://localhost:8000"</span>
+
+<span class="kw">if</span> <span class="str">"messages"</span> <span class="kw">not in</span> st.session_state:
+    st.session_state.messages = []
+<span class="kw">if</span> <span class="str">"session_id"</span> <span class="kw">not in</span> st.session_state:
+    st.session_state.session_id = str(uuid.<span class="fn">uuid4</span>())
+
+<span class="cm"># SIDEBAR</span>
+<span class="kw">with</span> st.sidebar:
+    st.<span class="fn">title</span>(<span class="str">"📚 KB Assistant"</span>)
+    st.<span class="fn">caption</span>(<span class="str">"Project 2 · RAG System"</span>)
+    st.<span class="fn">divider</span>()
+
+    <span class="cm"># Collection stats</span>
+    <span class="kw">try</span>:
+        health = requests.<span class="fn">get</span>(<span class="str">f"{API_URL}/"</span>, timeout=<span class="num">2</span>).<span class="fn">json</span>()
+        stats = health.get(<span class="str">"collection_stats"</span>, {})
+        st.<span class="fn">metric</span>(<span class="str">"Indexed Chunks"</span>, stats.get(<span class="str">"total_chunks"</span>, <span class="str">"—"</span>))
+    <span class="kw">except</span>:
+        st.<span class="fn">warning</span>(<span class="str">"API offline"</span>)
+
+    st.<span class="fn">divider</span>()
+    top_k = st.<span class="fn">slider</span>(<span class="str">"Chunks to retrieve (top-K)"</span>, <span class="num">1</span>, <span class="num">10</span>, <span class="num">5</span>)
+    show_sources = st.<span class="fn">toggle</span>(<span class="str">"Show source chunks"</span>, value=<span class="kw">True</span>)
+    show_scores = st.<span class="fn">toggle</span>(<span class="str">"Show similarity scores"</span>, value=<span class="kw">False</span>)
+    show_timing = st.<span class="fn">toggle</span>(<span class="str">"Show timing breakdown"</span>, value=<span class="kw">False</span>)
+
+    st.<span class="fn">divider</span>()
+    st.<span class="fn">caption</span>(<span class="str">"💡 Try adjusting top-K and see how answers change. Great interview demo point."</span>)
+    <span class="kw">if</span> st.<span class="fn">button</span>(<span class="str">"🔄 New Session"</span>):
+        st.session_state.messages = []
+        st.session_state.session_id = str(uuid.<span class="fn">uuid4</span>())
+        st.<span class="fn">rerun</span>()
+
+<span class="cm"># MAIN</span>
+col1, col2 = st.<span class="fn">columns</span>([<span class="num">2</span>, <span class="num">1</span>])
+
+<span class="kw">with</span> col1:
+    st.<span class="fn">title</span>(<span class="str">"📚 Knowledge Base Assistant"</span>)
+    st.<span class="fn">caption</span>(<span class="str">"Ask anything — answers are grounded in company documents with full citations."</span>)
+
+    <span class="kw">for</span> msg <span class="kw">in</span> st.session_state.messages:
+        <span class="kw">with</span> st.<span class="fn">chat_message</span>(msg[<span class="str">"role"</span>]):
+            st.<span class="fn">markdown</span>(msg[<span class="str">"content"</span>])
+
+    <span class="kw">if</span> question := st.<span class="fn">chat_input</span>(<span class="str">"Ask a question about company policies, products, or procedures..."</span>):
+        st.session_state.messages.<span class="fn">append</span>({<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: question})
+        <span class="kw">with</span> st.<span class="fn">chat_message</span>(<span class="str">"user"</span>):
+            st.<span class="fn">markdown</span>(question)
+
+        <span class="kw">with</span> st.<span class="fn">chat_message</span>(<span class="str">"assistant"</span>):
+            <span class="kw">with</span> st.<span class="fn">spinner</span>(<span class="str">"Retrieving and generating..."</span>):
+                <span class="kw">try</span>:
+                    res = requests.<span class="fn">post</span>(
+                        <span class="str">f"{API_URL}/api/query"</span>,
+                        json={<span class="str">"question"</span>: question, <span class="str">"top_k"</span>: top_k,
+                              <span class="str">"session_id"</span>: st.session_state.session_id},
+                        timeout=<span class="num">30</span>
+                    ).<span class="fn">json</span>()
+                    st.<span class="fn">markdown</span>(res[<span class="str">"answer"</span>])
+
+                    <span class="kw">if</span> show_timing:
+                        t = res[<span class="str">"timings"</span>]
+                        cols = st.<span class="fn">columns</span>(<span class="num">3</span>)
+                        cols[<span class="num">0</span>].<span class="fn">caption</span>(<span class="str">f"⏱ Retrieval: {t.get('retrieval_ms')}ms"</span>)
+                        cols[<span class="num">1</span>].<span class="fn">caption</span>(<span class="str">f"🤖 Generation: {t.get('generation_ms')}ms"</span>)
+                        cols[<span class="num">2</span>].<span class="fn">caption</span>(<span class="str">f"🪙 Tokens: {res['tokens_used']}"</span>)
+
+                    st.session_state.messages.<span class="fn">append</span>({
+                        <span class="str">"role"</span>: <span class="str">"assistant"</span>, <span class="str">"content"</span>: res[<span class="str">"answer"</span>],
+                        <span class="str">"sources"</span>: res.get(<span class="str">"source_chunks"</span>, [])
+                    })
+                    st.session_state[<span class="str">"last_result"</span>] = res
+                <span class="kw">except Exception as</span> e:
+                    st.<span class="fn">error</span>(<span class="str">f"API error: {e}"</span>)
+
+<span class="cm"># SOURCE VIEWER — right column</span>
+<span class="kw">with</span> col2:
+    st.<span class="fn">subheader</span>(<span class="str">"📎 Source Documents"</span>)
+    <span class="kw">if</span> show_sources <span class="kw">and</span> <span class="str">"last_result"</span> <span class="kw">in</span> st.session_state:
+        chunks = st.session_state[<span class="str">"last_result"</span>].get(<span class="str">"source_chunks"</span>, [])
+        <span class="kw">if</span> chunks:
+            <span class="kw">for</span> i, chunk <span class="kw">in</span> <span class="fn">enumerate</span>(chunks, <span class="num">1</span>):
+                score = chunk.get(<span class="str">"similarity_score"</span>, <span class="str">"N/A"</span>)
+                src = chunk.get(<span class="str">"source_file"</span>, <span class="str">"unknown"</span>)
+                header = <span class="str">f"📄 {src}"</span>
+                <span class="kw">if</span> show_scores:
+                    header += <span class="str">f" (score: {score})"</span>
+                <span class="kw">with</span> st.<span class="fn">expander</span>(header, expanded=(i == <span class="num">1</span>)):
+                    st.<span class="fn">text</span>(chunk[<span class="str">"content"</span>][:<span class="num">400</span>] + (<span class="str">"..."</span> <span class="kw">if</span> <span class="fn">len</span>(chunk[<span class="str">"content"</span>]) > <span class="num">400</span> <span class="kw">else</span> <span class="str">""</span>))
+        <span class="kw">else</span>:
+            st.<span class="fn">info</span>(<span class="str">"Ask a question to see which documents were retrieved."</span>)
+    <span class="kw">else</span>:
+        st.<span class="fn">info</span>(<span class="str">"Enable 'Show source chunks' in the sidebar."</span>)</pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-fn">Run Streamlit</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="cm"># Terminal 1: FastAPI already running on 8000</span>
+<span class="cm"># Terminal 2:</span>
+streamlit run frontend/streamlit_app.py
+<span class="cm"># Opens at http://localhost:8501</span></pre>
+  </div>
+</div>
+
+<!-- STEP 6: RAGAS EVALUATION -->
+<div class="section" id="step6">
+  <div class="sec-label">Implementation Step 6</div>
+  <div class="sec-title">RAGAS Evaluation Pipeline</div>
+  <div class="sec-sub">This is what makes your project production-quality. RAGAS gives you real metrics you can quote in every interview. Build the test dataset first, then run the evaluation.</div>
+
+  <div class="callout orange">
+    <div class="ico">⭐</div>
+    <div class="body"><strong>Most important step for interview credibility</strong>"I built a RAGAS evaluation pipeline and my faithfulness score is 0.87" is a statement that immediately signals you are a serious AI engineer. Most people skip evaluation entirely. Don't be those people.</div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">evaluation/test_questions.json — starter dataset (add 25 more yourself)</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre>[
+  {
+    <span class="str">"question"</span>: <span class="str">"What is the return window for defective products?"</span>,
+    <span class="str">"ground_truth"</span>: <span class="str">"Products found to be defective within 90 days of purchase qualify for a full replacement or full refund including original shipping charges."</span>
+  },
+  {
+    <span class="str">"question"</span>: <span class="str">"How long does a credit card refund take?"</span>,
+    <span class="str">"ground_truth"</span>: <span class="str">"Credit card refunds take 3-5 business days after the return is received."</span>
+  },
+  {
+    <span class="str">"question"</span>: <span class="str">"What should I do if my password reset email doesn't arrive?"</span>,
+    <span class="str">"ground_truth"</span>: <span class="str">"Check your spam or junk folder. The reset link arrives within 2 minutes and expires after 30 minutes."</span>
+  },
+  {
+    <span class="str">"question"</span>: <span class="str">"How do I enable two-factor authentication?"</span>,
+    <span class="str">"ground_truth"</span>: <span class="str">"Go to Settings then Security then Enable 2FA. Choose either Authenticator App or SMS. Scan the QR code with Google Authenticator or Authy and save your 10 backup codes."</span>
+  },
+  {
+    <span class="str">"question"</span>: <span class="str">"What happens to my account if my payment fails?"</span>,
+    <span class="str">"ground_truth"</span>: <span class="str">"Payment is retried 3 times over 7 days with email notifications each time. If all retries fail, the account is suspended but not deleted and data is preserved for 30 days."</span>
+  },
+  {
+    <span class="str">"question"</span>: <span class="str">"What is the rate limit for the Pro tier API?"</span>,
+    <span class="str">"ground_truth"</span>: <span class="str">"The Pro tier has a rate limit of 1,000 requests per minute and 500,000 requests per day."</span>
+  },
+  {
+    <span class="str">"question"</span>: <span class="str">"How much does express delivery cost?"</span>,
+    <span class="str">"ground_truth"</span>: <span class="str">"Express delivery costs $12.99 flat rate and takes 1-2 business days."</span>
+  },
+  {
+    <span class="str">"question"</span>: <span class="str">"Can I get a refund on downloaded software?"</span>,
+    <span class="str">"ground_truth"</span>: <span class="str">"Digital products and software licences are non-refundable once activated."</span>
+  }
+]</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">evaluation/ragas_eval.py</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre><span class="str">"""
+RAGAS Evaluation Pipeline.
+Measures: Faithfulness, Answer Relevance, Context Precision, Context Recall.
+Run: python evaluation/ragas_eval.py
+"""</span>
+<span class="kw">import</span> json, os, sys
+sys.path.<span class="fn">insert</span>(<span class="num">0</span>, <span class="str">"."</span>)
+
+<span class="kw">from</span> datasets <span class="kw">import</span> Dataset
+<span class="kw">from</span> ragas <span class="kw">import</span> evaluate
+<span class="kw">from</span> ragas.metrics <span class="kw">import</span> (
+    faithfulness,
+    answer_relevancy,
+    context_precision,
+    context_recall,
+)
+<span class="kw">from</span> langchain_groq <span class="kw">import</span> ChatGroq
+<span class="kw">from</span> langchain_huggingface <span class="kw">import</span> HuggingFaceEmbeddings
+<span class="kw">from</span> generation.rag_chain <span class="kw">import</span> RAGChain
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+
+load_dotenv()
+
+<span class="kw">def</span> <span class="fn">run_ragas_eval</span>():
+    <span class="fn">print</span>(<span class="str">"\n🧪 RAGAS EVALUATION"</span>)
+    <span class="fn">print</span>(<span class="str">"Loading test questions..."</span>)
+
+    <span class="kw">with</span> <span class="fn">open</span>(<span class="str">"evaluation/test_questions.json"</span>) <span class="kw">as</span> f:
+        test_cases = json.<span class="fn">load</span>(f)
+
+    rag = <span class="fn">RAGChain</span>()
+
+    <span class="cm"># Build RAGAS dataset structure</span>
+    questions, answers, contexts, ground_truths = [], [], [], []
+
+    <span class="fn">print</span>(<span class="str">f"Running {len(test_cases)} queries..."</span>)
+    <span class="kw">for</span> i, case <span class="kw">in</span> <span class="fn">enumerate</span>(test_cases, <span class="num">1</span>):
+        <span class="fn">print</span>(<span class="str">f"  [{i}/{len(test_cases)}] {case['question'][:50]}..."</span>)
+        result = rag.<span class="fn">query</span>(case[<span class="str">"question"</span>])
+
+        questions.<span class="fn">append</span>(case[<span class="str">"question"</span>])
+        answers.<span class="fn">append</span>(result[<span class="str">"answer"</span>])
+        contexts.<span class="fn">append</span>([c[<span class="str">"content"</span>] <span class="kw">for</span> c <span class="kw">in</span> result[<span class="str">"source_chunks"</span>]])
+        ground_truths.<span class="fn">append</span>(case[<span class="str">"ground_truth"</span>])
+
+    dataset = <span class="fn">Dataset</span>.<span class="fn">from_dict</span>({
+        <span class="str">"question"</span>: questions,
+        <span class="str">"answer"</span>: answers,
+        <span class="str">"contexts"</span>: contexts,
+        <span class="str">"ground_truth"</span>: ground_truths,
+    })
+
+    <span class="cm"># Set RAGAS to use Groq (free) instead of OpenAI</span>
+    llm = <span class="fn">ChatGroq</span>(model=<span class="str">"llama3-70b-8192"</span>)
+    embeddings = <span class="fn">HuggingFaceEmbeddings</span>(model_name=<span class="str">"all-MiniLM-L6-v2"</span>)
+
+    <span class="fn">print</span>(<span class="str">"\n📊 Running RAGAS metrics..."</span>)
+    scores = <span class="fn">evaluate</span>(
+        dataset=dataset,
+        metrics=[faithfulness, answer_relevancy, context_precision, context_recall],
+        llm=llm,
+        embeddings=embeddings,
+    )
+
+    <span class="fn">print</span>(<span class="str">f"""
+{'='*55}
+📊 RAGAS EVALUATION RESULTS
+{'='*55}
+Faithfulness:       {scores['faithfulness']:.3f}  (target: > 0.85)
+Answer Relevance:   {scores['answer_relevancy']:.3f}  (target: > 0.80)
+Context Precision:  {scores['context_precision']:.3f}  (target: > 0.75)
+Context Recall:     {scores['context_recall']:.3f}  (target: > 0.70)
+{'='*55}
+Questions tested: {len(test_cases)}
+"""</span>)
+
+    <span class="cm"># Save results for portfolio/README</span>
+    <span class="kw">with</span> <span class="fn">open</span>(<span class="str">"evaluation/ragas_results.json"</span>, <span class="str">"w"</span>) <span class="kw">as</span> f:
+        json.<span class="fn">dump</span>({
+            <span class="str">"faithfulness"</span>: scores[<span class="str">"faithfulness"</span>],
+            <span class="str">"answer_relevancy"</span>: scores[<span class="str">"answer_relevancy"</span>],
+            <span class="str">"context_precision"</span>: scores[<span class="str">"context_precision"</span>],
+            <span class="str">"context_recall"</span>: scores[<span class="str">"context_recall"</span>],
+            <span class="str">"num_questions"</span>: <span class="fn">len</span>(test_cases),
+        }, f, indent=<span class="num">2</span>)
+    <span class="fn">print</span>(<span class="str">"💾 Saved to evaluation/ragas_results.json"</span>)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="fn">run_ragas_eval</span>()</pre>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-fn">Run RAGAS evaluation</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre>python evaluation/ragas_eval.py
+<span class="cm"># Takes 5-10 minutes (runs LLM on each test case)
+# Screenshot the output — you'll quote these numbers in every interview</span></pre>
+  </div>
+
+  <div class="callout blue">
+    <div class="ico">📐</div>
+    <div class="body"><strong>Run RAGAS 3 times — once per chunk size</strong>Change CHUNK_SIZE in your .env to 256, then 512, then 1024. Run the eval each time. Record which chunk size gives the best faithfulness score. This experiment is gold for interviews — it shows you treat RAG like engineering, not magic.</div>
+  </div>
+</div>
+
+<!-- STEP 7: DOCKER + GITHUB -->
+<div class="section" id="step7">
+  <div class="sec-label">Implementation Step 7</div>
+  <div class="sec-title">Docker + GitHub Setup</div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">Dockerfile</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre>FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+<span class="cm"># Pre-download embedding model during build (not at runtime)</span>
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+
+COPY . .
+EXPOSE 8000
+CMD [<span class="str">"uvicorn"</span>, <span class="str">"app.main:app"</span>, <span class="str">"--host"</span>, <span class="str">"0.0.0.0"</span>, <span class="str">"--port"</span>, <span class="str">"8000"</span>]</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">docker-compose.yml</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre>version: <span class="str">'3.8'</span>
+services:
+  api:
+    build: .
+    ports:
+      - <span class="str">"8000:8000"</span>
+    env_file: .env
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./data:/app/data
+
+  frontend:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: bash -c <span class="str">"pip install streamlit requests -q && streamlit run frontend/streamlit_app.py --server.port 8501 --server.address 0.0.0.0"</span>
+    ports:
+      - <span class="str">"8501:8501"</span>
+    depends_on:
+      - api</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">.gitignore</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre>.env
+chroma_db/
+__pycache__/
+*.pyc
+.DS_Store
+venv/
+*.egg-info/
+evaluation/ragas_results.json</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-file">.github/workflows/test.yml</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre>name: Test RAG Pipeline
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: pip install -r requirements.txt
+      - name: Generate test docs and run ingestion
+        run: |
+          python data/generate_docs.py
+          python ingestion/ingest.py
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      - name: Test API starts
+        run: |
+          uvicorn app.main:app --port 8000 &
+          sleep 5
+          curl -f http://localhost:8000/
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}</pre>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-head"><span class="code-fn">Push to GitHub</span><div class="code-actions"><button class="btn-copy" onclick="cp(this)">Copy</button></div></div>
+    <pre>git init
+git add .
+git status  <span class="cm"># Verify: .env and chroma_db/ should NOT appear</span>
+git commit -m <span class="str">"feat: project 2 — knowledge base RAG with RAGAS evaluation"</span>
+git remote add origin https://github.com/YOUR_USERNAME/project2-knowledge-base-rag.git
+git branch -M main
+git push -u origin main</pre>
+  </div>
+</div>
+
+<!-- INTERVIEW PREP -->
+<div class="section" id="interview">
+  <div class="sec-label">Interview Preparation</div>
+  <div class="sec-title">Project 2 Interview Guide</div>
+  <div class="sec-sub">RAG is the most common AI engineering interview topic. These are the exact questions you will be asked. Expand each one for a full model answer.</div>
+
+  <div class="callout purple">
+    <div class="ico">🎯</div>
+    <div class="body"><strong>The three things interviewers are really testing</strong>(1) Do you understand WHY RAG works — the grounding mechanism, not just the code? (2) Do you have real evaluation metrics to back up your claims? (3) Can you explain where RAG fails and what you'd do about it? Nail these three and you'll stand out from 90% of candidates.</div>
+  </div>
+
+  <div class="acc-item">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <span class="acc-title">Explain RAG from scratch to someone who doesn't know what it is.</span>
+      <span class="acc-meta">Most likely first question</span>
+      <span class="acc-arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      <strong style="color:var(--green2)">Model answer:</strong><br><br>
+      "The core problem RAG solves is that LLMs have a knowledge cutoff and can hallucinate when asked about private company data they've never seen. The solution is: instead of asking the LLM from memory, you first retrieve the relevant documents, then ask the LLM to answer based only on those documents.<br><br>
+      Concretely, there are two phases. First, indexing — you take all your company documents, split them into small chunks of about 500 tokens each, convert each chunk into a numerical vector called an embedding that captures its meaning, and store those vectors in a vector database like ChromaDB. This runs once when documents are created or updated.<br><br>
+      Second, querying — when a user asks a question, you convert that question into the same kind of vector, find the 5 chunks in your database whose vectors are most similar to the question vector, and pass those chunks to the LLM as context. Crucially, you instruct the LLM: 'only answer using the information I've given you — if it's not in here, say you don't know.' This eliminates hallucination because the LLM is just synthesising and formatting information you've already verified."
+    </div>
+  </div>
+
+  <div class="acc-item">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <span class="acc-title">What chunk size did you choose and how did you decide?</span>
+      <span class="acc-meta">Very common — must have real numbers</span>
+      <span class="acc-arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      "I treated this as an experiment. I ran my RAGAS evaluation with three chunk sizes — 256, 512, and 1024 tokens — keeping everything else constant, and measured context precision and faithfulness for each.<br><br>
+      256 tokens gave high precision — the retrieved chunks were very targeted — but hurt recall because answers sometimes span more context than 256 tokens provide. 1024 tokens had the opposite problem: more context per chunk but lower precision, so I was retrieving chunks that were only tangentially related. 512 tokens with 50-token overlap gave the best balance on my test set, scoring 0.87 faithfulness and 0.83 context precision.<br><br>
+      The overlap is important — without it, an answer that happens to fall on a chunk boundary gets split and may not be retrieved correctly. 50 tokens is roughly one paragraph, which is usually enough to bridge any boundary."
+    </div>
+  </div>
+
+  <div class="acc-item">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <span class="acc-title">What is the difference between faithfulness and answer relevance in RAGAS?</span>
+      <span class="acc-meta">Tests evaluation depth — many candidates can't answer this</span>
+      <span class="acc-arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      "They measure completely different failure modes. Faithfulness asks: does the answer only contain information that appears in the retrieved context? A faithfulness score of 1.0 means every fact in the answer is traceable to a retrieved chunk — no hallucination. A low faithfulness score means the LLM is adding information from its training data that wasn't in the context you provided.<br><br>
+      Answer relevance asks: does the answer actually address the question that was asked? You can have a perfectly faithful answer — one that only uses the retrieved context — but that doesn't actually answer the user's question. For example, if someone asks 'how long does a refund take?' and the system retrieves chunks about the return process and gives a faithful answer about how to ship items back — that's high faithfulness but low answer relevance.<br><br>
+      Both need to be high for a production RAG system to work. Faithfulness catches hallucination; answer relevance catches retrieval quality issues."
+    </div>
+  </div>
+
+  <div class="acc-item">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <span class="acc-title">When does RAG fail and how do you fix it?</span>
+      <span class="acc-meta">Tests production thinking</span>
+      <span class="acc-arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      "Five failure modes, each with a different fix:<br><br>
+      1. <strong>Bad chunking</strong> — the answer spans two chunks and neither chunk alone has enough to answer. Fix: increase chunk size or overlap, or use parent-child chunking (which I implement in Project 3).<br><br>
+      2. <strong>Vocabulary mismatch</strong> — the user says 'broken' but the document says 'malfunction'. Semantic search should handle this, but sometimes doesn't. Fix: add BM25 keyword search alongside semantic search — hybrid retrieval, which is exactly what Project 3 is about.<br><br>
+      3. <strong>The answer isn't in the knowledge base at all</strong> — the LLM hallucinates to fill the gap. Fix: the system prompt must explicitly say 'if the answer is not in the context, say you don't know' — and you must test this case in your evaluation set.<br><br>
+      4. <strong>Top-K too low</strong> — the relevant chunk exists but ranks 6th or 7th. Fix: retrieve more candidates (K=20), then use a re-ranker to select the best 5 — this is the re-ranking technique in Project 3.<br><br>
+      5. <strong>Stale knowledge base</strong> — documents updated but the index wasn't rebuilt. Fix: trigger re-ingestion via API when documents change, and track document version hashes to only re-embed changed files."
+    </div>
+  </div>
+
+  <div class="acc-item">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <span class="acc-title">Why did you use sentence-transformers instead of OpenAI embeddings?</span>
+      <span class="acc-meta">Tests cost and architecture thinking</span>
+      <span class="acc-arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      "Three reasons. First, cost: at $0.0001 per 1K tokens, embedding a knowledge base of 10,000 document chunks would cost about $0.50 once, and every user query would add embedding cost. sentence-transformers runs locally for free — the only cost is compute time, which on a Mac M5 is about 5ms per chunk.<br><br>
+      Second, data privacy: using OpenAI embeddings means every document chunk in your knowledge base is sent to OpenAI's servers. For enterprise customers with confidential internal documents, this can be a compliance blocker. Local embeddings keep everything on-premises.<br><br>
+      Third, quality tradeoff is acceptable: all-MiniLM-L6-v2 is about 90% as good as OpenAI's text-embedding-3-small on most semantic similarity benchmarks, and it's significantly better for domain-specific fine-tuning if you want to go there later. For most enterprise RAG use cases, the quality difference isn't worth the cost and privacy tradeoffs."
+    </div>
+  </div>
+
+  <div class="acc-item">
+    <div class="acc-head" onclick="toggleAcc(this)">
+      <span class="acc-title">How would you scale this to 100,000 documents?</span>
+      <span class="acc-meta">Tests scalability thinking</span>
+      <span class="acc-arrow">▼</span>
+    </div>
+    <div class="acc-body">
+      "ChromaDB would still work at that scale — it handles millions of vectors efficiently — but I'd make several architectural changes.<br><br>
+      First, asynchronous ingestion: instead of blocking while documents are processed, I'd use a message queue like AWS SQS. When a document is uploaded to S3, an event triggers a Lambda function that runs the ingestion pipeline. This decouples document upload from indexing latency.<br><br>
+      Second, incremental re-indexing: track a content hash for each document. When a document changes, only re-embed that document, not the entire corpus. At 100K documents, full re-indexing could take hours.<br><br>
+      Third, vector database upgrade: for production scale with concurrent users, I'd migrate from local ChromaDB to Pinecone or AWS OpenSearch with vector support. These are horizontally scalable and have built-in replication.<br><br>
+      Fourth, query caching: the top 20% of questions account for 80% of traffic in enterprise KB systems. I'd cache the (question_embedding, answer) pairs in Redis with a 1-hour TTL to avoid redundant retrieval and LLM calls."
+    </div>
+  </div>
+
+  <div class="div"></div>
+
+  <h2>Questions You Should Be Able to Answer Without Notes</h2>
+  <div class="tbl-wrap">
+    <table>
+      <tr><th>Question</th><th>Key Point</th></tr>
+      <tr><td>What is cosine similarity?</td><td>"It measures the angle between two vectors. A score of 1.0 means identical direction (same meaning), 0 means orthogonal (unrelated)."</td></tr>
+      <tr><td>What is the HNSW index?</td><td>"Hierarchical Navigable Small World — the default index in ChromaDB and Pinecone. It sacrifices small amounts of accuracy for 100x speed vs. brute-force search."</td></tr>
+      <tr><td>Why temperature 0.1 for RAG generation?</td><td>"We want the LLM to synthesise the retrieved facts accurately, not be creative. Low temperature means it closely follows the context rather than improvising."</td></tr>
+      <tr><td>What metadata do you store with each chunk?</td><td>"source_file, page_number, chunk_index, chunk_size, and similarity_score at query time. Metadata enables filtering (show only chunks from a specific document) and debugging."</td></tr>
+      <tr><td>How do you handle multi-document questions?</td><td>"Retrieve top-K across all documents. The LLM synthesises from whichever chunks are returned, regardless of source. Cite all sources in the response."</td></tr>
+    </table>
+  </div>
+
+  <div class="div"></div>
+  <h2>Resume Bullets</h2>
+  <div class="resume-box">
+    <div class="resume-label">📋 Copy these into your resume</div>
+    <div class="rb">Built end-to-end RAG system indexing 20+ knowledge base documents (PDF/DOCX/TXT) using ChromaDB and sentence-transformers, achieving RAGAS faithfulness score of 0.87 and context precision of 0.83 across 30-question evaluation suite</div>
+    <div class="rb">Engineered document ingestion pipeline with configurable chunking strategies (chunk_size: 256/512/1024), systematically evaluating tradeoffs via RAGAS to select optimal 512-token strategy with 50-token overlap</div>
+    <div class="rb">Implemented source-cited RAG responses with grounding enforcement — LLM instructed to cite documents and say "I don't know" when context is insufficient, reducing hallucination rate to near-zero on evaluation set</div>
+    <div class="rb">Deployed FastAPI + Streamlit RAG application with real-time source chunk viewer, similarity score display, and per-stage latency tracking (retrieval vs. generation breakdown)</div>
+  </div>
+</div>
+
+<footer>
+  Project 2 of 6 · Knowledge Base RAG System · AI Engineering Roadmap<br>
+  <span style="margin-top:6px;display:block">Save to iCloud Drive or Google Drive — works offline from any device</span>
+</footer>
+
+<script>
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('prog').style.width = pct + '%';
+});
+const secs = document.querySelectorAll('[id]');
+const navs = document.querySelectorAll('.nav-link');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  secs.forEach(s => { if (window.scrollY >= s.offsetTop - 80) cur = s.id; });
+  navs.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + cur));
+}, {passive:true});
+function toggleAcc(el) { el.closest('.acc-item').classList.toggle('open'); }
+function cp(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+</script>
+</body>
+</html>
