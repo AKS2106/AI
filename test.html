@@ -1,125 +1,15 @@
-"""
-Generate 200 realistic synthetic customer support tickets
-for a CX/Survey Platform (Medallia-style).
-Run: python data/synthetic_tickets.py
-Output: data/tickets.json
-"""
-import json
-import random
-
-TICKETS = {
-    "billing": [
-        "I was charged twice for my annual Medallia licence this month.",
-        "My invoice shows the enterprise plan but I signed up for the basic plan.",
-        "I cancelled my subscription last week but was still charged.",
-        "Why does my bill show $499? I only use the starter plan.",
-        "I need an itemised invoice for our company finance team.",
-        "My credit card was charged but my account still shows as expired.",
-        "The promo code from our sales rep is not applying at checkout.",
-        "Can I get a refund? We only used the platform for 2 days this month.",
-        "Our payment failed but money was deducted from our account.",
-        "I need to update our billing address for the next invoice.",
-    ],
-    "automation": [
-        "Our survey distribution automation stopped sending emails yesterday.",
-        "The trigger I set up to send surveys after a purchase is not firing.",
-        "Medallia automation is running but customers are not receiving surveys.",
-        "Our NPS survey automation sent 3 copies to every customer by mistake.",
-        "The scheduled weekly report automation has not run for 5 days.",
-        "API integration with Salesforce stopped working after the last update.",
-        "Our post-call survey trigger is firing too late — 3 days after the call.",
-        "The automation rule I created is being ignored completely.",
-        "Webhook is not receiving data from our CRM anymore.",
-        "Survey throttling automation is blocking all our surveys incorrectly.",
-    ],
-    "dashboard": [
-        "My dashboard is showing a blank white screen when I log in.",
-        "The NPS trend chart is not updating even though new responses came in.",
-        "I cannot see last month's data on the response rate widget.",
-        "The dashboard I shared with my manager shows different numbers than mine.",
-        "Filters on the dashboard are not working — selecting a region shows all data.",
-        "The export to PDF option has disappeared from my dashboard.",
-        "Real-time response counter is stuck at the same number for 2 hours.",
-        "My custom widget stopped showing data after I updated the date range.",
-        "The dashboard loads correctly on desktop but is broken on mobile.",
-        "I am getting an error code 403 when trying to access the analytics view.",
-    ],
-    "survey": [
-        "I cannot publish my survey — the publish button is greyed out.",
-        "Survey preview looks different from what customers are actually seeing.",
-        "My survey logic is broken — skip logic is not routing correctly.",
-        "The survey I sent yesterday has 0 responses but I know customers opened it.",
-        "Can I add a new question to a survey that is already live?",
-        "Survey is displaying in English but our customers are in France.",
-        "The star rating question is not saving responses correctly.",
-        "I need to increase the survey response limit — we hit the cap already.",
-        "Survey distribution list uploaded incorrectly — sent to wrong segment.",
-        "How do I set up a recurring monthly satisfaction survey?",
-    ],
-    "general": [
-        "How do I create a new survey template from scratch?",
-        "What is the maximum number of questions allowed per survey?",
-        "Can I export all survey responses to Excel?",
-        "How do I add a new team member to our Medallia account?",
-        "What are the support hours for enterprise customers?",
-        "Does Medallia integrate with Microsoft Teams for alerts?",
-        "How do I set up role-based access for different departments?",
-        "What happens to our data if we downgrade our plan?",
-        "Can I white-label the survey with our company branding?",
-        "How do I set up email notifications when response rate drops below 10%?",
-    ],
-}
-
-PRIORITIES = ["low", "medium", "high", "urgent"]
-PRIORITY_WEIGHTS = {
-    "billing":    [0.1, 0.3, 0.4, 0.2],
-    "automation": [0.1, 0.2, 0.4, 0.3],
-    "dashboard":  [0.2, 0.4, 0.3, 0.1],
-    "survey":     [0.2, 0.4, 0.3, 0.1],
-    "general":    [0.4, 0.4, 0.2, 0.0],
-}
-
-
-def generate_tickets(n_per_category: int = 40) -> list[dict]:
-    tickets = []
-    ticket_id = 1000
-
-    for category, messages in TICKETS.items():
-        for i in range(n_per_category):
-            msg = random.choice(messages)
-
-            # Add slight variation so we don't have exact duplicates
-            variations = [
-                msg,
-                msg + " Please help urgently.",
-                "Hi, " + msg[0].lower() + msg[1:],
-                msg + " This is really frustrating.",
-                "Hello, I need help. " + msg,
-            ]
-            final_msg = random.choice(variations)
-            weights = PRIORITY_WEIGHTS[category]
-            priority = random.choices(PRIORITIES, weights=weights)[0]
-
-            tickets.append({
-                "ticket_id": f"TKT-{ticket_id}",
-                "message": final_msg,
-                "expected_intent": category,
-                "expected_priority": priority,
-            })
-            ticket_id += 1
-
-    random.shuffle(tickets)
-    return tickets
-
-
-if __name__ == "__main__":
-    tickets = generate_tickets(n_per_category=40)  # 200 total
-    with open("data/tickets.json", "w") as f:
-        json.dump(tickets, f, indent=2)
-    print(f"✅ Generated {len(tickets)} tickets → data/tickets.json")
-
-    # Show distribution
-    from collections import Counter
-    cats = Counter(t["expected_intent"] for t in tickets)
-    for cat, count in cats.most_common():
-        print(f"  {cat}: {count} tickets")
+---
+ID:                     TKT-1084
+Message:        Hello, I need help. My dashboard is showing a blank white screen when I log in.
+Intent:         dashboard
+Priority:       high
+---
+ID:                     TKT-1193
+Message:        Hi, what happens to our data if we downgrade our plan?
+Intent:         general
+Priority:       low
+---
+ID:                     TKT-1142
+Message:        The star rating question is not saving responses correctly.
+Intent:         survey
+Priority:       medium
