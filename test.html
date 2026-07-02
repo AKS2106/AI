@@ -1,21 +1,29 @@
-python -c "
-import json
-from collections import Counter
+automation:
+  low      ██████ 6
+  medium   ██████ 6
+  high     ██████████████ 14
+  urgent   ██████████████ 14
 
-with open('data/tickets.json') as f:
-    tickets = json.load(f)
+billing:
+  low      ████ 4
+  medium   ████████████ 12
+  high     ████████████████ 16
+  urgent   ████████ 8
 
-# Show priority breakdown per category
-from collections import defaultdict
-by_cat = defaultdict(list)
-for t in tickets:
-    by_cat[t['expected_intent']].append(t['expected_priority'])
+dashboard:
+  low      ███████████ 11
+  medium   ████████████ 12
+  high     ██████████████ 14
+  urgent   ███ 3
 
-for cat, priorities in sorted(by_cat.items()):
-    counts = Counter(priorities)
-    print(f'{cat}:')
-    for p in ['low', 'medium', 'high', 'urgent']:
-        bar = '█' * counts.get(p, 0)
-        print(f'  {p:8} {bar} {counts.get(p, 0)}')
-    print()
-"
+general:
+  low      ████████████████ 16
+  medium   ████████████████ 16
+  high     ████████ 8
+  urgent    0
+
+survey:
+  low      ███ 3
+  medium   ███████████████████████ 23
+  high     ███████████ 11
+  urgent   ███ 3
