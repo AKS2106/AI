@@ -1,15 +1,21 @@
----
-ID:                     TKT-1084
-Message:        Hello, I need help. My dashboard is showing a blank white screen when I log in.
-Intent:         dashboard
-Priority:       high
----
-ID:                     TKT-1193
-Message:        Hi, what happens to our data if we downgrade our plan?
-Intent:         general
-Priority:       low
----
-ID:                     TKT-1142
-Message:        The star rating question is not saving responses correctly.
-Intent:         survey
-Priority:       medium
+python -c "
+import json
+from collections import Counter
+
+with open('data/tickets.json') as f:
+    tickets = json.load(f)
+
+# Show priority breakdown per category
+from collections import defaultdict
+by_cat = defaultdict(list)
+for t in tickets:
+    by_cat[t['expected_intent']].append(t['expected_priority'])
+
+for cat, priorities in sorted(by_cat.items()):
+    counts = Counter(priorities)
+    print(f'{cat}:')
+    for p in ['low', 'medium', 'high', 'urgent']:
+        bar = '█' * counts.get(p, 0)
+        print(f'  {p:8} {bar} {counts.get(p, 0)}')
+    print()
+"
