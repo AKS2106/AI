@@ -1,29 +1,20 @@
-automation:
-  low      ██████ 6
-  medium   ██████ 6
-  high     ██████████████ 14
-  urgent   ██████████████ 14
+python -c "
+import json
+from collections import Counter, defaultdict
 
-billing:
-  low      ████ 4
-  medium   ████████████ 12
-  high     ████████████████ 16
-  urgent   ████████ 8
+with open('data/tickets.json') as f:
+    tickets = json.load(f)
 
-dashboard:
-  low      ███████████ 11
-  medium   ████████████ 12
-  high     ██████████████ 14
-  urgent   ███ 3
+by_cat = defaultdict(list)
+for t in tickets:
+    by_cat[t['expected_intent']].append(t['expected_priority'])
 
-general:
-  low      ████████████████ 16
-  medium   ████████████████ 16
-  high     ████████ 8
-  urgent    0
-
-survey:
-  low      ███ 3
-  medium   ███████████████████████ 23
-  high     ███████████ 11
-  urgent   ███ 3
+for cat, priorities in sorted(by_cat.items()):
+    counts = Counter(priorities)
+    total = sum(counts.values())
+    print(f'{cat} (total: {total}):')
+    for p in ['low', 'medium', 'high', 'urgent']:
+        bar = '█' * counts.get(p, 0)
+        print(f'  {p:8} {bar} {counts.get(p, 0)}')
+    print()
+"
