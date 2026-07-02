@@ -1,0 +1,28 @@
+python -c "
+from app.models import IntentType, ClassificationResult, ChatRequest
+
+# Test 1: Valid intent
+print(IntentType.BILLING)
+
+# Test 2: Valid confidence
+r = ClassificationResult(
+    intent=IntentType.BILLING,
+    confidence=0.95,
+    priority='high',
+    keywords=['charge', 'invoice'],
+    reasoning='Customer reports billing issue'
+)
+print(f'Classification OK: {r.intent} at {r.confidence} confidence')
+
+# Test 3: This should FAIL — confidence above 1.0
+try:
+    bad = ClassificationResult(
+        intent=IntentType.BILLING,
+        confidence=1.5,
+        priority='high',
+        keywords=[],
+        reasoning='test'
+    )
+except Exception as e:
+    print(f'Validation caught bad data: {e.errors()[0][\"msg\"]}')
+"
